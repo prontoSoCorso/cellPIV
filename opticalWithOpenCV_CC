@@ -1,0 +1,41 @@
+import cv2
+import numpy as np
+
+def compute_optical_flow_matpiv_opencv(prev_frame, current_frame):
+    """
+    Calcola il flusso ottico tra due immagini usando MatPIV, basato su libreria openCV.
+
+    Parametri:
+        prev_frame: La prima immagine.
+        current_frame: La seconda immagine.
+
+    Restituisce:
+        - La magnitudo del flusso ottico.
+        - L'angolo del flusso ottico in gradi.
+        - Il campo vettoriale del flusso ottico.
+    """
+
+    # Definire i parametri di MatPIV
+    interrogation_region_size = 15
+    search_region_size = interrogation_region_size * 2
+
+    # Calcolare la cross-correlazione usando OpenCV
+    cross_correlation_distributions = cv2.phaseCorrelate(prev_frame, current_frame)
+
+    # Applicare l'overlap del 50%
+    cross_correlation_distributions = cross_correlation_distributions[::2, ::2]
+
+    # Trovare i picchi delle distribuzioni di cross-correlazione
+    displacements = np.argmax(cross_correlation_distributions, axis=2)
+
+    # Calcolare il campo vettoriale della velocità
+    velocity_field = displacements / search_region_size
+
+    # Calcolare la magnitudo e l'angolo del flusso ottico
+    magnitude, angle = cv2.cartToPolar(velocity_field[..., 0], velocity_field[..., 1])
+
+    # Convertire l'angolo in gradi
+    angle_degrees = np.rad2deg(angle) % 360
+
+    return magnitude, angle_degrees, velocity_field
+
