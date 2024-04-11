@@ -2,10 +2,8 @@
 import cv2
 import numpy as np
 import os
-from scipy.ndimage import fourier_shift
 
-
-def compute_optical_flow(prev_frame, current_frame):
+def compute_optical_flowFarneback(prev_frame, current_frame):
     """
         Calcola il flusso ottico tra due immagini usando algoritmo Farneback (usato da calcOpticalFlowFarneback).
 
@@ -32,6 +30,18 @@ def compute_optical_flow(prev_frame, current_frame):
 
     flow = cv2.calcOpticalFlowFarneback(prev_frame, current_frame, None, **flow_params)
 
+    '''
+    flow ha shape (500,500,2). La dimensione è la stessa dell'immagine e ha due canali che sono flusso
+    verticale e orizzontale. La spiegazione dei canali è:
+    Canale x (orizzontale): Questo canale contiene i valori del flusso ottico per la componente orizzontale. 
+                            Per ogni pixel, il valore rappresenta la velocità di spostamento in direzione orizzontale tra il frame precedente e quello attuale. 
+                            I valori positivi indicano uno spostamento verso destra, mentre i valori negativi indicano uno spostamento verso sinistra.
+    Canale y (verticale): Questo canale contiene i valori del flusso ottico per la componente verticale. 
+                            Per ogni pixel, il valore rappresenta la velocità di spostamento in direzione verticale tra il frame precedente e quello attuale. 
+                            I valori positivi indicano uno spostamento verso il basso, mentre i valori negativi indicano uno spostamento verso l'alto.
+
+    '''
+
     # Compute the magnitude and angle of the flow
     magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1])
 
@@ -39,43 +49,6 @@ def compute_optical_flow(prev_frame, current_frame):
     angle_degrees = np.rad2deg(angle) % 360
 
     return magnitude, angle_degrees, flow
-
-
-def compute_optical_flow_matpiv(prev_frame, current_frame):
-    """
-        Calcola il flusso ottico tra due immagini usando MatPIV.
-
-        Parametri:
-            prev_frame: La prima immagine.
-            current_frame: La seconda immagine.
-
-        Restituisce:
-            - La magnitudo del flusso ottico.
-            - L'angolo del flusso ottico in gradi.
-            - Il campo vettoriale del flusso ottico.
-    """
-
-    # Definire i parametri di MatPIV
-    interrogation_region_size = 15
-    overlap = 0.5
-    search_region_size = interrogation_region_size * 2
-
-    # Calcolare la cross-correlazione
-    cross_correlation_distributions = fourier_shift(current_frame, -np.fft.fftshift(prev_frame))
-
-    # Trovare i picchi delle distribuzioni di cross-correlazione
-    displacements = np.argmax(cross_correlation_distributions, axis=2)
-
-    # Calcolare il campo vettoriale della velocità
-    velocity_field = displacements / search_region_size
-
-    # Calcolare la magnitudo e l'angolo del flusso ottico
-    magnitude, angle = cv2.cartToPolar(velocity_field[..., 0], velocity_field[..., 1])
-
-    # Convertire l'angolo in gradi
-    angle_degrees = np.rad2deg(angle) % 360
-
-    return magnitude, angle_degrees, velocity_field
 
 
 
@@ -97,6 +70,8 @@ def overlay_arrows(frame, magnitude, angle_degrees, step=16):
 
     return frame
 
+
+
 def sort_files_by_slice_number(file_list):
     # Define a custom sorting key function
     def get_slice_number(filename):
@@ -112,6 +87,7 @@ def sort_files_by_slice_number(file_list):
 
     return sorted_files
 
+
 def process_frames(folder_path, output_folder):
     target_size = (224, 224) #DIPENDE DAL METODO USATO, POTREBBE NON ESSERE NECESSARIO
 
@@ -122,6 +98,7 @@ def process_frames(folder_path, output_folder):
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)
     prev_frame = cv2.resize(prev_frame, target_size)
     
+
     # Metrics initialization (QUI DA CAMBIARE)
 
     # media della magnitudine in ogni frame (1 valore per frame)
@@ -129,8 +106,9 @@ def process_frames(folder_path, output_folder):
     # vorticity media in ogni frame (1 valore per ogni frame che indica la media delle fasi delle coordinate polari (rotazione media))
     # media dell'inverso della deviazione standard delle direzioni dei vettori
     # hybrid: insieme di mean magnitude e st.dev (quello inverso medio calcolato prima. Non specifica come, guardo meglio)
+    
+    # MEAN MAG, VORT, ST DEV
     mean_magnitude = []
-
 
 
     for frame_file in enumerate(frame_files[1:]):
@@ -139,7 +117,7 @@ def process_frames(folder_path, output_folder):
         current_frame = cv2.resize(current_frame, target_size)
 
         # Compute optical flow
-        magnitude, angle_degrees, flow = compute_optical_flow(prev_frame, current_frame)
+        magnitude, angle_degrees, flow = compute_optical_flowFarneback(prev_frame, current_frame)
 
         # Calculate metrics
         mean_magnitude.append(np.mean(magnitude))
@@ -195,9 +173,36 @@ def process_frames(folder_path, output_folder):
 
 
 
-path = "C:/Users/loren/Documents/Data/BlastoData/blasto/D2013.02.19_S0675_I141_1"
-errors = []
 
+prev_image_path = "C:/Users/loren/Documents/Data/BlastoData/blasto/D2013.02.19_S0675_I141_1/D2013.02.19_S0675_I141_1_12_0_41324.840721423614.jpg"
+current_image_path = "C:/Users/loren/Documents/Data/BlastoData/blasto/D2013.02.19_S0675_I141_1/D2013.02.19_S0675_I141_1_13_0_41324.85114539352.jpg"
+
+# Controllo di caricamento immagini
+try:
+    prev_frame = cv2.imread(prev_image_path, cv2.IMREAD_GRAYSCALE)
+    current_frame = cv2.imread(current_image_path, cv2.IMREAD_GRAYSCALE)
+except FileNotFoundError as e:
+    print(f"Errore: File non trovato - {e}")
+    exit()
+
+
+# Calcola il flusso ottico tra i due frame
+magnitude, angle_degrees, velocity_field = compute_optical_flowFarneback(prev_frame, current_frame)
+
+# Sovrappone il flusso ottico al secondo frame
+overlaid_frame = overlay_arrows(current_frame.copy(), magnitude, angle_degrees)
+
+# Salvo il frame con le frecce 
+# output_path = "frame_con_flusso_ottico.jpg"
+output_folder = "C:/Users/loren/Documents/Data/BlastoData/opticalFlowFrames/frame_con_flusso_ottico.jpg"
+cv2.imwrite(output_folder, overlaid_frame)
+
+
+
+
+
+
+"""
 for sample in os.listdir(path):
     try:
         sample_path = os.path.join(path, sample)
@@ -218,6 +223,7 @@ for sample in os.listdir(path):
 
 print('Errors: ', errors)
 
+"""
 
 
 '''
