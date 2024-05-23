@@ -29,8 +29,9 @@ def prepare_image(seq_dir):
     #image_list = sort_files_by_slice_number(os.listdir(seq_dir))
     image_list = os.listdir(seq_dir)
 
+    counter = 0
     for im in image_list:
-        if ".jpg" in im:
+        if ".jpg" in im and counter<20:
             img = Image.open(seq_dir + "/" + im)
             img = np.array(img).astype(np.uint8)
             img = img[np.newaxis, :]
@@ -39,7 +40,9 @@ def prepare_image(seq_dir):
             img = torch.from_numpy(img).float()
             img = torch.stack([img,img,img]).squeeze(1)
             images.append(img)
+            counter += 1
     
+
     return torch.stack(images)
 
 
@@ -171,7 +174,13 @@ if __name__ == '__main__':
     print(cfg)
     print("===============================================================")
     
-    breakpoint()
+
+    # NB: model.module accede al modello originale, non parallelizzato da DataParallel
+    '''
+    torch.nn.DataParallel è un wrapper che permette di parallelizzare l'addestramento su più GPU. 
+    Quando un modello viene avvolto in DataParallel, il modello stesso diventa un oggetto che gestisce la parallelizzazione, 
+    e il modello originale diventa un attributo di questo oggetto, denominato module
+    '''
 
     with torch.no_grad():
         if args.mode == 'MOF':

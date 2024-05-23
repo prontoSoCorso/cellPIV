@@ -9,6 +9,7 @@ from ...utils.utils import bilinear_sampler, coords_grid, upflow8
 from .gma import Attention, Aggregate
 
 from torchvision.utils import save_image
+from .cnn import BasicEncoder
 
 autocast = torch.cuda.amp.autocast
 
@@ -136,6 +137,13 @@ class MOFNet(nn.Module):
     
 
     def forward(self, images, data={}, flow_init=None):
+
+        print("11111111111111111111111111111111111111111111")
+        print(self)
+        print("22222222222222222222222222222222222222222222")
+        print(images)
+        print("33333333333333333333333333333333333333333333")
+        print(images.shape)
 
         down_ratio = self.cfg.down_ratio
 
