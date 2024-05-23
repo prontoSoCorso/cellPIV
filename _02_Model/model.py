@@ -108,6 +108,8 @@ if __name__ == '__main__':
     # start a new wandb run to track this script
     prova_push = "riga aggiunta da desktop - 15:45"
     prova2 = "riga da portatile - 15:47"
+    prova_contemporanea1 = "pc fisso"
+    
     wandb.init(
         # set the wandb project where this run will be logged
         project = conf.project_name,
