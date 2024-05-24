@@ -10,6 +10,7 @@ from myFunctions import calculate_vorticity, sort_files_by_slice_number
 import sys
 sys.path.append("C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV")
 from config import Config_01_OpticalFlow as conf
+from config import user_paths as myPaths
 
 
 
@@ -80,8 +81,7 @@ def process_frames(folder_path, output_folder):
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)
     prev_frame = cv2.resize(prev_frame, target_size)
 
-    # Metrics initialization (QUI DA CAMBIARE)
-
+    # METRICHE
     # media della magnitudine in ogni frame (1 valore per frame)
     # media della magnitudine tra un numero di frame specifico in avanti nel tempo (?)
     # vorticity media in ogni frame (1 valore per ogni frame che indica la media delle fasi delle coordinate polari (rotazione media))
@@ -136,8 +136,23 @@ def process_frames(folder_path, output_folder):
     padding_length = len(mean_magnitude) - len(sum_mean_mag)
     sum_mean_mag = np.pad(sum_mean_mag, ((0, padding_length)), 'constant', constant_values=(0))
 
-    print(f"Processed frames saved to {output_folder}")
+    
 
+    if conf.save_images:
+        process_and_save_metrics(folder_path, output_folder, frame_files, mean_magnitude, vorticity, std_dev, hybrid, sum_mean_mag)
+        print(f"Processed frames saved to {output_folder}")
+
+    else:
+        print(f"Processed frames {output_folder} saved successfully")   # In questo caso "output folder" sarebbe il sample_name
+
+    return mean_magnitude, vorticity, hybrid, sum_mean_mag
+
+
+
+
+
+
+def process_and_save_metrics(folder_path, output_folder, frame_files, mean_magnitude, vorticity, std_dev, hybrid, sum_mean_mag):
     #Find 5 peaks for each metric
     peaks_mag, _ = find_peaks(mean_magnitude, distance=10)  # Trova i picchi con una distanza minima di n frame tra loro
     tmp_vort = [abs(x) for x in vorticity]
@@ -145,7 +160,6 @@ def process_frames(folder_path, output_folder):
     peaks_std_dev, _ = find_peaks(std_dev, distance=10)
     peaks_hybrid, _ = find_peaks(hybrid, distance=10)
     peaks_sum_mean_mag, _ = find_peaks(sum_mean_mag, distance=10)
-
 
     # Trovo i valori e gli indici dei 5 picchi più alti
     mean_magnitude = np.array(mean_magnitude).astype(float)     # Devo convertirlo perché è una lista in partenza
@@ -198,9 +212,6 @@ def process_frames(folder_path, output_folder):
     # Call saveFig function to save the plot
     saveFig(folder_path, output_folder)
 
-    return mean_magnitude, vorticity, hybrid, sum_mean_mag
-
-
 
 
 
@@ -211,10 +222,10 @@ def saveFig(folder_path, output_folder):
     substring_after_d20 = folder_path[index_d20:]
 
     # Trova l'indice della sottostringa specificata da method_optical_flow
-    index_method = output_folder.find(method_optical_flow)
+    index_method = output_folder.find(conf.method_optical_flow)
 
     # Estrai la parte della stringa fino all'indice trovato
-    partial_path_till_method_optical = output_folder[:index_method + len(method_optical_flow)]
+    partial_path_till_method_optical = output_folder[:index_method + len(conf.method_optical_flow)]
 
     if 'no_blasto' in folder_path:
         output_folder_metrics = partial_path_till_method_optical + "/metrics/no_blasto/"+substring_after_d20+"/"
@@ -233,9 +244,9 @@ def saveFig(folder_path, output_folder):
 
 
 def main():
-    # Parametri da impostare in base al metodo di flusso ottico, utile solo per cartelle
-    global method_optical_flow 
-    method_optical_flow = "LucasKanade"
+    # Success/Error
+    n_video_error = 0
+    n_video_success = 0
 
     # Initialize matrices to store metrics for all videos
     mean_mag_mat = []
@@ -244,7 +255,7 @@ def main():
     sum_mean_mag_mat = []
 
     for class_sample in ['blasto','no_blasto']:
-        path_all_folders = "C:/Users/loren/Documents/Data/BlastoData/"+class_sample
+        path_all_folders = myPaths.path_BlastoData + class_sample
         errors = []
 
         # Set the value to add based on the class_sample
@@ -255,25 +266,35 @@ def main():
                 sample_path = path_all_folders + "/" + sample
                 sample_name = sample    #sample_name è il nome della cartella
 
-                if 'no_blasto' in path_all_folders:
-                    output_folder = "C:/Users/loren/Documents/Data/BlastoData/opticalFlowFrames/" + method_optical_flow + "/no_blasto/" + sample_name + "/"
-                    if not os.path.exists(output_folder):
-                        os.makedirs(output_folder)
+
+                if conf.save_images:
+                    # Voglio salvare le immagini delle metriche di flusso ottico per ogni paziente
+                    if 'no_blasto' in path_all_folders:
+                        output_folder = myPaths.path_BlastoData + "opticalFlowFrames/" + conf.method_optical_flow + "/no_blasto/" + sample_name + "/"
+                        if not os.path.exists(output_folder):
+                            os.makedirs(output_folder)
+
+                    else:
+                        output_folder = myPaths.path_BlastoData + "opticalFlowFrames/" + conf.method_optical_flow + "/blasto/"    + sample_name + "/"
+                        if not os.path.exists(output_folder):
+                            os.makedirs(output_folder)
+
+                    mean_magnitude, vorticity, hybrid, sum_mean_mag = process_frames(sample_path,output_folder)
+
 
                 else:
-                    output_folder = "C:/Users/loren/Documents/Data/BlastoData/opticalFlowFrames/" + method_optical_flow + "/blasto/"    + sample_name + "/"
-                    if not os.path.exists(output_folder):
-                        os.makedirs(output_folder)
-
-                mean_magnitude, vorticity, hybrid, sum_mean_mag = process_frames(sample_path,output_folder)
+                    # Non voglio salvare le immagini delle metriche di flusso ottico per ogni paziente
+                    mean_magnitude, vorticity, hybrid, sum_mean_mag = process_frames(sample_path, sample_name)
 
                 # Append new patient data to matrices
                 mean_mag_mat.append(mean_magnitude + [value_to_add])
                 vorticity_mat.append(vorticity + [value_to_add])
                 hybrid_mat.append(hybrid + [value_to_add])
                 sum_mean_mag_mat.append(sum_mean_mag + [value_to_add])
+                n_video_success += 1
 
             except Exception as e:
+                n_video_error += 1
                 print('-------------------')
                 print("Error in sample: ", sample_name)
                 print(e)
@@ -283,6 +304,12 @@ def main():
                 
         print('Errors: ', errors)
 
+
+    # Stampo quanti frame con successo e quanti errori
+    print('===================')
+    print('===================')
+    print(f"Sono state elaborate con successo {n_video_success} serie temporali")
+    print(f"Non sono state elaborate le serie temporali di {n_video_error} video")
 
     # Ottengo il percorso della cartella dello script corrente
     current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -304,12 +331,12 @@ def main():
 
 
 
+# Se non voglio misurare tempo
+# main()
+
 # Misura il tempo di esecuzione della funzione main()
-main()
-
-#execution_time = timeit.timeit(main, number=1)
-
-#print("Tempo impiegato:", execution_time, "secondi")
+execution_time = timeit.timeit(main, number=1)
+print("Tempo impiegato:", execution_time, "secondi")
 
 
 

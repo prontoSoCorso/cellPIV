@@ -106,32 +106,26 @@ if __name__ == '__main__':
     val_accuracies = []
 
     # start a new wandb run to track this script
-    wandb.init(
-        # set the wandb project where this run will be logged
-        project = conf.project_name,
+    exp_name = conf.dataset + "," + conf.model_name + "," + conf.epochs + "," + conf.batch_size + "," + conf.img_size + "," + + conf.num_frames + "," + + conf.num_classes
 
-        # track hyperparameters and run metadata
+    wandb.init(
+        # Set the W&B project where this run will be logged
+        project=conf.project_name,
+
+        # Track hyperparameters and run metadata
         config={
-        "learning_rate": 0.02,
-        "architecture": "LSTM",
-        "dataset": "Blasto",
-        "epochs": conf.epochs,
+            "exp_name": exp_name,
+            "dataset": conf.dataset,
+            "model": conf.model_name,
+            "epochs": conf.epochs,
+            "batch_size": conf.batch_size,
+            "img_size": conf.img_size, 
+            "num_classes": conf.num_classes,
+            "num_frames": conf.num_frames
         }
     )
-
-    wandb.init(project=project_name, 
-               config={"exp_name": exp_name, "model": model_name,
-                       "config": config_name,
-                       "pretrain": pretrain, "learning_rate": lr,
-                       "dropout": dropout, "l2": l2,
-                       "batch_size": batch_size,
-                       "epochs": epochs, "milestones": milestones,
-                       "lsmooth": lsmooth, "pos_weight": pos_weight,
-                       "img_size": img_size, "num_classes": num_classes, 
-                       "num_frames": num_frames})
     wandb.run.name = exp_name
-
-
+    
 
     for epoch in range(num_epochs):
         model.train()  # Imposta la modalità di training
