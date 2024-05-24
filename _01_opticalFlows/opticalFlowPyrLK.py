@@ -8,10 +8,10 @@ from scipy.signal import find_peaks
 from myFunctions import calculate_vorticity, sort_files_by_slice_number
 
 import sys
-sys.path.append("C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV")
+#sys.path.append("C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV")
+sys.path.append("/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV")
 from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
-
 
 
 
@@ -143,6 +143,11 @@ def process_frames(folder_path, output_folder):
         print(f"Processed frames saved to {output_folder}")
 
     else:
+        mean_magnitude = np.array(mean_magnitude).astype(float)     # Devo convertirlo perché è una lista in partenza
+        vorticity = np.array(vorticity).astype(float)
+        std_dev = np.array(std_dev).astype(float)    
+        hybrid = np.array(hybrid).astype(float)
+        sum_mean_mag = np.array(sum_mean_mag).astype(float)
         print(f"Processed frames {output_folder} saved successfully")   # In questo caso "output folder" sarebbe il sample_name
 
     return mean_magnitude, vorticity, hybrid, sum_mean_mag
@@ -259,7 +264,7 @@ def main():
         errors = []
 
         # Set the value to add based on the class_sample
-        value_to_add = 0 if 'no_blasto' in class_sample else 1
+        value_to_add = np.array([0]) if 'no_blasto' in class_sample else np.array([1])
 
         for sample in os.listdir(path_all_folders):
             try:
@@ -287,10 +292,11 @@ def main():
                     mean_magnitude, vorticity, hybrid, sum_mean_mag = process_frames(sample_path, sample_name)
 
                 # Append new patient data to matrices
-                mean_mag_mat.append(mean_magnitude + [value_to_add])
-                vorticity_mat.append(vorticity + [value_to_add])
-                hybrid_mat.append(hybrid + [value_to_add])
-                sum_mean_mag_mat.append(sum_mean_mag + [value_to_add])
+                mean_mag_mat.append(np.concatenate([mean_magnitude, value_to_add]))
+                vorticity_mat.append(np.concatenate([vorticity, value_to_add]))
+                hybrid_mat.append(np.concatenate([hybrid, value_to_add]))
+                sum_mean_mag_mat.append(np.concatenate([sum_mean_mag[:-3], value_to_add]))
+            
                 n_video_success += 1
 
             except Exception as e:

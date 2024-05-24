@@ -3,13 +3,16 @@
 import torch
 
 class user_paths:
-    path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
+    # Per computer fisso
+    path_BlastoData = "/home/giovanna/Documents/Data/BlastoData/"
+    
+    #Per computer portatile
+    #path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
 
 
 class Config_01_OpticalFlow:
     # Paths
     project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
-    data_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
     method_optical_flow = "LucasKanade"
 
     # Dim
@@ -24,17 +27,18 @@ class Config_01_OpticalFlow:
 
 class Config_02_Model:
     project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
-    data_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_02_Model'
+    #ata_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
+    data_path = '/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV/_01_opticalFlows'
     model_name = 'LSTM'
     dataset = "Blasto"
     seed = 2024
 
-    epochs = 5
-    batch_size = 2
+    epochs = 50
+    batch_size = 16                  # numero di sequenze prese
+    learning_rate = 0.0001
     pos_weight = torch.tensor(1)
     img_size=500
     num_classes=2
-    num_frames=288
 
 
 

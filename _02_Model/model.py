@@ -10,7 +10,8 @@ import wandb
 
 
 import sys
-sys.path.append("C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV")
+#sys.path.append("C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV")
+sys.path.append("/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV")
 from networksTemporalSeries import LSTM
 from config import Config_02_Model as conf
 
@@ -27,6 +28,14 @@ def load_pickled_files(directory):
 
 
 
+def remove_small_rows(data_list):
+    # Trova l'array con la dimensione maggiore
+    max_size = max(array.size for array in data_list)
+    cleaned_data = [array for array in data_list if array.size == max_size]
+
+    return cleaned_data
+
+
 if __name__ == '__main__':
 
     # Definire il percorso della cartella dove sono stati salvati i file
@@ -39,6 +48,9 @@ if __name__ == '__main__':
 
     # Estrazione dei dati relativi a sum_mean_mag
     sum_mean_mag_data = loaded_data["sum_mean_mag_mat"]
+
+    # Rimuovo tutti gli array nulli
+    sum_mean_mag_data = remove_small_rows(sum_mean_mag_data)
 
     # Separazione dei dati di input e delle etichette di classe
     input_data = []
@@ -61,9 +73,6 @@ if __name__ == '__main__':
     # Creazione di un TensorDataset
     dataset = TensorDataset(input_tensor, labels_tensor)
 
-    # Definizione dei batch size (numero di sequenze prese)
-    batch_size = 3
-
     # Split dei dati in train, validation, e test set
     train_size = int(0.7 * len(dataset))
     val_size = int(0.1 * len(dataset))
@@ -72,9 +81,9 @@ if __name__ == '__main__':
 
     # Creazione dei DataLoader
     # Creazione dei DataLoader per train, validation e test set
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    train_dataloader = DataLoader(train_dataset, batch_size = conf.batch_size, shuffle = True)
+    val_dataloader = DataLoader(val_dataset, batch_size = conf.batch_size, shuffle = True)
+    test_dataloader = DataLoader(test_dataset, batch_size = conf.batch_size, shuffle = True)
     
     # Definisco dove far girare modello
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -82,14 +91,14 @@ if __name__ == '__main__':
     # Definizione dei parametri della rete
     input_size = input_tensor.shape[1]  # Dimensione dell'input
     hidden_size = 64                    # Dimensione della cella nascosta
-    num_layers = 2                      # Numero di layer LSTM
+    num_layers = 3                      # Numero di layer LSTM
     output_size = 1                     # Dimensione dell'output
     bidirectional = False               # Imposta a True se la rete è bidirezionale
 
     # Creazione di un'istanza della rete
     model = LSTM.LSTMnetwork(input_size, hidden_size, num_layers, output_size, bidirectional).to(device)
     # Definisci l'ottimizzatore
-    learning_rate = 0.001  # Puoi regolare il tasso di apprendimento secondo necessità
+    learning_rate = conf.learning_rate
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Define the criterion for calculating loss (binary cross-entropy for binary classification)
@@ -98,15 +107,8 @@ if __name__ == '__main__':
     # Numero di epoche
     num_epochs = conf.epochs
 
-    # Inizializzazione di liste per loss accuracy durante le epoche (per train e validation)
-    train_losses = []
-    train_accuracies = []
-
-    val_losses = []
-    val_accuracies = []
-
     # start a new wandb run to track this script
-    exp_name = conf.dataset + "," + conf.model_name + "," + conf.epochs + "," + conf.batch_size + "," + conf.img_size + "," + + conf.num_frames + "," + + conf.num_classes
+    exp_name = conf.dataset + "," + conf.model_name + "," + str(conf.epochs) + "," + str(conf.batch_size) + "," + str(conf.learning_rate) + "," + str(conf.img_size) + "," + str(conf.num_classes)
 
     wandb.init(
         # Set the W&B project where this run will be logged
@@ -119,9 +121,9 @@ if __name__ == '__main__':
             "model": conf.model_name,
             "epochs": conf.epochs,
             "batch_size": conf.batch_size,
+            "learning_rate": conf.learning_rate,
             "img_size": conf.img_size, 
-            "num_classes": conf.num_classes,
-            "num_frames": conf.num_frames
+            "num_classes": conf.num_classes
         }
     )
     wandb.run.name = exp_name
@@ -160,12 +162,7 @@ if __name__ == '__main__':
             
             optimizer.step()
 
-        # Calcola loss e accuracy medie per epoca
-        epoch_train_loss /= len(train_dataloader)
-        train_loss = epoch_train_loss
-        train_accuracy = correct_train_predictions / total_train_samples
-        train_losses.append(train_loss)
-        train_accuracies.append(train_accuracy)
+        
 
         # Valutazione della rete su validation
         model.eval()
@@ -188,15 +185,48 @@ if __name__ == '__main__':
                 correct_val_predictions += (torch.squeeze(predictions, 1) == labels).sum().item()
                 total_val_samples += labels.size(0)
 
-        # Calcola loss e accuracy medie per epoca sul validation set
+
+        # Calcola loss e accuracy per epoca sul train e validation set
         epoch_val_loss /= len(val_dataloader)
+        epoch_train_loss /= len(train_dataloader)
+
         val_loss = epoch_val_loss
         val_accuracy = correct_val_predictions / total_val_samples
-        val_losses.append(val_loss)
-        val_accuracies.append(val_accuracy)
+
+        train_loss = epoch_train_loss
+        train_accuracy = correct_train_predictions / total_train_samples
+
+        
+        wandb.log({'epoch': epoch + 1,
+                   'train_accuracy': train_accuracy,
+                   'train_loss': train_loss,
+                   'val_accuracy': val_accuracy,
+                   'val_loss': val_loss})
 
         # Stampa delle informazioni sull'epoca
         print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss}, Train Accuracy: {train_accuracy}, Val Loss: {val_loss}, Val Accuracy: {val_accuracy}')
+
+
+
+
+
+    '''
+    # Calcola loss e accuracy medie per epoca sul validation set
+    epoch_val_loss /= len(val_dataloader)
+    val_loss = epoch_val_loss
+    val_accuracy = correct_val_predictions / total_val_samples
+    val_losses.append(val_loss)
+    val_accuracies.append(val_accuracy)
+
+    # Calcola loss e accuracy medie per epoca
+    epoch_train_loss /= len(train_dataloader)
+    train_loss = epoch_train_loss
+    train_accuracy = correct_train_predictions / total_train_samples
+    train_losses.append(train_loss)
+    train_accuracies.append(train_accuracy)
+    
+
+    
 
 
 
@@ -219,7 +249,7 @@ if __name__ == '__main__':
     plt.legend()
 
     plt.show()
-
+    '''
 
 
     # Valutazione finale sul test set
@@ -268,9 +298,5 @@ wandb.run.name = exp_name (magari concateno tutti i parametri)
 quando voglio fare il grafico faccio
 wandb.log({})
 e ci metto dentro tutto quello che voglio graficare
-
-
-
-
 '''
 
