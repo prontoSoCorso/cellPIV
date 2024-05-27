@@ -14,6 +14,7 @@ import sys
 sys.path.append("/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV")
 from networksTemporalSeries import LSTM
 from config import Config_02_Model as conf
+from _02_Model import myModelsFunctions as myFun
 
 
 
@@ -26,14 +27,6 @@ def load_pickled_files(directory):
                 data[file[:-4]] = pickle.load(f)
     return data
 
-
-
-def remove_small_rows(data_list):
-    # Trova l'array con la dimensione maggiore
-    max_size = max(array.size for array in data_list)
-    cleaned_data = [array for array in data_list if array.size == max_size]
-
-    return cleaned_data
 
 
 if __name__ == '__main__':
@@ -50,7 +43,7 @@ if __name__ == '__main__':
     sum_mean_mag_data = loaded_data["sum_mean_mag_mat"]
 
     # Rimuovo tutti gli array nulli
-    sum_mean_mag_data = remove_small_rows(sum_mean_mag_data)
+    sum_mean_mag_data = myFun.remove_small_rows(sum_mean_mag_data)
 
     # Separazione dei dati di input e delle etichette di classe
     input_data = []
@@ -89,47 +82,42 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Definizione dei parametri della rete
-    input_size = input_tensor.shape[1]  # Dimensione dell'input
-    hidden_size = 64                    # Dimensione della cella nascosta
-    num_layers = 3                      # Numero di layer LSTM
-    output_size = 1                     # Dimensione dell'output
-    bidirectional = False               # Imposta a True se la rete è bidirezionale
+    input_size = input_tensor.shape[1]      # Dimensione dell'input
+    hidden_size = conf.hidden_size          # Dimensione della cella nascosta
+    num_layers = conf.num_layers            # Numero di layer LSTM
+    output_size = conf.output_size          # Dimensione dell'output
+    bidirectional = conf.bidirectional      # Imposta a True se la rete è bidirezionale
+    dropout_prob = conf.dropout_prob        # Dimensione dropout    
 
     # Creazione di un'istanza della rete
-    model = LSTM.LSTMnetwork(input_size, hidden_size, num_layers, output_size, bidirectional).to(device)
-    # Definisci l'ottimizzatore
-    learning_rate = conf.learning_rate
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    model = LSTM.LSTMnetwork(input_size, hidden_size, num_layers, output_size, bidirectional, dropout_prob).to(device)
 
-    # Define the criterion for calculating loss (binary cross-entropy for binary classification)
-    criterion = nn.BCEWithLogitsLoss()
-
-    # Numero di epoche
-    num_epochs = conf.epochs
-
+    # Definizione ottimizzatore e criterion for loss
+    optimizer = myFun.create_optimizer(model, conf.optimizer_type, conf.learning_rate)     
+    criterion = nn.BCEWithLogitsLoss()      # (binary cross-entropy for binary classification)
+    
     # start a new wandb run to track this script
-    exp_name = conf.dataset + "," + conf.model_name + "," + str(conf.epochs) + "," + str(conf.batch_size) + "," + str(conf.learning_rate) + "," + str(conf.img_size) + "," + str(conf.num_classes)
-
     wandb.init(
         # Set the W&B project where this run will be logged
         project=conf.project_name,
 
         # Track hyperparameters and run metadata
         config={
-            "exp_name": exp_name,
+            "exp_name": conf.exp_name,
             "dataset": conf.dataset,
             "model": conf.model_name,
-            "epochs": conf.epochs,
+            "num_epochs": conf.num_epochs,
             "batch_size": conf.batch_size,
             "learning_rate": conf.learning_rate,
+            "optimizer_type": conf.optimizer_type,
             "img_size": conf.img_size, 
             "num_classes": conf.num_classes
         }
     )
-    wandb.run.name = exp_name
+    wandb.run.name = conf.exp_name
     
 
-    for epoch in range(num_epochs):
+    for epoch in range(conf.num_epochs):
         model.train()  # Imposta la modalità di training
 
         epoch_train_loss = 0.0
@@ -204,52 +192,9 @@ if __name__ == '__main__':
                    'val_loss': val_loss})
 
         # Stampa delle informazioni sull'epoca
-        print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_loss}, Train Accuracy: {train_accuracy}, Val Loss: {val_loss}, Val Accuracy: {val_accuracy}')
+        print(f'Epoch [{epoch+1}/{conf.num_epochs}], Train Loss: {train_loss}, Train Accuracy: {train_accuracy}, Val Loss: {val_loss}, Val Accuracy: {val_accuracy}')
 
 
-
-
-
-    '''
-    # Calcola loss e accuracy medie per epoca sul validation set
-    epoch_val_loss /= len(val_dataloader)
-    val_loss = epoch_val_loss
-    val_accuracy = correct_val_predictions / total_val_samples
-    val_losses.append(val_loss)
-    val_accuracies.append(val_accuracy)
-
-    # Calcola loss e accuracy medie per epoca
-    epoch_train_loss /= len(train_dataloader)
-    train_loss = epoch_train_loss
-    train_accuracy = correct_train_predictions / total_train_samples
-    train_losses.append(train_loss)
-    train_accuracies.append(train_accuracy)
-    
-
-    
-
-
-
-    # Plot loss e accuracy
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(range(1, num_epochs + 1), train_losses, label='Train Loss')
-    plt.plot(range(1, num_epochs + 1), val_losses, label='Validation Loss')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.title('Train and Validation Loss')
-    plt.legend()
-    
-    plt.subplot(1, 2, 2)
-    plt.plot(range(1, num_epochs + 1), train_accuracies, label='Train Accuracy')
-    plt.plot(range(1, num_epochs + 1), val_accuracies, label='Validation Accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.title('Train and Validation Accuracy')
-    plt.legend()
-
-    plt.show()
-    '''
 
 
     # Valutazione finale sul test set
@@ -258,6 +203,7 @@ if __name__ == '__main__':
         test_loss = 0.0
         correct_test_predictions = 0
         total_test_samples = 0
+
         for inputs, labels in test_dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -278,7 +224,6 @@ if __name__ == '__main__':
     test_accuracy = correct_test_predictions / total_test_samples
 
     print(f'Test Loss: {test_loss}, Test Accuracy: {test_accuracy}')
-
 
 
 

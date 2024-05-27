@@ -33,12 +33,24 @@ class Config_02_Model:
     dataset = "Blasto"
     seed = 2024
 
-    epochs = 50
+    num_epochs = 100
     batch_size = 16                  # numero di sequenze prese
-    learning_rate = 0.0001
+    learning_rate = 0.0005
     pos_weight = torch.tensor(1)
     img_size=500
     num_classes=2
+
+    # Parametri LSTM
+    hidden_size = 64                    # Dimensione della cella nascosta
+    num_layers = 5                      # Numero di layer LSTM
+    output_size = 1                     # Dimensione dell'output
+    bidirectional = True               # Imposta a True se la rete è bidirezionale
+    dropout_prob = 0.2                  # Dimensione dropout
+
+    optimizer_type = "RMSprop"             # Tipo optimizer utilizzato
+
+    exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size) + "," + str(learning_rate) + "," + optimizer_type + "," + str(bidirectional)
+
 
 
 
