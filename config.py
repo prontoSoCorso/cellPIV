@@ -27,13 +27,18 @@ class Config_01_OpticalFlow:
 
 class Config_02_Model:
     project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
-    #ata_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
-    data_path = '/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV/_01_opticalFlows'
+    data_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
+    #data_path = '/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV/_01_opticalFlows'
+    keyAPIpath = "C:/Users/loren/Documents/keyAPIwandb.txt"
+    local_dir = "C:/Users/loren/Documents/rayTuneResults"
+    
     model_name = 'LSTM'
     dataset = "Blasto"
     seed = 2024
+    perc_train = 0.7
+    perc_val = 0.2
 
-    num_epochs = 100
+    num_epochs = 20
     batch_size = 16                  # numero di sequenze prese
     learning_rate = 0.0005
     pos_weight = torch.tensor(1)
@@ -50,6 +55,29 @@ class Config_02_Model:
     optimizer_type = "RMSprop"             # Tipo optimizer utilizzato
 
     exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size) + "," + str(learning_rate) + "," + optimizer_type + "," + str(bidirectional)
+
+
+
+
+'''
+class Config_02_Model_transf:
+    device = torch.device("mps")
+    max_len=5000 # max time series sequence length 
+    n_head = 4 # number of attention head
+    n_layer = 2 # number of encoder layer
+    drop_prob = 0.1
+    d_model = 200 # number of dimension ( for positional embedding)
+    ffn_hidden = 512 # size of hidden layer before classification 
+    feature = 1 # for univariate time series (1d), it must be adjusted for 1. 
+    model =  Transformer(  d_model=d_model, details=True, n_head=n_head, max_len=max_len, seq_len=sequence_len, ffn_hidden=ffn_hidden, n_layers=n_layer, drop_prob=drop_prob, device=device)
+
+    batch_size = 7
+
+    summary(model, input_size=(batch_size,sequence_len,feature) , device=device)
+
+    print(model)
+
+'''
 
 
 
