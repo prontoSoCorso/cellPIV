@@ -8,8 +8,13 @@ from scipy.signal import find_peaks
 from myFunctions import calculate_vorticity, sort_files_by_slice_number
 
 import sys
-#sys.path.append("C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV")
-sys.path.append("/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV")
+# Configurazione dei percorsi e dei parametri
+current_file_path = os.path.abspath(__file__)
+parent_dir = os.path.dirname(current_file_path)
+while not os.path.basename(parent_dir) == "cellPIV":
+    parent_dir = os.path.dirname(parent_dir)
+sys.path.append(parent_dir)
+
 from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
 

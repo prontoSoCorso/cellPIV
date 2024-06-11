@@ -10,6 +10,12 @@ class user_paths:
     #path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
 
 
+class Config_00_preprocessing:
+    path_old_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels.xlsx"
+    path_new_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels_singleFile.csv"
+
+
+
 class Config_01_OpticalFlow:
     # Paths
     project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
@@ -25,12 +31,12 @@ class Config_01_OpticalFlow:
 
 
 
-class Config_02_Model:
+class Config_02_train:
     project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
     data_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
     #data_path = '/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV/_01_opticalFlows'
     keyAPIpath = "C:/Users/loren/Documents/keyAPIwandb.txt"
-    local_dir = "C:/Users/loren/Documents/rayTuneResults"
+    local_dir = "C:/Utenti/loren/Documents/rayTuneResults"
     
     model_name = 'LSTM'
     dataset = "Blasto"
