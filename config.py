@@ -2,17 +2,27 @@
 
 import torch
 
+giovanna = True
+
 class user_paths:
-    # Per computer fisso
-    #path_BlastoData = "/home/giovanna/Documents/Data/BlastoData/"
+    #Per computer fisso
+    if giovanna:
+        path_BlastoData = "/home/giovanna/Documents/Data/BlastoData/"
     
+    else:
     #Per computer portatile
-    path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
+        path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
 
 
 class Config_00_preprocessing:
-    path_old_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels.xlsx"
-    path_new_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels_singleFile.csv"
+    if giovanna:
+        path_old_excel = "/home/giovanna/Documents/Data/BlastoData/BlastoLabels.xlsx"
+        path_new_excel = "/home/giovanna/Documents/Data/BlastoData/BlastoLabels_singleFile.csv"
+        path_double_dish_excel = "/home/giovanna/Documents/Data/BlastoData/pz con doppia dish.xlsx"
+    else:
+        path_old_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels.xlsx"
+        path_new_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels_singleFile.csv"
+        path_double_dish_excel = "C:/Users/loren/Documents/Data/BlastoData/pz con doppia dish.xlsx"
 
 
 
@@ -33,8 +43,11 @@ class Config_01_OpticalFlow:
 
 class Config_02_train:
     project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
-    data_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
-    #data_path = '/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV/_01_opticalFlows'
+    if giovanna:
+        data_path = '/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV/_01_opticalFlows'
+    else:
+        data_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
+    
     keyAPIpath = "C:/Users/loren/Documents/keyAPIwandb.txt"
     local_dir = "C:/Utenti/loren/Documents/rayTuneResults"
     

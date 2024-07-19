@@ -1,6 +1,6 @@
 import pandas as pd
-
 import os
+
 # Ottieni il percorso del file corrente
 current_file_path = os.path.abspath(__file__)
 # Risali la gerarchia fino alla cartella "cellPIV"
@@ -11,7 +11,6 @@ import sys
 sys.path.append(parent_dir)
 
 from config import Config_00_preprocessing as conf
-
 
 # Leggi il file Excel senza password (tolta manualmente)
 xls = pd.ExcelFile(conf.path_old_excel, engine='openpyxl')
@@ -54,6 +53,41 @@ sheet2_filtered = sheet2_filtered[sheet1.columns]
 # Combina i due DataFrame
 combined_df = pd.concat([sheet1, sheet2_filtered], ignore_index=True)
 
-# Salva il DataFrame risultante in un file CSV
-combined_df.to_csv(conf.path_new_excel, index=False)
+# Rinomina le colonne "slide" a "dish" e "slide_well" a "dish_well"
+combined_df.rename(columns={"slide": "dish", "slide_well": "dish_well"}, inplace=True)
+
+# Leggi il file "pz con doppia dish" che contiene la mappatura dei pazienti con doppia dish
+double_dish_df = pd.read_excel(conf.path_double_dish_excel, engine='openpyxl', header=None, names=['dish1', 'dish2'])
+
+# Initialize patient ID
+patient_id = 1
+dish_to_patient = {}
+
+# Function to assign patient IDs to linked dishes
+def assign_patient_id(dish, patient_id):
+    stack = [dish]
+    while stack:
+        current_dish = stack.pop()
+        if current_dish not in dish_to_patient:
+            dish_to_patient[current_dish] = patient_id
+            linked_dishes = double_dish_df[(double_dish_df['dish1'] == current_dish) | (double_dish_df['dish2'] == current_dish)]
+            for _, linked_dish in linked_dishes.iterrows():
+                if linked_dish['dish1'] != current_dish:
+                    stack.append(linked_dish['dish1'])
+                if linked_dish['dish2'] != current_dish:
+                    stack.append(linked_dish['dish2'])
+
+# Iterate through the combined data
+for dish in combined_df['dish'].unique():
+    if dish not in dish_to_patient:
+        assign_patient_id(dish, patient_id)
+        patient_id += 1
+
+# Map patient IDs to the combined data
+combined_df['patient'] = combined_df['dish'].map(dish_to_patient)
+
+# Save the result to a CSV file
+combined_df.to_csv("output.csv", index=False)  # replace with the correct path
+
+print(combined_df.head())
 
