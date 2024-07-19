@@ -340,8 +340,6 @@ def main():
 
 
 
-
-
 # Se non voglio misurare tempo
 # main()
 
@@ -361,7 +359,7 @@ print("Tempo impiegato:", execution_time, "secondi")
 
 
 
-
+'''
 def main_two_frames():
     # Percorso delle immagini di input
     prev_image_path = "C:/Users/loren/Documents/Data/BlastoData/blasto/D2013.02.19_S0675_I141_1/D2013.02.19_S0675_I141_1_12_0_41324.840721423614.jpg"
@@ -384,3 +382,4 @@ def main_two_frames():
     # Salvataggio del frame con le frecce
     output_folder = "C:/Users/loren/Documents/Data/BlastoData/opticalFlowFrames/frame_con_flusso_otticoPyrLK_3.jpg"
     cv2.imwrite(output_folder, overlaid_frame)
+'''

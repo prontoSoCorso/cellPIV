@@ -75,3 +75,5 @@ if __name__ == '__main__':
     print('Number of samples from 2013 to 2020: {}'.format(num_samples_from_year_to_year(df, '2013', '2020')))
     print('Number of blastocysts from 2013 to 2020: {}'.format(num_blastocysts_from_year_to_year(df, '2013', '2020')))
     print('Number of non-blastocysts from 2013 to 2020: {}'.format(num_non_blastocysts_from_year_to_year(df, '2013', '2020')))
+
+    

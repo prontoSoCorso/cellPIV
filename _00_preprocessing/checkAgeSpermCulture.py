@@ -207,11 +207,10 @@ if __name__ == '__main__':
         u_stat, u_p, effect_size_r = mann_whitney_u_test_with_effect_size(df, column, target_column)
         print(f'\nMann-Whitney U Test for {column}: U-statistic = {u_stat}, p-value = {u_p}, effect size r = {effect_size_r}')
         
-        '''
-        # Usare t-Test con effect size, NO PERCHE' DISTRIBUZIONE NON GAUSSIANA
+        # Usare t-Test con effect size
         t_stat, t_p, cohens_d = student_t_test_with_effect_size(df, column, target_column)
         print(f't-Test for {column}: t-statistic = {t_stat}, p-value = {t_p}, effect size d = {cohens_d}')
-        '''
+        
 
         # Point-Biserial Correlation Coefficient
         correlation, p_value = point_biserial_correlation(df, column, target_column)
