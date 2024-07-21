@@ -51,43 +51,48 @@ for col in missing_columns:
 sheet2_filtered = sheet2_filtered[sheet1.columns]
 
 # Combina i due DataFrame
-combined_df = pd.concat([sheet1, sheet2_filtered], ignore_index=True)
+blasto_labels_df = pd.concat([sheet1, sheet2_filtered], ignore_index=True)
 
 # Rinomina le colonne "slide" a "dish" e "slide_well" a "dish_well"
-combined_df.rename(columns={"slide": "dish", "slide_well": "dish_well"}, inplace=True)
+blasto_labels_df.rename(columns={"slide": "dish", "slide_well": "dish_well"}, inplace=True)
+
+# Save the result to a CSV file
+blasto_labels_df.to_csv(conf.path_single_csv, index=False)
+
+print(blasto_labels_df.head())
+print("========================")
 
 # Leggi il file "pz con doppia dish" che contiene la mappatura dei pazienti con doppia dish
-double_dish_df = pd.read_excel(conf.path_double_dish_excel, engine='openpyxl', header=None, names=['dish1', 'dish2'])
+double_dish_df = pd.read_excel(conf.path_double_dish_excel, engine='openpyxl', header=None, names=['dish1', 'dish2','id'])
+double_dish_df = double_dish_df.iloc[:, :2]
+print(double_dish_df.head())
+print("========================")
 
-# Initialize patient ID
+# Crea un dizionario per mappare le slide ai pazienti
 patient_id = 1
 dish_to_patient = {}
 
-# Function to assign patient IDs to linked dishes
-def assign_patient_id(dish, patient_id):
-    stack = [dish]
-    while stack:
-        current_dish = stack.pop()
-        if current_dish not in dish_to_patient:
-            dish_to_patient[current_dish] = patient_id
-            linked_dishes = double_dish_df[(double_dish_df['dish1'] == current_dish) | (double_dish_df['dish2'] == current_dish)]
-            for _, linked_dish in linked_dishes.iterrows():
-                if linked_dish['dish1'] != current_dish:
-                    stack.append(linked_dish['dish1'])
-                if linked_dish['dish2'] != current_dish:
-                    stack.append(linked_dish['dish2'])
+# Associa le slide doppie allo stesso paziente
+for _, row in double_dish_df.iterrows():
+    dish1, dish2 = row['dish1'], row['dish2']
+    dish_to_patient[dish1] = patient_id
+    dish_to_patient[dish2] = patient_id
+    patient_id += 1
 
-# Iterate through the combined data
-for dish in combined_df['dish'].unique():
+# Associa le slide singole ai pazienti rimanenti
+for dish in blasto_labels_df['dish'].unique():
     if dish not in dish_to_patient:
-        assign_patient_id(dish, patient_id)
+        dish_to_patient[dish] = patient_id
         patient_id += 1
 
-# Map patient IDs to the combined data
-combined_df['patient'] = combined_df['dish'].map(dish_to_patient)
+# Aggiungi la colonna dell'identificativo del paziente
+blasto_labels_df['patient_id'] = blasto_labels_df['dish'].map(dish_to_patient)
+
+# Sposta la colonna "patient_id" come prima colonna
+cols = ['patient_id'] + [col for col in blasto_labels_df.columns if col != 'patient_id']
+blasto_labels_df = blasto_labels_df[cols]
 
 # Save the result to a CSV file
-combined_df.to_csv("output.csv", index=False)  # replace with the correct path
+blasto_labels_df.to_csv(conf.path_final_csv, index=False)
 
-print(combined_df.head())
-
+print(blasto_labels_df.head())

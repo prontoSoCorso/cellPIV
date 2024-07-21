@@ -2,7 +2,7 @@
 
 import torch
 
-giovanna = True
+giovanna = False
 
 class user_paths:
     #Per computer fisso
@@ -14,15 +14,20 @@ class user_paths:
         path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
 
 
+class utils:
+    # Dim
+    img_size=500
+    num_frames=288
+    
+    # Seed
+    seed = 2024
+
+
 class Config_00_preprocessing:
-    if giovanna:
-        path_old_excel = "/home/giovanna/Documents/Data/BlastoData/BlastoLabels.xlsx"
-        path_new_excel = "/home/giovanna/Documents/Data/BlastoData/BlastoLabels_singleFile.csv"
-        path_double_dish_excel = "/home/giovanna/Documents/Data/BlastoData/pz con doppia dish.xlsx"
-    else:
-        path_old_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels.xlsx"
-        path_new_excel = "C:/Users/loren/Documents/Data/BlastoData/BlastoLabels_singleFile.csv"
-        path_double_dish_excel = "C:/Users/loren/Documents/Data/BlastoData/pz con doppia dish.xlsx"
+    path_old_excel = user_paths.path_BlastoData + "BlastoLabels.xlsx"
+    path_single_csv = user_paths.path_BlastoData + "BlastoLabels_singleFile.csv"
+    path_final_csv = user_paths.path_BlastoData + "BlastoLabels_finalFile.csv"
+    path_double_dish_excel = user_paths.path_BlastoData + "pz con doppia dish.xlsx"
 
 
 
@@ -31,13 +36,27 @@ class Config_01_OpticalFlow:
     project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
     method_optical_flow = "LucasKanade"
 
-    # Dim
-    seed = 2024
-    img_size=500
-    num_frames=288
+    # LK parameters
+    winSize = 10
+    maxLevelPyramid = 3
+    maxCorners = 300
+    qualityLevel = 0.3
+    minDistance = 10
+    blockSize = 7
 
     # Var
     save_images = 0
+    num_forward_frame = 4   # Numero di frame per sum_mean_mag
+    
+
+
+class Config_02_temporalData:
+    #Paths
+    csv_file_path = Config_00_preprocessing.path_final_csv
+    output_csv_file_path = user_paths.path_BlastoData + "NormalizedBlastoLabels.csv"
+
+    # Data
+    temporalDataType = "sum_mean_mag_dict"
 
 
 

@@ -161,7 +161,6 @@ def process_frames(folder_path, output_folder):
 
 
 
-
 def process_and_save_metrics(folder_path, output_folder, frame_files, mean_magnitude, vorticity, std_dev, hybrid, sum_mean_mag):
     #Find 5 peaks for each metric
     peaks_mag, _ = find_peaks(mean_magnitude, distance=10)  # Trova i picchi con una distanza minima di n frame tra loro
@@ -255,6 +254,7 @@ def saveFig(folder_path, output_folder):
 
 def main():
     # Success/Error
+    n_video = 0
     n_video_error = 0
     n_video_success = 0
 
@@ -272,6 +272,7 @@ def main():
         value_to_add = np.array([0]) if 'no_blasto' in class_sample else np.array([1])
 
         for sample in os.listdir(path_all_folders):
+            n_video += 1
             try:
                 sample_path = path_all_folders + "/" + sample
                 sample_name = sample    #sample_name è il nome della cartella
@@ -319,6 +320,7 @@ def main():
     # Stampo quanti frame con successo e quanti errori
     print('===================')
     print('===================')
+    print(f"Sono stati analizzati {n_video} Time Lapse")
     print(f"Sono state elaborate con successo {n_video_success} serie temporali")
     print(f"Non sono state elaborate le serie temporali di {n_video_error} video")
 

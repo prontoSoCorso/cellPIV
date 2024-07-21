@@ -30,5 +30,3 @@ def calculate_vorticity(flow):
     
     return vorticity
 
-
-
