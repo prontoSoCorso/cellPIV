@@ -40,10 +40,12 @@ Decisione finale: NORMALIZZAZIONE PER PAZIENTE
     - Facilita l'apprendimento del modello: Modelli di machine learning spesso beneficiano di dati 
         normalizzati a livello di gruppo, migliorando la stabilità e la generalizzabilità.
 '''
-import sys
+
+
 import os
-import pandas as pd
+import sys
 import pickle
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -65,31 +67,10 @@ def load_pickled_files(directory):
                 data[file[:-4]] = pickle.load(f)
     return data
 
-def plot_signals(patient_id, original_data, normalized_data, dish_wells):
-    fig, axes = plt.subplots(2, 1, figsize=(14, 10), sharex=True)
-
-    # Plot original data
-    for data, dish_well in zip(original_data, dish_wells):
-        axes[0].plot(data, marker='o', label=dish_well)
-    axes[0].set_title(f'Original Signals for Patient {patient_id}')
-    axes[0].set_xlabel('Time')
-    axes[0].set_ylabel('Signal Value')
-    axes[0].legend()
-
-    # Plot normalized data
-    for data, dish_well in zip(normalized_data, dish_wells):
-        axes[1].plot(data, marker='o', label=dish_well)
-    axes[1].set_title(f'Normalized Signals for Patient {patient_id}')
-    axes[1].set_xlabel('Time')
-    axes[1].set_ylabel('Normalized Signal Value')
-    axes[1].legend()
-
-    plt.tight_layout()
-    plt.show()
-
 if __name__ == '__main__':
     csv_file_path = conf.csv_file_path
     output_csv_file_path = conf.output_csv_file_path
+    output_csv_normalized_file_path = conf.output_csvNormalized_file_path
 
     # Carica i dati dal file CSV
     df_csv = pd.read_csv(csv_file_path)
@@ -117,36 +98,44 @@ if __name__ == '__main__':
     # Unisci i dati del file CSV con i dati temporali
     df_merged = pd.merge(df_csv, df_temporal, on='dish_well', how='inner')
 
-    # Normalizza i dati per paziente
-    normalized_values = []
-    original_values = []
-    dish_wells_list = []
+    # Rimuovi le righe che contengono valori mancanti
+    df_merged.dropna(inplace=True)
 
-    for patient_id, group in df_merged.groupby('patient_id'):
-        temporal_data = group.iloc[:, 3:].values  # Ottieni solo le colonne dei valori temporali
-        original_values.append(temporal_data)
-        dish_wells_list.append(group['dish_well'].values)
-        min_val = np.min(temporal_data)
-        max_val = np.max(temporal_data)
-        normalized_data = (temporal_data - min_val) / (max_val - min_val)
-        normalized_values.append(normalized_data)
-
-    # Sovrascrivi i valori normalizzati nel DataFrame
-    normalized_values = np.vstack(normalized_values)
-    df_merged.iloc[:, 3:] = normalized_values
-
-    # Salva il risultato in un nuovo file csv
+    # Salva i dati originali in un nuovo file CSV
     df_merged.to_csv(output_csv_file_path, index=False)
+    print(f"I dati originali sono stati salvati in {output_csv_file_path}")
 
-    print(f"I dati normalizzati sono stati salvati in {output_csv_file_path}")
+    # Funzione per normalizzare per patient_id
+    def normalize_group(group):
+        # Seleziona solo i valori > 0
+        positive_values = group[group > 0]
+        
+        # Calcola il minimo e il massimo ignorando gli zeri
+        min_val = np.min(positive_values)
+        max_val = np.max(positive_values)
 
-    # Plotting
-    # Seleziona un esempio di paziente per il confronto
-    example_patient_id = 55
-    example_index = df_merged['patient_id'] == example_patient_id
-    example_group = df_merged[example_index]
-    example_dish_wells = dish_wells_list[np.where(df_merged['patient_id'].unique() == example_patient_id)[0][0]]
-    example_original_data = original_values[np.where(df_merged['patient_id'].unique() == example_patient_id)[0][0]]
-    example_normalized_data = example_group.iloc[:, 3:].values
+        # Applica la normalizzazione Min-Max ignorando gli zeri
+        normalized = (group - min_val) / (max_val - min_val)
+        
+        # Mantieni gli zeri invariati
+        normalized[group == 0] = 0
 
-    plot_signals(example_patient_id, example_original_data, example_normalized_data, example_dish_wells)
+        return normalized
+
+    # Separare le prime 3 colonne (metadati) dalle serie temporali
+    metadata = df_merged.iloc[:, :3]
+    time_series = df_merged.iloc[:, 3:]
+
+    # Applicare la normalizzazione per gruppo (patient_id)
+    normalized_time_series = df_merged.groupby('patient_id').apply(lambda x: normalize_group(x.iloc[:, 3:]))
+
+    # Rimuovi il MultiIndex risultante dal groupby
+    normalized_time_series = normalized_time_series.reset_index(level=0, drop=True)
+
+    # Concatenare i metadati con le serie temporali normalizzate
+    normalized_df = pd.concat([metadata, normalized_time_series], axis=1)
+
+    # Salva i dati normalizzati in un nuovo file CSV
+    normalized_df.to_csv(output_csv_normalized_file_path, index=False)
+    print(f"I dati normalizzati sono stati salvati in {output_csv_normalized_file_path}")
+

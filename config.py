@@ -2,7 +2,7 @@
 
 import torch
 
-giovanna = False
+giovanna = True
 
 class user_paths:
     #Per computer fisso
@@ -24,10 +24,10 @@ class utils:
 
 
 class Config_00_preprocessing:
-    path_old_excel = user_paths.path_BlastoData + "BlastoLabels.xlsx"
-    path_single_csv = user_paths.path_BlastoData + "BlastoLabels_singleFile.csv"
-    path_final_csv = user_paths.path_BlastoData + "BlastoLabels_finalFile.csv"
-    path_double_dish_excel = user_paths.path_BlastoData + "pz con doppia dish.xlsx"
+    path_old_excel          = user_paths.path_BlastoData + "BlastoLabels.xlsx"
+    path_single_csv         = user_paths.path_BlastoData + "BlastoLabels_singleFile.csv"
+    path_singleWithID_csv   = user_paths.path_BlastoData + "BlastoLabels_singleFileWithID.csv"
+    path_double_dish_excel  = user_paths.path_BlastoData + "pz con doppia dish.xlsx"
 
 
 
@@ -52,8 +52,9 @@ class Config_01_OpticalFlow:
 
 class Config_02_temporalData:
     #Paths
-    csv_file_path = Config_00_preprocessing.path_final_csv
-    output_csv_file_path = user_paths.path_BlastoData + "NormalizedBlastoLabels.csv"
+    csv_file_path = Config_00_preprocessing.path_singleWithID_csv
+    output_csv_file_path            = user_paths.path_BlastoData + "FinalBlastoLabels.csv"
+    output_csvNormalized_file_path  = user_paths.path_BlastoData + "Normalized_Final_BlastoLabels.csv"
 
     # Data
     temporalDataType = "sum_mean_mag_dict"
