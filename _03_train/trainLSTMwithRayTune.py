@@ -23,7 +23,7 @@ import sys
 sys.path.append(parent_dir)
 
 from networksTemporalSeries import LSTM
-from config import Config_02_train as conf
+from config import Config_03_train_rocket as conf
 from _02_train import myModelsFunctions as myFun
 
 

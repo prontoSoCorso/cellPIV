@@ -1,6 +1,9 @@
 ''' Configuration file for the project'''
 
 import torch
+import random
+import numpy as np
+import torch
 
 giovanna = True
 
@@ -18,8 +21,9 @@ class utils:
     # Dim
     img_size=500
     num_frames=288
-    
-    # Seed
+    num_classes=2
+
+    # Seed everything
     seed = 2024
 
 
@@ -52,7 +56,7 @@ class Config_01_OpticalFlow:
 
 class Config_02_temporalData:
     #Paths
-    csv_file_path = Config_00_preprocessing.path_singleWithID_csv
+    csv_file_path                   = Config_00_preprocessing.path_singleWithID_csv
     output_csv_file_path            = user_paths.path_BlastoData + "FinalBlastoLabels.csv"
     output_csvNormalized_file_path  = user_paths.path_BlastoData + "Normalized_Final_BlastoLabels.csv"
 
@@ -61,62 +65,69 @@ class Config_02_temporalData:
 
 
 
-class Config_02_train:
-    project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
-    if giovanna:
-        data_path = '/home/giovanna/Desktop/Lorenzo/Tesi Magistrale/cellPIV/_01_opticalFlows'
-    else:
-        data_path = 'C:/Users/loren/OneDrive - Università di Pavia/Magistrale - Sanità Digitale/Tesi Magistrale/cellPIV/_01_opticalFlows'
-    
+class Config_03_train_rocket:
+    project_name = 'BlastoClass_y13-14_3days_288frames_optflow_LK'
+    data_path = Config_02_temporalData.output_csvNormalized_file_path
     keyAPIpath = "C:/Users/loren/Documents/keyAPIwandb.txt"
-    local_dir = "C:/Utenti/loren/Documents/rayTuneResults"
     
-    model_name = 'LSTM'
+    model_name = 'Rocket'
     dataset = "Blasto"
-    seed = 2024
-    perc_train = 0.7
-    perc_val = 0.2
+    num_kernels = 100000
+    perc_train = 0.8
+    perc_test = 0.2
+    img_size = utils.img_size
+    num_classes = utils.num_classes
 
-    num_epochs = 20
-    batch_size = 16                  # numero di sequenze prese
-    learning_rate = 0.0005
-    pos_weight = torch.tensor(1)
-    img_size=500
-    num_classes=2
+    exp_name = dataset + "," + model_name + "," + str(num_kernels)
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed=0):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+
+
+
+
+class Config_03_train_lstmfcn:
+    project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
+    data_path = Config_02_temporalData.output_csvNormalized_file_path
+    keyAPIpath = "C:/Users/loren/Documents/keyAPIwandb.txt"
+    
+    model_name = 'LSTMFCN'
+    dataset = "Blasto"
+    train_size = 0.8
+    val_size = 0.2
+
+    img_size = utils.img_size
+    num_classes = utils.num_classes
 
     # Parametri LSTM
-    hidden_size = 64                    # Dimensione della cella nascosta
-    num_layers = 5                      # Numero di layer LSTM
-    output_size = 1                     # Dimensione dell'output
-    bidirectional = True               # Imposta a True se la rete è bidirezionale
-    dropout_prob = 0.2                  # Dimensione dropout
+    num_epochs = 2000
+    batch_size = 32                  # numero di sequenze prese
+    dropout = 0.8
+    kernel_sizes = (8,5,3)
+    filter_sizes = (128,256,128)
+    lstm_size = 8                      # Numero di layer LSTM
+    attention = False
+    verbose = 2
 
-    optimizer_type = "RMSprop"             # Tipo optimizer utilizzato
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed=0):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
 
-    exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size) + "," + str(learning_rate) + "," + optimizer_type + "," + str(bidirectional)
+    exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size)
 
-
-
-
-'''
-class Config_02_Model_transf:
-    device = torch.device("mps")
-    max_len=5000 # max time series sequence length 
-    n_head = 4 # number of attention head
-    n_layer = 2 # number of encoder layer
-    drop_prob = 0.1
-    d_model = 200 # number of dimension ( for positional embedding)
-    ffn_hidden = 512 # size of hidden layer before classification 
-    feature = 1 # for univariate time series (1d), it must be adjusted for 1. 
-    model =  Transformer(  d_model=d_model, details=True, n_head=n_head, max_len=max_len, seq_len=sequence_len, ffn_hidden=ffn_hidden, n_layers=n_layer, drop_prob=drop_prob, device=device)
-
-    batch_size = 7
-
-    summary(model, input_size=(batch_size,sequence_len,feature) , device=device)
-
-    print(model)
-
-'''
 
 
 

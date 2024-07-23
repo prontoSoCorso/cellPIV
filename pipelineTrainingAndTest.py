@@ -15,7 +15,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from networksTemporalSeries import LSTM
-from config import Config_02_train as conf
+from config import Config_03_train_rocket as conf
 from _02_train import myModelsFunctions as myFun
 
 
@@ -209,3 +209,23 @@ if __name__ == '__main__':
     test_accuracy = correct_test_predictions / total_test_samples
 
     print(f'Test Loss: {test_loss}, Test Accuracy: {test_accuracy}')
+
+
+
+
+
+# wandb.ai
+'''
+Installo 
+faccio wandb login e scrivo API che mi dice dal sito
+Importo come libreria (import wandb)
+
+
+wandb.init(project = project_name) per fare dizionario per campi da vedere su wandb
+wandb.run.name = exp_name (magari concateno tutti i parametri)
+
+
+quando voglio fare il grafico faccio
+wandb.log({})
+e ci metto dentro tutto quello che voglio graficare
+'''
