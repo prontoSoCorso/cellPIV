@@ -95,7 +95,7 @@ def train_model(config):
     dataset = TensorDataset(input_tensor, labels_tensor)
 
     # Split dei dati in train, validation, e test set
-    train_size = int(conf.perc_train * len(dataset))
+    train_size = int(conf.train_size * len(dataset))
     val_size = len(dataset) - train_size 
     train_dataset, val_dataset= torch.utils.data.random_split(dataset, [train_size, val_size])
 

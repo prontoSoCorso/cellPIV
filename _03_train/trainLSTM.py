@@ -77,7 +77,7 @@ if __name__ == '__main__':
     dataset = TensorDataset(input_tensor, labels_tensor)
 
     # Split dei dati in train, validation, e test set
-    train_size = int(conf.perc_train * len(dataset))
+    train_size = int(conf.train_size * len(dataset))
     val_size = int(conf.perc_val * len(dataset))
     test_size = len(dataset) - train_size - val_size
     train_dataset, val_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, val_size, test_size])

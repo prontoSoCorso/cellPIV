@@ -1,14 +1,12 @@
 import sys
 import os
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sktime.classification.deep_learning import LSTMFCNClassifier
 from sklearn.metrics import accuracy_score, classification_report, balanced_accuracy_score, cohen_kappa_score, brier_score_loss
 import wandb
-import torch
-import random
 import joblib  # Per il salvataggio del modello
+import timeit
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
@@ -18,13 +16,6 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_train_lstmfcn as conf
-
-# Imposta il seed per la ripetibilità
-SEED = conf.seed
-random.seed(SEED)
-np.random.seed(SEED)
-torch.manual_seed(SEED)
-torch.cuda.manual_seed_all(SEED)
 
 # Funzione per caricare i dati normalizzati da CSV
 def load_normalized_data(csv_file_path):
@@ -69,7 +60,8 @@ def log_results(wandb, train_metrics, val_metrics):
         'val_brier': val_metrics[3]
     })
 
-if __name__ == '__main__':
+
+def main():
     csv_file_path = conf.data_path
 
     # Carica i dati normalizzati dal file CSV
@@ -78,7 +70,7 @@ if __name__ == '__main__':
     # Prepara i data loader
     X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
 
-    # Definisce il modello LSTMFCNClassifier
+    # Definisce il modello LSTMFCNClassifier con attenzione
     model = LSTMFCNClassifier(n_epochs=conf.num_epochs, 
                               batch_size=conf.batch_size,
                               dropout=conf.dropout,
@@ -135,3 +127,9 @@ if __name__ == '__main__':
 
     # Fine della run W&B
     wandb.finish()
+
+
+if __name__ == "__main__":
+    # Misura il tempo di esecuzione della funzione main()
+    execution_time = timeit.timeit(main, number=1)
+    print("Tempo impiegato per l'esecuzione di LSTMFCN:", execution_time, "secondi")

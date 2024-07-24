@@ -22,6 +22,7 @@ class utils:
     img_size=500
     num_frames=288
     num_classes=2
+    project_name = "BlastoClass_y13-14_3days_288frames_optflow_LK"
 
     # Seed everything
     seed = 2024
@@ -66,18 +67,17 @@ class Config_02_temporalData:
 
 
 class Config_03_train_rocket:
-    project_name = 'BlastoClass_y13-14_3days_288frames_optflow_LK'
+    project_name = utils.project_name
     data_path = Config_02_temporalData.output_csvNormalized_file_path
-    keyAPIpath = "C:/Users/loren/Documents/keyAPIwandb.txt"
-    
+
     model_name = 'Rocket'
     dataset = "Blasto"
-    num_kernels = 100000
-    perc_train = 0.8
-    perc_test = 0.2
+    num_kernels = 100
+    test_size = 0.1
     img_size = utils.img_size
     num_classes = utils.num_classes
 
+    # Nome dell'esperimento
     exp_name = dataset + "," + model_name + "," + str(num_kernels)
 
     # Seed
@@ -94,9 +94,8 @@ class Config_03_train_rocket:
 
 
 class Config_03_train_lstmfcn:
-    project_name = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
+    project_name = utils.project_name
     data_path = Config_02_temporalData.output_csvNormalized_file_path
-    keyAPIpath = "C:/Users/loren/Documents/keyAPIwandb.txt"
     
     model_name = 'LSTMFCN'
     dataset = "Blasto"
@@ -106,15 +105,18 @@ class Config_03_train_lstmfcn:
     img_size = utils.img_size
     num_classes = utils.num_classes
 
-    # Parametri LSTM
-    num_epochs = 2000
+    # Parametri LSTMFCN
+    num_epochs = 200
     batch_size = 32                  # numero di sequenze prese
-    dropout = 0.8
-    kernel_sizes = (8,5,3)
+    dropout = 0.2
+    kernel_sizes = (16,8,4) #def: 8,5,3
     filter_sizes = (128,256,128)
     lstm_size = 8                      # Numero di layer LSTM
     attention = False
     verbose = 2
+
+    # Nome dell'esperimento
+    exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size) + "," + str(kernel_sizes) + "," + str(filter_sizes) + "," + str(lstm_size) + "," + str(attention)
 
     # Seed
     seed = utils.seed
@@ -126,9 +128,82 @@ class Config_03_train_lstmfcn:
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
 
-    exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size)
 
 
 
 
+class Config_03_train_hivecote:
+    project_name = utils.project_name
+    data_path = Config_02_temporalData.output_csvNormalized_file_path
+    
+    model_name = 'HIVECOTEV2'
+    dataset = "Blasto"
+    test_size = 0.1
+    img_size = utils.img_size
+    num_classes = utils.num_classes
+
+    # Nome dell'esperimento
+    exp_name = dataset + "," + model_name
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed=0):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+    
+    '''
+    # Parametri specifici per la configurazione dei sotto-modelli utilizzati da HiveCoteV2
+    stc_params = {"n_shapelet_samples": 10000, "max_shapelets": 10}  # Shapelet Transform Classifier parameters
+    drcif_params = {"n_estimators": 500}  # DrCIF parameters
+    arsenal_params = {"num_kernels": 2000, "n_estimators": 25}  # Arsenal parameters
+    tde_params = {"n_parameter_samples": 25, "max_ensemble_size": 10}  # Temporal Dictionary Ensemble parameters
+    '''
+
+    # Parametri specifici per la configurazione dei sotto-modelli utilizzati da HiveCoteV2
+    stc_params = {"n_shapelet_samples": 1, "max_shapelets": 1}  # Shapelet Transform Classifier parameters
+    drcif_params = {"n_estimators": 1}  # DrCIF parameters
+    arsenal_params = {"num_kernels": 1, "n_estimators": 1}  # Arsenal parameters
+    tde_params = {"n_parameter_samples": 1, "max_ensemble_size": 1}  # Temporal Dictionary Ensemble parameters
+    
+
+
+class Config_03_train_ConvTran:
+    project_name = utils.project_name
+    data_path = user_paths.path_BlastoData + 'UEA/'
+    output_dir = 'Results'
+    Norm = False
+    val_ratio = 0.2
+    print_interval = 10
+
+    Net_Type = 'C-T'
+    emb_size = 16
+    dim_ff = 256
+    num_heads = 8
+    Fix_pos_encode = 'tAPE'
+    Rel_pos_encode = 'eRPE'
+
+    epochs = 100
+    batch_size = 16
+    lr = 1e-3
+    dropout = 0.01
+    val_interval = 2
+    key_metric = 'accuracy'
+
+    gpu = 0
+    console = False
+    
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed=0):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
 
