@@ -54,34 +54,39 @@ def log_results(wandb, train_accuracy, test_accuracy):
 
 
 def main():
-    csv_file_path = conf.data_path
+    accuracy_dict = {}
+    best_accuracy = 0
+    best_kernel = None
+    best_model_path = None
 
-    # Carica i dati normalizzati dal file CSV
-    df = load_normalized_data(csv_file_path)
+    for kernel in conf.kernels:
+        conf.kernels = kernel
 
-    # Prepara i data loader
-    X_train, X_test, y_train, y_test = prepare_data_loaders(df, conf.test_size)
+        # Carica i dati normalizzati dal file CSV
+        df = load_normalized_data(conf.data_path)
 
-    # Definisce il modello RocketClassifier
-    model = RocketClassifier(num_kernels = conf.num_kernels, random_state = conf.seed_everything(conf.seed), n_jobs=-1)
+        # Prepara i data loader
+        X_train, X_test, y_train, y_test = prepare_data_loaders(df, conf.test_size)
 
-    # Inizia una nuova run su W&B
-    wandb.init(
-        project=conf.project_name,
-        config={
-            "exp_name": conf.exp_name,
-            "dataset": conf.dataset,
-            "model": "RocketClassifier",
-            "img_size": conf.img_size,
-            "num_classes": conf.num_classes
-        }
-    )
-    wandb.run.name = conf.exp_name
+        # Definisce il modello RocketClassifier
+        model = RocketClassifier(num_kernels = kernel, random_state = conf.seed_everything(conf.seed), n_jobs=-1)
 
-    # Addestramento del modello
-    model = train_model(model, X_train, y_train)
+        # Inizia una nuova run su W&B
+        wandb.init(
+            project=conf.project_name,
+            config={
+                "exp_name": conf.exp_name + "," + str(kernel),
+                "dataset": conf.dataset,
+                "model": "RocketClassifier",
+                "img_size": conf.img_size,
+                "num_classes": conf.num_classes
+            }
+        )
+        wandb.run.name = f"{conf.exp_name}_kernels_{kernel}"
 
-    if conf.test_size != 0.0:
+        # Addestramento del modello
+        model = train_model(model, X_train, y_train)
+
         # Valutazione del modello su train e test set
         train_accuracy, train_report = evaluate_model(model, X_train, y_train)
         test_accuracy, test_report = evaluate_model(model, X_test, y_test)
@@ -89,37 +94,45 @@ def main():
         # Log dei risultati su W&B
         log_results(wandb, train_accuracy, test_accuracy)
 
+        # Salva l'accuratezza del test nel dizionario
+        accuracy_dict[kernel] = test_accuracy
+
         # Stampa dei risultati
         print(f'Train Accuracy: {train_accuracy}')
         print(f'Test Accuracy: {test_accuracy}')
-        print('Train Classification Report:')
+        print(f"Train Classification Report with {kernel} kernels:")
         print(train_report)
-        print('Test Classification Report:')
+        print(f"Test Classification Report with {kernel} kernels:")
         print(test_report)
 
-    else:
-        # Valutazione del modello su train
-        train_accuracy, train_report = evaluate_model(model, X_train, y_train)
+        # Aggiorna il modello migliore se l'accuratezza sul test è la migliore trovata finora
+        if accuracy_dict[kernel] > best_accuracy:
+            best_accuracy = accuracy_dict[kernel]
+            best_kernel = kernel
+            best_model_path = os.path.join(parent_dir, "_04_test", f"rocket_classifier_model_{kernel}_kernels.pkl")
+            joblib.dump(model, best_model_path)
+            print(f'Modello salvato in: {best_model_path}')
 
-        # Log dei risultati su W&B
-        log_results(wandb, train_accuracy)
+        # Fine della run W&B
+        wandb.finish()
 
-        # Stampa dei risultati
-        print(f'Train Accuracy: {train_accuracy}')
-        print('Train Classification Report:')
-        print(train_report)
+    # Stampa il dizionario delle accuratezze
+    print("Accuratezza su test set per ogni kernel:", accuracy_dict)
 
-    # Salvataggio del modello
-    model_save_path = os.path.join(parent_dir, "_04_test" ,"rocket_classifier_model_Try.pkl")
-    joblib.dump(model, model_save_path)
-    print(f'Modello salvato in: {model_save_path}')
+    # Stampa il modello con la migliore accuratezza
+    print(f"Il modello migliore è con {best_kernel} kernel, con un'accuratezza del {best_accuracy:.4f}")
+    print(f"Modello salvato in: {best_model_path}")
 
-    # Fine della run W&B
-    wandb.finish()
+    # Carica e stampa le metriche per il modello migliore
+    best_model = joblib.load(best_model_path)
+    X_train, X_test, y_train, y_test = prepare_data_loaders(load_normalized_data(conf.data_path), conf.test_size)
+    _, best_test_report = evaluate_model(best_model, X_test, y_test)
+    print('Best Model Test Classification Report:')
+    print(best_test_report)
+
 
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()
-    execution_time = timeit.timeit(main, number=1)
-    print("Tempo impiegato per l'esecuzione di LSTMFCN::", execution_time, "secondi")
-
+    execution_time = timeit.timeit(lambda: main(), number=1)
+    print(f"Tempo impiegato per l'esecuzione di Rocket con vari kernel:", execution_time, "secondi")

@@ -106,13 +106,22 @@ if __name__ == '__main__':
     print(f"I dati originali sono stati salvati in {output_csv_file_path}")
 
     # Funzione per normalizzare per patient_id
-    def normalize_group(group):
+    def normalize_group(group, check_number_last_column_changed):
         # Seleziona solo i valori > 0
         positive_values = group[group > 0]
         
         # Calcola il minimo e il massimo ignorando gli zeri
         min_val = np.min(positive_values)
         max_val = np.max(positive_values)
+
+        # Verifica se il massimo è nelle ultime 10 colonne
+        if max_val in group.iloc[:, -conf.n_last_colums_check_max:].values:
+            check_number_last_column_changed[0] += 1
+            # Imposta a zero le ultime 10 colonne della riga in cui ho trovato il massimo
+            group.iloc[:, -conf.n_last_colums_check_max:] = 0
+
+            # Ricalcola minimo e massimo ignorando gli zeri
+            normalize_group(group, check_number_last_column_changed)
 
         # Applica la normalizzazione Min-Max ignorando gli zeri
         normalized = (group - min_val) / (max_val - min_val)
@@ -127,7 +136,9 @@ if __name__ == '__main__':
     time_series = df_merged.iloc[:, 3:]
 
     # Applicare la normalizzazione per gruppo (patient_id)
-    normalized_time_series = df_merged.groupby('patient_id').apply(lambda x: normalize_group(x.iloc[:, 3:]))
+    check_number_last_column_changed = [0]
+    normalized_time_series = df_merged.groupby('patient_id').apply(lambda x: normalize_group(x.iloc[:, 3:], check_number_last_column_changed))
+    print(f"Sono state cambiate le ultime colonne in {check_number_last_column_changed[0]} pazienti")
 
     # Rimuovi il MultiIndex risultante dal groupby
     normalized_time_series = normalized_time_series.reset_index(level=0, drop=True)

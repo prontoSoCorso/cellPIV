@@ -15,10 +15,13 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
+from config import utils
 from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
 
-
+class InsufficientFramesError(Exception):
+    """Eccezione sollevata quando il numero di frame è insufficiente."""
+    pass
 
 def compute_optical_flowPyrLK(prev_frame, current_frame):
     # Parametri per il tracciamento dei punti di interesse
@@ -78,9 +81,15 @@ def process_frames(folder_path, output_folder):
     # Get the list of frames in the folder
     frame_files = sort_files_by_slice_number(os.listdir(folder_path))
 
-    # Se non ho visto male, al frame 293 ho sempre picco. Probabilmente cambio terreno (giorno 3 se frame ogni 15 min)
+    # Controllo se il numero di frame è sufficiente
+    if len(frame_files) < 300:
+        raise InsufficientFramesError(f"Il numero di frame nel file {dish_well} è minore di {conf.num_minimum_frames}: {len(frame_files)}")
+
+    # Intorno al frame 290 ho sempre picco dovuto al cambio terreno (giorno 3 se frame ogni 15 min)
     # Invece a 261/262 ho un mini shift di immagini (senza apparente motivo), quindi taglio ancora prima
-    frame_files = frame_files[:conf.num_frames]
+    # Non prendo i primi n frame (5) perché spesso possono presentare dei problemi, come sfocature o traslazioni 
+    # ingiustificate e potrebbero essere un motivo di confondimento per i modelli
+    frame_files = frame_files[conf.num_initial_frames_to_cut:utils.num_frames]
 
     # Read the first frame
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)

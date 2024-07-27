@@ -18,6 +18,13 @@ from config import user_paths as myPaths
 from config import utils as utils
 
 
+class InsufficientFramesError(Exception):
+    """Eccezione sollevata quando il numero di frame è insufficiente."""
+    pass
+
+class InvalidImageSizeError(Exception):
+    """Eccezione sollevata quando un'immagine non ha la dimensione 500x500."""
+    pass
 
 def compute_optical_flowPyrLK(prev_frame, current_frame):
     # Parametri per il tracciamento dei punti di interesse
@@ -57,22 +64,30 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
 
 
 def process_frames(folder_path, dish_well):
-    target_size = (utils.img_size, utils.img_size)    # Impongo dimensione altrimenti dà problemi
+    target_size = (utils.img_size, utils.img_size)    # Impongo dimensione immagini
 
     # Get the list of frames in the folder
     frame_files = sort_files_by_slice_number(os.listdir(folder_path))
 
-    # Se non ho visto male, al frame 293 ho sempre picco. Probabilmente cambio terreno (giorno 3 se frame ogni 15 min)
+    # Controllo se il numero di frame è sufficiente
+    if len(frame_files) < 300:
+        raise InsufficientFramesError(f"Il numero di frame nel file {dish_well} è minore di {conf.num_minimum_frames}: {len(frame_files)}")
+
+    # Intorno al frame 290 ho sempre picco dovuto al cambio terreno (giorno 3 se frame ogni 15 min)
     # Invece a 261/262 ho un mini shift di immagini (senza apparente motivo), quindi taglio ancora prima
-    frame_files = frame_files[:utils.num_frames]
+    # Non prendo i primi n frame (5) perché spesso possono presentare dei problemi, come sfocature o traslazioni 
+    # ingiustificate e potrebbero essere un motivo di confondimento per i modelli
+    frame_files = frame_files[conf.num_initial_frames_to_cut:utils.num_frames]
 
     # Read the first frame
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)
+    if prev_frame.shape[:2] != target_size:
+        raise InvalidImageSizeError(f"L'immagine {frame_files[0]} non è di dimensione 500x500")
     prev_frame = cv2.resize(prev_frame, target_size)
 
     # METRICHE
     # media della magnitudine in ogni frame (1 valore per frame)
-    # media della magnitudine tra un numero di frame specifico in avanti nel tempo (?)
+    # media della magnitudine tra un numero di frame specifico in avanti nel tempo (3)
     # vorticity media in ogni frame (1 valore per ogni frame che indica la media delle fasi delle coordinate polari (rotazione media))
     # media dell'inverso della deviazione standard delle direzioni dei vettori
     # hybrid: insieme di mean magnitude e st.dev (quello inverso medio calcolato prima. Non specifica come)
@@ -86,6 +101,8 @@ def process_frames(folder_path, dish_well):
 
         # Read the current frame
         current_frame = cv2.imread(os.path.join(folder_path, frame_file), cv2.IMREAD_GRAYSCALE)
+        if current_frame.shape[:2] != target_size:
+            raise InvalidImageSizeError(f"L'immagine {frame_file} non è di dimensione 500x500")
         current_frame = cv2.resize(current_frame, target_size)
 
         # Compute optical flow
@@ -132,8 +149,12 @@ def process_frames(folder_path, dish_well):
 def main():
     # Success/Error
     n_video = 0
-    n_video_error = 0
-    n_video_success = 0
+    n_video_blasto = 0
+    n_video_no_blasto = 0
+    n_video_error_blasto = 0
+    n_video_error_no_blasto = 0
+    n_video_success_blasto = 0
+    n_video_success_no_blasto = 0
 
     # Initialize dicts to store metrics for all videos
     mean_magnitude_dict = {}
@@ -147,6 +168,11 @@ def main():
 
         for sample in os.listdir(path_all_folders):
             n_video += 1
+            if class_sample == "blasto":
+                n_video_blasto += 1
+            else:
+                n_video_no_blasto += 1
+
             try:
                 sample_path = os.path.join(path_all_folders, sample)
 
@@ -157,10 +183,16 @@ def main():
                 vorticity_dict[sample] = vorticity
                 hybrid_dict[sample] = hybrid
                 sum_mean_mag_dict[sample] = sum_mean_mag
-                n_video_success += 1
+                if class_sample == "blasto":
+                    n_video_success_blasto += 1
+                else:
+                    n_video_success_no_blasto += 1
 
             except Exception as e:
-                n_video_error += 1
+                if class_sample == "blasto":
+                    n_video_error_blasto += 1
+                else:
+                    n_video_error_no_blasto += 1
                 print('-------------------')
                 print(f"Error in sample: {sample}")
                 print(e)
@@ -174,9 +206,9 @@ def main():
     # Stampo quanti frame con successo e quanti errori
     print('===================')
     print('===================')
-    print(f"Sono stati analizzati {n_video} Time Lapse")
-    print(f"Sono state elaborate con successo {n_video_success} serie temporali")
-    print(f"Non sono state elaborate le serie temporali di {n_video_error} video")
+    print(f"Sono stati analizzati {n_video} Time Lapse di cui {n_video_blasto} blasto e {n_video_no_blasto} no_blasto")
+    print(f"Sono state elaborate con successo {n_video_success_blasto} serie temporali per blasto e {n_video_success_no_blasto} per no_blasto")
+    print(f"Non sono state elaborate le serie temporali di {n_video_error_blasto} video blasto e {n_video_error_no_blasto} video no_blasto")
 
     # Ottengo il percorso della cartella "_02_temporalData"
     temporal_data_directory = os.path.join(parent_dir, '_02_temporalData')
