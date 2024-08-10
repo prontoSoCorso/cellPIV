@@ -163,12 +163,33 @@ class Config_03_train_lstmfcn_with_optuna:
     # Parametri LSTMFCN
     min_num_epochs      = 50
     max_num_epochs      = 300
+    num_epochs          = 1500
+
+    batch_size          = [16,32]            # numero di sequenze prese
+    
+    min_dropout         = 0.1
+    max_dropout         = 0.4
+
+    kernel_sizes        = [(8,5,3)]
+    filter_sizes        = [(128,256,128), (256,128,128)]
+
+    min_lstm_size       = 4                     # Numero di layer LSTM
+    max_lstm_size       = 8                     
+
+    attention           = False
+    verbose             = 2
+
+    '''
+    Con questa ricerca:
+    
+    in_num_epochs      = 50
+    max_num_epochs      = 300
     num_epochs          = 500
 
     batch_size          = [16,32,64]            # numero di sequenze prese
     
     min_dropout         = 0.1
-    max_dropout         = 0.8
+    max_dropout         = 0.4
 
     kernel_sizes        = [(16,8,4), (8,5,3)]
     filter_sizes        = [(128,256,128), (64,128,64), (256,128,128)]
@@ -178,7 +199,10 @@ class Config_03_train_lstmfcn_with_optuna:
 
     attention           = False
     verbose             = 2
-
+     
+    migliori parametri trovati con accuratezza di 0.63636:
+    Miglior trial: {'batch_size': 16, 'dropout': 0.2, 'kernel_sizes': (8, 5, 3), 'filter_sizes': (256, 128, 128), 'lstm_size': 6}
+    '''
 
 
 class Config_03_train_hivecote:

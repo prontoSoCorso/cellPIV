@@ -53,7 +53,7 @@ def objective(trial):
     num_epochs = conf.num_epochs
     #num_epochs = trial.suggest_int('num_epochs', conf.min_num_epochs, conf.max_num_epochs)
     batch_size = trial.suggest_categorical('batch_size', conf.batch_size)
-    dropout = trial.suggest_float('dropout', conf.min_dropout, conf.max_dropout)
+    dropout = trial.suggest_float('dropout', conf.min_dropout, conf.max_dropout, step=0.05)
     kernel_sizes = trial.suggest_categorical('kernel_sizes', conf.kernel_sizes)
     filter_sizes = trial.suggest_categorical('filter_sizes', conf.filter_sizes)
     lstm_size = trial.suggest_int('lstm_size', conf.min_lstm_size, conf.max_lstm_size)
