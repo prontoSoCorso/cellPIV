@@ -102,7 +102,7 @@ def main():
     print(f'Miglior trial: {study.best_trial.params}')
 
     # Salvataggio del modello
-    model_save_path = os.path.join(parent_dir, "_04_test", "lstmfcnWithOptuna_classifier_model.pkl")
+    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstmfcnWithOptuna_classifier_model.pkl")
     joblib.dump(study, model_save_path)
     print(f'Modello salvato in: {model_save_path}')
 

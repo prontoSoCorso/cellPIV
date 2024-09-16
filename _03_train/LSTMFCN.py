@@ -121,7 +121,7 @@ def main():
     print(val_metrics[4])
 
     # Salvataggio del modello
-    model_save_path = os.path.join(parent_dir, "_04_test", "lstmfcn_classifier_model.pkl")
+    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstmfcn_classifier_model.pkl")
     joblib.dump(model, model_save_path)
     print(f'Modello salvato in: {model_save_path}')
 

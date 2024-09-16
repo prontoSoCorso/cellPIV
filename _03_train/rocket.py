@@ -109,7 +109,7 @@ def main():
         if accuracy_dict[kernel] > best_accuracy:
             best_accuracy = accuracy_dict[kernel]
             best_kernel = kernel
-            best_model_path = os.path.join(parent_dir, "_04_test", f"rocket_classifier_model_{kernel}_kernels.pkl")
+            best_model_path = os.path.join(parent_dir, conf.test_dir, f"rocket_classifier_model_{kernel}_kernels.pkl")
             joblib.dump(model, best_model_path)
             print(f'Modello salvato in: {best_model_path}')
 

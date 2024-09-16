@@ -252,14 +252,6 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
-
-
-
 '''
 PER UN EVENTUALE SCHEDULER
 ASHA: uno dei più efficienti e comunemente utilizzati, ideale per la maggior parte delle applicazioni.

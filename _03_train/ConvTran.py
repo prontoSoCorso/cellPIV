@@ -46,17 +46,32 @@ if __name__ == '__main__':
     optimizer = get_optimizer("RAdam")(model.parameters(), lr=config.lr)
     loss_module = get_loss_module()
 
-    # Training
-    save_path = os.path.join(config.output_dir, 'model_last.pth')
-    tensorboard_writer = SummaryWriter('summary')
+    # Creazione di SummaryWriter
+    tensorboard_writer = SummaryWriter(os.path.join(parent_dir, config.tensorboard_dir))
 
-    trainer = SupervisedTrainer(model, train_loader, device, loss_module, optimizer, print_interval=config.print_interval)
-    val_evaluator = SupervisedTrainer(model, val_loader, device, loss_module, print_interval=config.print_interval)
+    # Training
+    save_path = os.path.join(parent_dir, config.test_dir, 'convTran_classifier_model.pkl')
+
+    trainer = SupervisedTrainer(
+        model, train_loader, device, loss_module, optimizer, 
+        print_interval=config.print_interval, writer=tensorboard_writer
+    )
+    val_evaluator = SupervisedTrainer(
+        model, val_loader, device, loss_module, 
+        print_interval=config.print_interval, writer=tensorboard_writer, is_training=False
+    )
 
     train_runner(config=config, model=model, trainer=trainer, val_evaluator=val_evaluator, save_path=save_path)
+    
+    # Dopo l'addestramento, chiudere il writer
+    tensorboard_writer.close()
+
     best_model, optimizer, start_epoch = load_model(model, save_path, optimizer)
     best_model.to(device)
 
-    best_test_evaluator = SupervisedTrainer(best_model, test_loader, device, loss_module, print_interval=config.print_interval)
+    best_test_evaluator = SupervisedTrainer(
+        best_model, test_loader, device, loss_module, 
+        print_interval=config.print_interval, writer=tensorboard_writer, is_training=False
+    )
     best_aggr_metrics_test, all_metrics = best_test_evaluator.evaluate(keep_all=True)
     logger.info(f"Best Model Test Summary: {best_aggr_metrics_test}")

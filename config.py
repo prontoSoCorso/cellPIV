@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import optuna
 
-giovanna = True
+giovanna = False
 
 class user_paths:
     #Per computer fisso
@@ -27,6 +27,9 @@ class utils:
 
     # Seed everything
     seed = 2024
+
+    # Test dir
+    test_dir = "_04_test"
 
 
 class Config_00_preprocessing:
@@ -76,6 +79,7 @@ class Config_02_temporalData:
 class Config_03_train_rocket:
     project_name    = utils.project_name
     data_path       = Config_02_temporalData.output_csvNormalized_file_path
+    test_dir        = utils.test_dir
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
@@ -102,7 +106,8 @@ class Config_03_train_rocket:
 
 class Config_03_train_lstmfcn:
     project_name = utils.project_name
-    data_path   = Config_02_temporalData.output_csvNormalized_file_path
+    data_path    = Config_02_temporalData.output_csvNormalized_file_path
+    test_dir     = utils.test_dir
     
     model_name  = 'LSTMFCN'
     dataset     = "Blasto"
@@ -139,6 +144,7 @@ class Config_03_train_lstmfcn:
 
 class Config_03_train_lstmfcn_with_optuna:
     data_path   = Config_02_temporalData.output_csvNormalized_file_path
+    test_dir    = utils.test_dir
 
     train_size  = 0.8
     val_size    = 0.2
@@ -207,7 +213,8 @@ class Config_03_train_lstmfcn_with_optuna:
 
 class Config_03_train_hivecote:
     project_name = utils.project_name
-    data_path = Config_02_temporalData.output_csvNormalized_file_path
+    data_path    = Config_02_temporalData.output_csvNormalized_file_path
+    test_dir     = utils.test_dir
     
     model_name = 'HIVECOTEV2'
     dataset = "Blasto"
@@ -245,32 +252,37 @@ class Config_03_train_hivecote:
     
 
 class Config_03_train_ConvTran:
+    # Input & Output
     project_name = utils.project_name
     data_path = Config_02_temporalData.output_csvNormalized_file_path
     output_dir = user_paths.path_BlastoData
-    Norm = False
-    val_ratio = 0.2
-    print_interval = 10
+    Norm = False        # Data Normalization
+    val_ratio = 0.2     # Propotion of train-set to be used as validation
+    print_interval = 10 # Print batch info every this many batches
+    test_dir = utils.test_dir
+    tensorboard_dir = "_98_ConvTranSummary"
 
-    Net_Type = 'C-T'
-    emb_size = 16
-    dim_ff = 256
-    num_heads = 8
-    Fix_pos_encode = 'tAPE'
-    Rel_pos_encode = 'eRPE'
+    # Transformers Parameters
+    Net_Type = 'C-T'    # choices={'T', 'C-T'}, help="Network Architecture. Convolution (C)", "Transformers (T)") (def = C-T)
+    emb_size = 16       # Internal dimension of transformer embeddings (def = 16)
+    dim_ff = 256        # Dimension of dense feedforward part of transformer layer (def = 256)
+    num_heads = 8       # Number of multi-headed attention heads (def = 8)
+    Fix_pos_encode = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
+    Rel_pos_encode = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
 
-    epochs = 100
-    batch_size = 16
-    lr = 1e-3
-    dropout = 0.01
-    val_interval = 2
+    # Training Parameters/Hyper-Parameters
+    epochs = 50        # Number of training epochs
+    batch_size = 16     # Training batch size
+    lr = 1e-3           # Learning rate
+    dropout = 0.2       # Dropout regularization ratio
+    val_interval = 2    # Evaluate on validation every XX epochs
+    key_metric = 'accuracy' # choices={'loss', 'accuracy', 'precision'}, help='Metric used for defining best epoch'
     num_classes = utils.num_classes
-    key_metric = 'accuracy'
-
-    gpu = 0
-    console = False
     
-
+    # System
+    gpu = 0             # GPU index, -1 for CPU
+    console = False     # Optimize printout for console output; otherwise for file
+    
     # Seed
     seed = utils.seed
     def seed_everything(seed=0):
