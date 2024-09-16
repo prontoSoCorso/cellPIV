@@ -67,8 +67,8 @@ def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
     for epoch in range(num_epochs):
         model.train()
         for inputs, labels in train_loader:
-            inputs = inputs.to(model.device)
-            labels = labels.to(model.device)
+            inputs = inputs.to(conf.device)
+            labels = labels.to(conf.device)
             
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -77,7 +77,7 @@ def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
             loss.backward()
             optimizer.step()
         
-        if (epoch+1) % 10 == 0:
+        if (epoch+1) % 20 == 0:
             print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
     
     return model
@@ -85,8 +85,8 @@ def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
 def evaluate_model(model, X, y):
     model.eval()
     with torch.no_grad():
-        X = X.to(model.device)
-        y = y.to(model.device)
+        X = X.to(conf.device)
+        y = y.to(conf.device)
         
         outputs = model(X)
         _, predicted = torch.max(outputs, 1)

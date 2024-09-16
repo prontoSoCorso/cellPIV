@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import optuna
 
-giovanna = True
+giovanna = False
 
 class user_paths:
     #Per computer fisso
@@ -108,6 +108,7 @@ class Config_03_LSTM:
 
 
 class Config_03_LSTM_WithOptuna:
+    device       = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
     test_dir     = utils.test_dir
@@ -127,7 +128,7 @@ class Config_03_LSTM_WithOptuna:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTM
-    num_epochs    = [100,200,300,400,500]
+    num_epochs          = [100,200,300,400,500]
     batch_size          = [8,16,32,64]  # Numero di sequenze prese
     dropout             = np.arange(0.1, 0.4, 0.05)
     hidden_size         = [32, 64, 128]
