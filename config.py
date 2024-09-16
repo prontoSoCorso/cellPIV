@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import optuna
 
-giovanna = False
+giovanna = True
 
 class user_paths:
     #Per computer fisso
@@ -73,6 +73,68 @@ class Config_02_temporalData:
 
     # Vars
     n_last_colums_check_max = 8
+
+
+
+class Config_03_LSTM:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    project_name = utils.project_name
+    data_path    = Config_02_temporalData.output_csvNormalized_file_path
+    test_dir     = utils.test_dir
+    
+    num_classes = utils.num_classes
+    train_size  = 0.8
+    val_size    = 0.2
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed=0):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+
+    # Parametri LSTM
+    num_epochs      = 300
+    batch_size      = 32
+    learning_rate   = 1e-3
+    hidden_size     = 128
+    num_layers      = 2
+    dropout         = 0.2
+    bidirectional   = True
+
+
+
+class Config_03_LSTM_WithOptuna:
+    project_name = utils.project_name
+    data_path    = Config_02_temporalData.output_csvNormalized_file_path
+    test_dir     = utils.test_dir
+    
+    num_classes = utils.num_classes
+    train_size  = 0.8
+    val_size    = 0.2
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed=0):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+
+    # Parametri LSTM
+    num_epochs    = [100,200,300,400,500]
+    batch_size          = [8,16,32,64]  # Numero di sequenze prese
+    dropout             = np.arange(0.1, 0.4, 0.05)
+    hidden_size         = [32, 64, 128]
+    num_layers          = [1,2,3,4]
+
+    sampler             = optuna.samplers.TPESampler(seed=seed)
+    pruner              = optuna.pruners.MedianPruner()
 
 
 
