@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import optuna
 
-giovanna = False
+giovanna = True
 
 class user_paths:
     #Per computer fisso
@@ -97,13 +97,13 @@ class Config_03_LSTM:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTM
-    num_epochs      = 300
+    num_epochs      = 500
     batch_size      = 32
     learning_rate   = 1e-3
     hidden_size     = 128
-    num_layers      = 2
-    dropout         = 0.2
-    bidirectional   = True
+    num_layers      = 4
+    dropout         = 0.25
+    bidirectional   = False
 
 
 
@@ -128,14 +128,16 @@ class Config_03_LSTM_WithOptuna:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTM
-    num_epochs          = [100,200,300,400,500]
+    num_epochs          = [300,400,500]
     batch_size          = [8,16,32,64]  # Numero di sequenze prese
     dropout             = np.arange(0.1, 0.4, 0.05)
     hidden_size         = [32, 64, 128]
-    num_layers          = [1,2,3,4]
+    num_layers          = [2,3,4]
 
     sampler             = optuna.samplers.TPESampler(seed=seed)
-    pruner              = optuna.pruners.MedianPruner()
+    n_startup_trials    = 10
+    pruner              = optuna.pruners.MedianPruner(n_startup_trials=n_startup_trials)
+    
 
 
 
@@ -146,7 +148,7 @@ class Config_03_train_rocket:
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
-    kernels = [50, 100, 200, 300, 400, 500]
+    kernels     = [50, 100, 200, 300, 10000]
     test_size   = 0.2
     img_size    = utils.img_size
     num_classes = utils.num_classes
@@ -191,13 +193,13 @@ class Config_03_train_lstmfcn:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTMFCN
-    num_epochs      = 200
-    batch_size      = 32                  # numero di sequenze prese
+    num_epochs      = 250
+    batch_size      = 16                  # numero di sequenze prese
     dropout         = 0.2
-    kernel_sizes    = (16,8,4) #def: 8,5,3
-    filter_sizes    = (128,256,128)
-    lstm_size       = 8                      # Numero di layer LSTM
-    attention       = True
+    kernel_sizes    = (8,5,3) #def: 8,5,3
+    filter_sizes    = (256,128,128)
+    lstm_size       = 6                      # Numero di layer LSTM
+    attention       = False
     verbose         = 2
 
 

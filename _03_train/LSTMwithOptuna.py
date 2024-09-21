@@ -57,7 +57,7 @@ def prepare_data_loaders(df, val_size=0.3):
 
     return X_train_tensor, X_val_tensor, y_train_tensor, y_val_tensor
 
-def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
+def train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
@@ -76,10 +76,19 @@ def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        
-        if (epoch+1) % 20 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
-    
+
+        # Valutazione intermedia su X_val
+        if (epoch+1) % 10 == 0:
+            val_accuracy, _, _, _, _ = evaluate_model(model, X_val, y_val)
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Accuracy: {val_accuracy:.4f}')
+
+            # Report della prestazione del trial per Optuna
+            trial.report(val_accuracy, epoch)
+
+            # Controlla se il trial deve essere fermato per pruning
+            if trial.should_prune():
+                raise optuna.TrialPruned()
+
     return model
 
 def evaluate_model(model, X, y):
@@ -119,10 +128,10 @@ def objective(trial):
     model = LSTMModel(input_size=1, hidden_size=hidden_size, num_layers=num_layers, 
                       dropout=dropout, num_classes=conf.num_classes).to(conf.device)
     
-    # Addestramento del modello
-    model = train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate)
+    # Addestramento del modello con pruning
+    model = train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate)
 
-    # Valutazione del modello
+    # Valutazione finale del modello
     val_metrics = evaluate_model(model, X_val, y_val)
 
     # Stampa dei risultati
@@ -133,8 +142,9 @@ def objective(trial):
     return val_metrics[0]
 
 def main():
+    # Definisci uno studio con il pruner MedianPruner per il pruning dei trial
     study = optuna.create_study(direction='maximize', sampler=conf.sampler, pruner=conf.pruner)
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=50)
 
     print(f'Numero di trial: {len(study.trials)}')
     print(f'Miglior trial: {study.best_trial.params}')

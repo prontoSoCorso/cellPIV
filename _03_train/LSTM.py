@@ -5,9 +5,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, balanced_accuracy_score, cohen_kappa_score, brier_score_loss
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
 import timeit
 import joblib
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Aggiungo il percorso del progetto al sys.path
 current_file_path = os.path.abspath(__file__)
@@ -18,7 +20,6 @@ sys.path.append(parent_dir)
 
 from config import Config_03_LSTM as conf
 device = conf.device
-
 
 # Definizione del modello LSTM con PyTorch
 class LSTMModel(nn.Module):
@@ -41,37 +42,42 @@ class LSTMModel(nn.Module):
 
         return out
 
-
 def load_normalized_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
-
-def prepare_data_loaders(df, val_size=0.3):
+def prepare_data_loaders(df, val_size=0.3, test_size=0.1):
     X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y = df['BLASTO NY'].values  # Colonna target
 
-    # Splitting the data into train and validation sets
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=val_size, random_state=conf.seed)
+    # Splitting the data into train, validation and test sets
+    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=(val_size + test_size), random_state=conf.seed)
+    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=(test_size / (val_size + test_size)), random_state=conf.seed)
 
     # Convert to PyTorch tensors
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32).unsqueeze(-1)  # Aggiungi dimensione input_size=1
     X_val_tensor = torch.tensor(X_val, dtype=torch.float32).unsqueeze(-1)      # Aggiungi dimensione input_size=1
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32).unsqueeze(-1)    # Aggiungi dimensione input_size=1
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
     y_val_tensor = torch.tensor(y_val, dtype=torch.long)
+    y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
-    return X_train_tensor, X_val_tensor, y_train_tensor, y_val_tensor
+    return X_train_tensor, X_val_tensor, X_test_tensor, y_train_tensor, y_val_tensor, y_test_tensor
 
-
-def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
+def train_model(model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate, patience):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
     train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
+    # Early stopping setup
+    best_val_loss = float('inf')
+    best_model = None
+    epochs_no_improve = 0
+
     for epoch in range(num_epochs):
         model.train()
-        for i, (inputs, labels) in enumerate(train_loader):
+        for inputs, labels in train_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
             
@@ -82,11 +88,30 @@ def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
             loss.backward()
             optimizer.step()
         
-        if (epoch+1) % 10 == 0:
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
-    
-    return model
+        # Valutazione su validation set dopo ogni epoca
+        model.eval()
+        val_accuracy, val_balanced_accuracy, val_kappa, val_brier, val_cm = evaluate_model(model, X_val, y_val)
+        val_loss = criterion(model(X_val.to(device)), y_val.to(device)).item()
 
+        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}')
+        print(f"Validation Balanced Accuracy: {val_balanced_accuracy:.4f}, Validation Cohen's Kappa: {val_kappa:.4f}, Validation Brier Score Loss: {val_brier:.4f}")
+
+        # Early stopping logic
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_model = model.state_dict()
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+            if epochs_no_improve >= patience:
+                print(f"Early stopping at epoch {epoch+1}")
+                break
+
+    # Load the best model if early stopping occurred
+    if best_model:
+        model.load_state_dict(best_model)
+
+    return model
 
 def evaluate_model(model, X, y):
     model.eval()
@@ -103,39 +128,50 @@ def evaluate_model(model, X, y):
         balanced_accuracy = balanced_accuracy_score(y.cpu().numpy(), y_pred)
         kappa = cohen_kappa_score(y.cpu().numpy(), y_pred)
         brier = brier_score_loss(y.cpu().numpy(), y_prob, pos_label=1)
-        report = classification_report(y.cpu().numpy(), y_pred, target_names=["Class 0", "Class 1"])
-        return accuracy, balanced_accuracy, kappa, brier, report
+        cm = confusion_matrix(y.cpu().numpy(), y_pred)
+        
+        return accuracy, balanced_accuracy, kappa, brier, cm
 
+def plot_confusion_matrix(cm):
+    plt.figure(figsize=(6,6))
+    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    plt.show()
 
 def main():
-    
     # Carico i dati normalizzati
     df = load_normalized_data(conf.data_path)
 
     # Preparo i data loader
-    X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
+    X_train, X_val, X_test, y_train, y_val, y_test = prepare_data_loaders(df, conf.val_size, test_size=0.1)
 
     # Definisco il modello LSTM
     model = LSTMModel(input_size=1, hidden_size=conf.hidden_size, num_layers=conf.num_layers, 
                       dropout=conf.dropout, num_classes=conf.num_classes, 
                       bidirectional=conf.bidirectional).to(device)
     
-    # Addestramento del modello
-    model = train_model(model, X_train, y_train, conf.num_epochs, conf.batch_size, conf.learning_rate)
+    # Addestramento del modello con valutazione sul validation set e early stopping
+    model = train_model(model, X_train, y_train, X_val, y_val, conf.num_epochs, conf.batch_size, 
+                        conf.learning_rate, patience=10)
 
-    # Valutazione del modello
-    val_metrics = evaluate_model(model, X_val, y_val)
+    # Valutazione finale del modello su test set
+    test_accuracy, test_balanced_accuracy, test_kappa, test_brier, test_cm = evaluate_model(model, X_test, y_test)
 
-    # Stampa dei risultati
-    print(f'val Accuracy: {val_metrics[0]}')
-    print('val Classification Report:')
-    print(val_metrics[4])
+    # Stampa delle metriche sul test set
+    print(f"Test Accuracy: {test_accuracy}")
+    print(f"Test Balanced Accuracy: {test_balanced_accuracy}")
+    print(f"Test Cohen's Kappa: {test_kappa}")
+    print(f"Test Brier Score Loss: {test_brier}")
+    
+    # Mostra la matrice di confusione per il test set
+    plot_confusion_matrix(test_cm)
 
     # Salvataggio del modello
     model_save_path = os.path.join(parent_dir, conf.test_dir, "lstm_classifier_model.pkl")
     joblib.dump(model, model_save_path)
     print(f'Modello salvato in: {model_save_path}')
-
 
 if __name__ == "__main__":
     # Misuro il tempo di esecuzione della funzione main()

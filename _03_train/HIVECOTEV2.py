@@ -3,10 +3,12 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sktime.classification.hybrid import HIVECOTEV2
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
 import wandb
 import joblib  # Per il salvataggio del modello
 import timeit
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
@@ -37,20 +39,26 @@ def train_model(model, X_train, y_train):
     model.fit(X_train, y_train)
     return model
 
-# Funzione per valutare il modello
+# Funzione per valutare il modello con metriche estese
 def evaluate_model(model, X, y):
     y_pred = model.predict(X)
+    y_prob = model.predict_proba(X)[:, 1]  # Probabilità della classe positiva
     accuracy = accuracy_score(y, y_pred)
-    report = classification_report(y, y_pred, target_names=["Class 0", "Class 1"])
-    return accuracy, report
+    balanced_accuracy = balanced_accuracy_score(y, y_pred)
+    kappa = cohen_kappa_score(y, y_pred)
+    brier = brier_score_loss(y, y_prob, pos_label=1)
+    cm = confusion_matrix(y, y_pred)
+    return accuracy, balanced_accuracy, kappa, brier, cm
 
-# Funzione per loggare i risultati su W&B
-def log_results(wandb, train_accuracy, test_accuracy):
-    wandb.log({
-        'train_accuracy': train_accuracy,
-        'test_accuracy': test_accuracy
-    })
-
+# Funzione per salvare la matrice di confusione come immagine
+def save_confusion_matrix(cm, filename):
+    plt.figure(figsize=(6, 6))
+    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    plt.savefig(filename)
+    plt.close()
 
 
 def main():
@@ -65,44 +73,30 @@ def main():
     # Definisce il modello HIVECOTEV2Classifier
     model = HIVECOTEV2(random_state=conf.seed_everything(conf.seed), n_jobs=-1)
 
-    # Inizia una nuova run su W&B
-    wandb.init(
-        project=conf.project_name,
-        config={
-            "exp_name": conf.exp_name,
-            "dataset": conf.dataset,
-            "model": "HIVECOTEV2Classifier",
-            "img_size": conf.img_size,
-            "num_classes": conf.num_classes
-        }
-    )
-    wandb.run.name = conf.exp_name
-
     # Addestramento del modello
     model = train_model(model, X_train, y_train)
 
     # Valutazione del modello su train e test set
-    train_accuracy, train_report = evaluate_model(model, X_train, y_train)
-    test_accuracy, test_report = evaluate_model(model, X_test, y_test)
-
-    # Log dei risultati su W&B
-    log_results(wandb, train_accuracy, test_accuracy)
+    train_metrics = evaluate_model(model, X_train, y_train)
+    test_metrics = evaluate_model(model, X_test, y_test)
 
     # Stampa dei risultati
-    print(f'Train Accuracy: {train_accuracy}')
-    print(f'Test Accuracy: {test_accuracy}')
-    print('Train Classification Report:')
-    print(train_report)
-    print('Test Classification Report:')
-    print(test_report)
+    print(f'Train Accuracy: {train_metrics[0]}')
+    print(f'Train Balanced Accuracy: {train_metrics[1]}')
+    print(f"Train Cohen's Kappa: {train_metrics[2]}")
+    print(f'Train Brier Score Loss: {train_metrics[3]}')
+    print(f'Test Accuracy: {test_metrics[0]}')
+    print(f'Test Balanced Accuracy: {test_metrics[1]}')
+    print(f"Test Cohen's Kappa: {test_metrics[2]}")
+    print(f'Test Brier Score Loss: {test_metrics[3]}')
+
+    # Salva la matrice di confusione per il test set
+    save_confusion_matrix(test_metrics[4], f"confusion_matrix_hivecotev2.png")
 
     # Salvataggio del modello
     model_save_path = os.path.join(parent_dir, conf.test_dir, "hivecotev2_classifier_model.pkl")
     joblib.dump(model, model_save_path)
     print(f'Modello salvato in: {model_save_path}')
-
-    # Fine della run W&B
-    wandb.finish()
 
 
 if __name__ == "__main__":
