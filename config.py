@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import optuna
 
-giovanna = True
+giovanna = False
 
 class user_paths:
     #Per computer fisso

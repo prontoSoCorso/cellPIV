@@ -18,7 +18,6 @@ df_norm = pd.read_csv(conf.output_csvNormalized_file_path)
 
 
 # Plot dati normalizzati
-# Plot dei segnali per il paziente con patient_id = 3
 patient_id_example = 55
 
 # Estrai i dati del paziente specificato prima della normalizzazione
