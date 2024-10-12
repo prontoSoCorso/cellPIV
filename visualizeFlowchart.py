@@ -4,7 +4,7 @@ import graphviz
 # FLOWCHART 1
 
 # Crea un diagramma di flusso del processo usando Graphviz
-flowchart = graphviz.Digraph(format='png')
+flowchart = graphviz.Digraph(format='png', graph_attr={'dpi': '600'})
 
 # Step 1: Seleziona valori positivi
 flowchart.node('C', 'Calcola min_val, max_val \nignorando gli zeri')
@@ -44,7 +44,7 @@ flowchart.render('processo_diagramma_flusso', view=True)
 # FLOWCHART 2
 
 # Crea un diagramma di flusso generale del processo di selezione e normalizzazione dei dati
-flowchart = graphviz.Digraph(format='png')
+flowchart = graphviz.Digraph(format='png', graph_attr={'dpi': '600'})
 
 # Step 1: Selezione dei dati
 flowchart.node('A', 'Selezione dei Dati\n(Seleziona video degli embrioni)')
@@ -76,7 +76,7 @@ flowchart.render('processo_generale_diagramma_flusso', view=True)
 # FLOWCHART 3
 
 # Creazione di un nuovo diagramma
-flowchart = graphviz.Digraph('flowchart immagini', format='png')
+flowchart = graphviz.Digraph(format='png', graph_attr={'dpi': '600'})
 
 # Estrazione dei file
 flowchart.node('A', 'Estrazione video dai file PDB')

@@ -31,6 +31,9 @@ class utils:
     # Test dir
     test_dir = "_04_test"
 
+    # Test Data
+    test_path = ""
+
 
 class Config_00_preprocessing:
     path_old_excel          = user_paths.path_BlastoData + "BlastoLabels.xlsx"
@@ -145,10 +148,11 @@ class Config_03_train_rocket:
     project_name    = utils.project_name
     data_path       = Config_02_temporalData.output_csvNormalized_file_path
     test_dir        = utils.test_dir
+    test_path       = utils.test_path
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
-    kernels     = [50, 100, 200, 300, 10000]
+    kernels     = [50, 100, 200, 300, 1000, 10000]
     test_size   = 0.2
     img_size    = utils.img_size
     num_classes = utils.num_classes

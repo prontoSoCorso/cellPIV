@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sktime.classification.kernel_based import RocketClassifier
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix, f1_score
 import joblib  # Per il salvataggio del modello
 import timeit
 import seaborn as sns
@@ -22,6 +22,12 @@ from config import Config_03_train_rocket as conf
 def load_normalized_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
+# Funzione per addestrare il modello
+def train_model(model, X_train, y_train):
+    model.fit(X_train, y_train)
+    return model
+
+'''
 # Funzione per preparare i data loader (in questo caso utilizziamo sklearn)
 def prepare_data_loaders(df, test_size=0.3):
     X = df.iloc[:, 3:].values
@@ -31,7 +37,8 @@ def prepare_data_loaders(df, test_size=0.3):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=conf.seed_everything(conf.seed))
 
     return X_train, X_test, y_train, y_test
-
+'''
+    
 # Funzione per addestrare il modello
 def train_model(model, X_train, y_train):
     model.fit(X_train, y_train)
@@ -45,8 +52,9 @@ def evaluate_model(model, X, y):
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
     kappa = cohen_kappa_score(y, y_pred)
     brier = brier_score_loss(y, y_prob, pos_label=1)
+    f1 = f1_score(y, y_pred)
     cm = confusion_matrix(y, y_pred)
-    return accuracy, balanced_accuracy, kappa, brier, cm
+    return accuracy, balanced_accuracy, kappa, brier, f1, cm
 
 # Funzione per salvare la matrice di confusione come immagine
 def save_confusion_matrix(cm, filename):
@@ -67,11 +75,15 @@ def main():
     for kernel in conf.kernels:
         conf.kernels = kernel
 
-        # Carica i dati normalizzati dal file CSV
-        df = load_normalized_data(conf.data_path)
+        # Carica i dati normalizzati dal file CSV per il training
+        df_train = load_normalized_data(conf.data_path)
+        X_train = df_train.iloc[:, 3:].values
+        y_train = df_train['BLASTO NY'].values
 
-        # Prepara i data loader
-        X_train, X_test, y_train, y_test = prepare_data_loaders(df, conf.test_size)
+        # Carica i dati normalizzati dal file CSV per il test
+        df_test = load_normalized_data(conf.test_path)
+        X_test = df_test.iloc[:, 3:].values
+        y_test = df_test['BLASTO NY'].values
 
         # Definisce il modello RocketClassifier
         model = RocketClassifier(num_kernels=kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)
@@ -92,16 +104,18 @@ def main():
         print(f'Train Balanced Accuracy with {kernel} kernels: {train_metrics[1]}')
         print(f"Train Cohen's Kappa with {kernel} kernels: {train_metrics[2]}")
         print(f'Train Brier Score Loss with {kernel} kernels: {train_metrics[3]}')
+        print(f'Train F1 Score with {kernel} kernels: {train_metrics[4]}')
 
         # Stampa dei risultati per il test set
         print(f'Test Accuracy with {kernel} kernels: {test_metrics[0]}')
         print(f'Test Balanced Accuracy with {kernel} kernels: {test_metrics[1]}')
         print(f"Test Cohen's Kappa with {kernel} kernels: {test_metrics[2]}")
         print(f'Test Brier Score Loss with {kernel} kernels: {test_metrics[3]}')
+        print(f'Test F1 Score with {kernel} kernels: {test_metrics[4]}')
 
         '''
         # Salva la matrice di confusione per il test set
-        save_confusion_matrix(test_metrics[4], f'confusion_matrix_{kernel}_kernels.png')  # Salva come immagine
+        save_confusion_matrix(test_metrics[5], f'confusion_matrix_{kernel}_kernels.png')  # Salva come immagine
         '''
 
         # Aggiorna il modello migliore se l'accuratezza sul test è la migliore trovata finora
@@ -121,10 +135,15 @@ def main():
 
     # Carica e stampa le metriche per il modello migliore
     best_model = joblib.load(best_model_path)
-    X_train, X_test, y_train, y_test = prepare_data_loaders(load_normalized_data(conf.data_path), conf.test_size)
+    df_train = load_normalized_data(conf.data_path)
+    df_test = load_normalized_data(conf.test_path)
+    X_train = df_train.iloc[:, 3:].values
+    y_train = df_train['BLASTO NY'].values
+    X_test = df_test.iloc[:, 3:].values
+    y_test = df_test['BLASTO NY'].values
     
     # Valutazione del modello migliore
-    _, _, _, _, best_test_cm = evaluate_model(best_model, X_test, y_test)  # Estrarre solo la matrice di confusione
+    _, _, _, _, _, best_test_cm = evaluate_model(best_model, X_test, y_test)  # Estrarre solo la matrice di confusione
     
     # Salva la matrice di confusione per il miglior modello
     save_confusion_matrix(best_test_cm, f"confusion_matrix_rocket_{best_kernel}_kernels.png")
