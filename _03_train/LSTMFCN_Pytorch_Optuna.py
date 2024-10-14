@@ -1,41 +1,55 @@
-import os
-import sys
-import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.utils.data as data
+import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, f1_score, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, balanced_accuracy_score, cohen_kappa_score, brier_score_loss
 import optuna
-import joblib
 import timeit
+import os
+import joblib
+import sys
 
-# Aggiungi il percorso del progetto al sys.path
+# Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
 parent_dir = os.path.dirname(current_file_path)
 while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_03_LSTM_WithOptuna as conf
+from config import Config_03_train_lstmfcn_with_optuna as conf
 
-# Definizione del modello LSTM con PyTorch
-class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, dropout, num_classes):
-        super(LSTMModel, self).__init__()
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
-        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, 
-                            dropout=dropout, batch_first=True)
-        self.fc = nn.Linear(hidden_size, num_classes)
-    
+# Definizione del modello LSTM-FCN in PyTorch
+class LSTMFCN(nn.Module):
+    def __init__(self, lstm_size, filter_sizes, kernel_sizes, dropout, num_layers):
+        super(LSTMFCN, self).__init__()
+        
+        self.lstm = nn.LSTM(input_size=1, hidden_size=lstm_size, num_layers=num_layers, batch_first=True)
+        
+        self.conv1 = nn.Conv1d(in_channels=1, out_channels=filter_sizes[0], kernel_size=kernel_sizes[0])
+        self.conv2 = nn.Conv1d(in_channels=filter_sizes[0], out_channels=filter_sizes[1], kernel_size=kernel_sizes[1])
+        self.conv3 = nn.Conv1d(in_channels=filter_sizes[1], out_channels=filter_sizes[2], kernel_size=kernel_sizes[2])
+        
+        self.dropout = nn.Dropout(dropout)
+        self.fc = nn.Linear(lstm_size + filter_sizes[-1], 2)  # Classificazione binaria
+
     def forward(self, x):
-        # Inizializza gli stati nascosti h0 e c0
-        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)  # Stato nascosto iniziale
-        c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(x.device)  # Stato della cella iniziale
+        lstm_out, _ = self.lstm(x)
+        lstm_out = lstm_out[:, -1, :]  # Prendo l'ultimo stato
 
-        out, _ = self.lstm(x, (h0, c0))  # out ha dimensioni [batch_size, seq_length, hidden_size]
-        out = self.fc(out[:, -1, :])  # Prendi l'ultimo passo temporale e passa al fully connected
+        x = torch.transpose(x, 1, 2)  # Trasposizione per convoluzioni
+        conv_out = self.conv1(x)
+        conv_out = torch.relu(conv_out)
+        conv_out = self.conv2(conv_out)
+        conv_out = torch.relu(conv_out)
+        conv_out = self.conv3(conv_out)
+        conv_out = torch.relu(conv_out)
+        conv_out = torch.mean(conv_out, dim=-1)  # Global Average Pooling
+
+        combined = torch.cat((lstm_out, conv_out), dim=-1)
+        combined = self.dropout(combined)
+        out = self.fc(combined)
         return out
 
 # Funzione per caricare i dati normalizzati da CSV
@@ -44,12 +58,12 @@ def load_normalized_data(csv_file_path):
 
 # Funzione per preparare i data loader (in questo caso utilizziamo sklearn)
 def prepare_data_loaders(df, val_size=0.3):
-    X = df.iloc[:, 3:].values  # Dati a partire dalla quarta colonna
-    y = df['BLASTO NY'].values  # Etichette target
+    X = df.iloc[:, 3:].values
+    y = df['BLASTO NY'].values
 
-    # Suddivisione del dataset in train e validation set
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=val_size, random_state=conf.seed_everything(conf.seed))
-
+    # Splitting the data into train, validation, and val sets
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=val_size, random_state=42)
+    
     # Converti i dati in tensori PyTorch e aggiungi input_size=1 espandendo la dimensione finale
     X_train_tensor = torch.tensor(X_train, dtype=torch.float32).unsqueeze(-1)  # [batch_size, seq_length, input_size=1]
     X_val_tensor = torch.tensor(X_val, dtype=torch.float32).unsqueeze(-1)      # [batch_size, seq_length, input_size=1]
@@ -58,15 +72,16 @@ def prepare_data_loaders(df, val_size=0.3):
 
     return X_train_tensor, X_val_tensor, y_train_tensor, y_val_tensor
 
-def train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate):
+# Funzione per addestrare il modello
+def train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_size, lr):
     # Usa DataParallel per distribuire il modello su più GPU se disponibili
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
     
     model = model.to(conf.device)
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
     train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
 
@@ -75,14 +90,14 @@ def train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_
         for inputs, labels in train_loader:
             inputs = inputs.to(conf.device)
             labels = labels.to(conf.device)
-            
+
             optimizer.zero_grad()
-            outputs = model(inputs)
+            outputs = model(inputs.unsqueeze(2))
             loss = criterion(outputs, labels)
-            
+
             loss.backward()
             optimizer.step()
-
+        
         if (epoch+1) % 10 == 0:
             val_metrics = evaluate_model(model, X_val, y_val)
             print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Accuracy: {val_metrics[0]:.4f}')
@@ -93,49 +108,43 @@ def train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_
             # Controlla se il trial deve essere fermato per pruning
             if trial.should_prune():
                 raise optuna.TrialPruned()
-
+            
     return model
 
+# Funzione per valutare il modello
 def evaluate_model(model, X, y):
     model.eval()
     with torch.no_grad():
-        X = X.to(conf.device)
-        y = y.to(conf.device)
-        
-        outputs = model(X)
-        _, predicted = torch.max(outputs, 1)
-        y_pred = predicted.cpu().numpy()
-        y_prob = torch.softmax(outputs, dim=1)[:, 1].cpu().numpy()
-        
-        accuracy = accuracy_score(y.cpu().numpy(), y_pred)
-        balanced_accuracy = balanced_accuracy_score(y.cpu().numpy(), y_pred)
-        kappa = cohen_kappa_score(y.cpu().numpy(), y_pred)
-        brier = brier_score_loss(y.cpu().numpy(), y_prob, pos_label=1)
-        f1 = f1_score(y.cpu().numpy(), y_pred)
-        cm = confusion_matrix(y.cpu().numpy(), y_pred)
-        return accuracy, balanced_accuracy, kappa, brier, f1, cm
+        outputs = model(torch.tensor(X, dtype=torch.float32).unsqueeze(2).to(conf.device))
+        _, y_pred = torch.max(outputs, 1)
+        y_pred = y_pred.cpu().numpy()
+        accuracy = accuracy_score(y, y_pred)
+        balanced_accuracy = balanced_accuracy_score(y, y_pred)
+        f1 = f1_score(y, y_pred)
+        cm = confusion_matrix(y, y_pred)
+        return accuracy, balanced_accuracy, f1, cm
 
 def objective(trial):
-    # Definisce lo spazio di ricerca degli iperparametri
-    num_epochs = trial.suggest_categorical('num_epochs', conf.num_epochs)
-    batch_size = trial.suggest_categorical('batch_size', conf.batch_size)
-    hidden_size = trial.suggest_categorical('hidden_size', conf.hidden_size)
-    num_layers = trial.suggest_categorical('num_layers', conf.num_layers)
-    dropout = trial.suggest_categorical('dropout', conf.dropout)
-    learning_rate = trial.suggest_categorical('learning_rate', conf.learning_rate)
+    # Definisco lo spazio di ricerca degli iperparametri
+    num_epochs = trial.suggest_categorical('num_epochs', [200, 300, 400])
+    batch_size = trial.suggest_categorical('batch_size', [16, 32, 64])
+    lstm_size = trial.suggest_int('lstm_size', 64, 128)
+    filter_sizes = trial.suggest_categorical('filter_sizes', [(128, 256, 128), (256, 128, 64)])
+    kernel_sizes = trial.suggest_categorical('kernel_sizes', [(8, 5, 3)])
+    num_layers = trial.suggest_categorical('num_layers', [2,3,4])
+    dropout = trial.suggest_float('dropout', 0.1, 0.4)
 
-    # Carica i dati normalizzati e preparo i data loader
+    # Carico i dati e preparo i data loader
     df = load_normalized_data(conf.data_path)
-    X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
+    X_train, X_val, y_train, y_val = prepare_data_loaders(df, val_size=0.3)
 
-    # Definisce il modello LSTM
-    model = LSTMModel(input_size=1, hidden_size=hidden_size, num_layers=num_layers, 
-                      dropout=dropout, num_classes=conf.num_classes).to(conf.device)
+    # Modello LSTMFCN
+    model = LSTMFCN(lstm_size, filter_sizes, kernel_sizes, dropout, num_layers)
     
-    # Addestramento del modello con pruning
-    model = train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate)
-
-    # Valutazione finale del modello
+    # Addestro il modello
+    model = train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_size, lr=0.001)
+    
+    # Valutazione
     val_metrics = evaluate_model(model, X_val, y_val)
 
     # Stampa dei risultati
@@ -145,24 +154,30 @@ def objective(trial):
     print(f"val Cohen's Kappa: {val_metrics[2]}")
     print(f'val Brier Score Loss: {val_metrics[3]}')
     print(f'val F1 Score: {val_metrics[4]}')
-
+    
     return val_metrics[0]
 
 
+# Funzione per allenare il miglior modello sui dati completi
 def retrain_best_model(best_trial):
+    # Carico i dati per allenare il miglior modello
     df = load_normalized_data(conf.data_path)
     X = df.iloc[:, 3:].values
     y = df['BLASTO NY'].values
     X_tensor = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)
     y_tensor = torch.tensor(y, dtype=torch.long)
-
-    best_model = LSTMModel(input_size=1, hidden_size=best_trial.params['hidden_size'], 
-                           num_layers=best_trial.params['num_layers'], 
-                           dropout=best_trial.params['dropout'], num_classes=conf.num_classes).to(conf.device)
     
+    best_params = best_trial.params
+    lstm_size = best_params['lstm_size']
+    filter_sizes = best_params['filter_sizes']
+    kernel_sizes = best_params['kernel_sizes']
+    dropout = best_params['dropout']
+    num_epochs = best_params['num_epochs']
+    batch_size = best_params['batch_size']
+        
+    best_model = LSTMFCN(lstm_size, filter_sizes, kernel_sizes, dropout)
     if torch.cuda.device_count() > 1:
         best_model = nn.DataParallel(best_model)
-
     best_model = best_model.to(conf.device)
     
     train_dataset = torch.utils.data.TensorDataset(X_tensor, y_tensor)
@@ -172,7 +187,7 @@ def retrain_best_model(best_trial):
     optimizer = optim.Adam(best_model.parameters(), lr=best_trial.params['learning_rate'])
 
     num_epochs = best_trial.params['num_epochs']
-    
+
     for epoch in range(num_epochs):
         best_model.train()
         for inputs, labels in train_loader:
@@ -189,27 +204,23 @@ def retrain_best_model(best_trial):
         if (epoch+1) % 10 == 0:
             print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
     
-    model_save_path = os.path.join(parent_dir, conf.test_dir, "best_lstm_model.pkl")
+    model_save_path = os.path.join(parent_dir, conf.test_dir, "best_lstmfcn_model.pkl")
     joblib.dump(best_model, model_save_path)
     print(f"Best model saved at: {model_save_path}")
 
 
 def main():
-    # Definisci uno studio con il pruner MedianPruner per il pruning dei trial
-    study = optuna.create_study(direction='maximize', sampler=conf.sampler, pruner=conf.pruner)
-    study.optimize(objective, n_trials=50)
-
+    study = optuna.create_study(direction='maximize')
+    study.optimize(objective, n_trials=10)
+    
     best_trial = study.best_trial
     print(f'Numero di trial: {len(study.trials)}')
     print(f'Migliore trial: {best_trial.number}, \nMigliore Accuracy: {best_trial.value}, \nBest trial params: {best_trial.params}')
 
-    #Devo riaddestrare il modello migliore. Infatti Il best_trial che si ottiene da Optuna contiene solo i parametri ottimali che 
-    # hanno prodotto la miglior performance, non il modello addestrato stesso. Quindi, se dovessi salvare il best_trial, salverei
-    # semplicemente i dati riguardo ai parametri, ma non il modello LSTM addestrato.
-    # Ricostruisco il modello usando i migliori parametri trovati
+    # Alleno il miglior modello su tutto il dataset
     retrain_best_model(best_trial)
 
 if __name__ == "__main__":
-    # Misura il tempo di esecuzione della funzione main()
-    execution_time = timeit.timeit(main, number=1)
-    print("Tempo impiegato per l'esecuzione dell'ottimizzazione LSTM:", execution_time, "secondi")
+    start_time = timeit.default_timer()
+    main()
+    print("Execution time: ", timeit.default_timer() - start_time)

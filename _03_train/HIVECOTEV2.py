@@ -54,11 +54,6 @@ def main():
     X_train = df_train.iloc[:, 3:].values
     y_train = df_train['BLASTO NY'].values
 
-    # Carica i dati normalizzati dal file CSV per il test
-    df_test = load_normalized_data(conf.test_path)
-    X_test = df_test.iloc[:, 3:].values
-    y_test = df_test['BLASTO NY'].values
-
     # Definisce il modello HIVECOTEV2Classifier
     model = HIVECOTEV2(random_state=conf.seed_everything(conf.seed), n_jobs=-1)
 
@@ -67,7 +62,6 @@ def main():
 
     # Valutazione del modello su train e test set
     train_metrics = evaluate_model(model, X_train, y_train)
-    test_metrics = evaluate_model(model, X_test, y_test)
 
     # Stampa dei risultati per il train set
     print(f'Train Accuracy: {train_metrics[0]}')
@@ -75,16 +69,6 @@ def main():
     print(f"Train Cohen's Kappa: {train_metrics[2]}")
     print(f'Train Brier Score Loss: {train_metrics[3]}')
     print(f'Train F1 Score: {train_metrics[4]}')
-
-    # Stampa dei risultati per il test set
-    print(f'Test Accuracy: {test_metrics[0]}')
-    print(f'Test Balanced Accuracy: {test_metrics[1]}')
-    print(f"Test Cohen's Kappa: {test_metrics[2]}")
-    print(f'Test Brier Score Loss: {test_metrics[3]}')
-    print(f'Test F1 Score: {test_metrics[4]}')
-
-    # Salva la matrice di confusione per il test set
-    save_confusion_matrix(test_metrics[5], f"confusion_matrix_hivecotev2.png")
 
     # Salvataggio del modello
     model_save_path = os.path.join(parent_dir, conf.test_dir, "hivecotev2_classifier_model.pkl")

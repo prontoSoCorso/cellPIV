@@ -1,6 +1,8 @@
 import sys
 import os
 import pandas as pd
+import torch
+from sklearn.model_selection import train_test_split
 from sktime.classification.kernel_based import RocketClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix, f1_score
 import joblib  # Per il salvataggio del modello
@@ -21,23 +23,16 @@ from config import Config_03_train_rocket as conf
 def load_normalized_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
-# Funzione per addestrare il modello
-def train_model(model, X_train, y_train):
-    model.fit(X_train, y_train)
-    return model
+# Per divedere in validation e train. In questo caso uso la grid search come se fossero delle epoche per il modello ML
+def prepare_data_loaders(df, val_size=0.3):
+    X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
+    y = df['BLASTO NY'].values  # Colonna target
 
-'''
-# Funzione per preparare i data loader (in questo caso utilizziamo sklearn)
-def prepare_data_loaders(df, test_size=0.3):
-    X = df.iloc[:, 3:].values
-    y = df['BLASTO NY'].values
+    # Suddivisione del dataset in train e validation set
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=val_size, random_state=conf.seed)
 
-    # Splitting the data into train, validation, and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=conf.seed_everything(conf.seed))
+    return X_train, X_val, y_train, y_val
 
-    return X_train, X_test, y_train, y_test
-'''
-    
 # Funzione per addestrare il modello
 def train_model(model, X_train, y_train):
     model.fit(X_train, y_train)
@@ -71,18 +66,14 @@ def main():
     best_kernel = None
     best_model_path = None
 
+    # Carico i dati normalizzati
+    df = load_normalized_data(conf.data_path)
+
+    # Preparo i data loader
+    X_train, X_test, y_train, y_test = prepare_data_loaders(df, conf.val_size)
+
     for kernel in conf.kernels:
         conf.kernels = kernel
-
-        # Carica i dati normalizzati dal file CSV per il training
-        df_train = load_normalized_data(conf.data_path)
-        X_train = df_train.iloc[:, 3:].values
-        y_train = df_train['BLASTO NY'].values
-
-        # Carica i dati normalizzati dal file CSV per il test
-        df_test = load_normalized_data(conf.test_path)
-        X_test = df_test.iloc[:, 3:].values
-        y_test = df_test['BLASTO NY'].values
 
         # Definisce il modello RocketClassifier
         model = RocketClassifier(num_kernels=kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)
@@ -112,18 +103,10 @@ def main():
         print(f'Test Brier Score Loss with {kernel} kernels: {test_metrics[3]}')
         print(f'Test F1 Score with {kernel} kernels: {test_metrics[4]}')
 
-        '''
-        # Salva la matrice di confusione per il test set
-        save_confusion_matrix(test_metrics[5], f'confusion_matrix_{kernel}_kernels.png')  # Salva come immagine
-        '''
-
         # Aggiorna il modello migliore se l'accuratezza sul test è la migliore trovata finora
         if accuracy_dict[kernel] > best_accuracy:
             best_accuracy = accuracy_dict[kernel]
             best_kernel = kernel
-            best_model_path = os.path.join(parent_dir, conf.test_dir, f"rocket_classifier_model_{kernel}_kernels.pkl")
-            joblib.dump(model, best_model_path)
-            print(f'Modello salvato in: {best_model_path}')
 
     # Stampa il dizionario delle accuratezze
     print("Accuratezza su test set per ogni kernel:", accuracy_dict)
@@ -132,21 +115,16 @@ def main():
     print(f"Il modello migliore è con {best_kernel} kernel, con un'accuratezza del {best_accuracy:.4f}")
     print(f"Modello salvato in: {best_model_path}")
 
-    # Carica e stampa le metriche per il modello migliore
-    best_model = joblib.load(best_model_path)
-    df_train = load_normalized_data(conf.data_path)
-    df_test = load_normalized_data(conf.test_path)
-    X_train = df_train.iloc[:, 3:].values
-    y_train = df_train['BLASTO NY'].values
-    X_test = df_test.iloc[:, 3:].values
-    y_test = df_test['BLASTO NY'].values
+    # Rialleno il modello su tutti i dati con il numero di kernel migliore che ho trovato e lo salvo
+    df = load_normalized_data(conf.data_path)
+    X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
+    y = df['BLASTO NY'].values  # Colonna target
+    model = RocketClassifier(num_kernels=best_kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)
+    model = train_model(model, X, y)
+    best_model_path = os.path.join(parent_dir, conf.test_dir, f"rocket_classifier_model_{kernel}_kernels.pkl")
+    joblib.dump(model, best_model_path)
+    print(f'Modello salvato in: {best_model_path}')
     
-    # Valutazione del modello migliore
-    _, _, _, _, _, best_test_cm = evaluate_model(best_model, X_test, y_test)  # Estrarre solo la matrice di confusione
-    
-    # Salva la matrice di confusione per il miglior modello
-    save_confusion_matrix(best_test_cm, f"confusion_matrix_rocket_{best_kernel}_kernels.png")
-
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()

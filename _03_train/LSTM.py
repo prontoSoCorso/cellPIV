@@ -45,7 +45,7 @@ class LSTMModel(nn.Module):
 def load_normalized_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
-def prepare_data_loaders(df, val_size=0.3, test_size=0.1):
+def prepare_data_loaders(df, val_size=0.3):
     X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y = df['BLASTO NY'].values  # Colonna target
 
@@ -61,6 +61,11 @@ def prepare_data_loaders(df, val_size=0.3, test_size=0.1):
     return X_train_tensor, X_val_tensor, y_train_tensor, y_val_tensor
 
 def train_model(model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate, patience):
+    # Usa DataParallel per distribuire il modello su più GPU se disponibili
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
+    
+    model = model.to(conf.device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
@@ -85,25 +90,22 @@ def train_model(model, X_train, y_train, X_val, y_val, num_epochs, batch_size, l
             loss.backward()
             optimizer.step()
         
-        # Valutazione su validation set dopo ogni epoca
-        model.eval()
-        val_accuracy, val_balanced_accuracy, val_kappa, val_brier, val_f1, val_cm = evaluate_model(model, X_val, y_val)
-        val_loss = criterion(model(X_val.to(conf.device)), y_val.to(conf.device)).item()
+        if (epoch+1) % 10 == 0:
+            # Valutazione su validation set ogni 10 epoche
+            val_metrics = evaluate_model(model, X_val, y_val)
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Accuracy: {val_metrics[0]:.4f}')
+            val_loss = criterion(model(X_val.to(conf.device)), y_val.to(conf.device)).item()
 
-        print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}')
-        print(f'Validation Accuracy: {val_accuracy:.4f}, F1 Score: {val_f1:.4f}, Balanced Accuracy: {val_balanced_accuracy:.4f}')
-        print(f"Cohen's Kappa: {val_kappa:.4f}, Brier Score Loss: {val_brier:.4f}")
-
-        # Early stopping logic
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_model = model.state_dict()
-            epochs_no_improve = 0
-        else:
-            epochs_no_improve += 1
-            if epochs_no_improve >= patience:
-                print(f"Early stopping at epoch {epoch+1}")
-                break
+            # Early stopping logic
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_model = model.state_dict()
+                epochs_no_improve = 0
+            else:
+                epochs_no_improve += 1
+                if epochs_no_improve >= patience:
+                    print(f"Early stopping at epoch {epoch+1}")
+                    break
 
     # Load the best model if early stopping occurred
     if best_model:
@@ -131,23 +133,12 @@ def evaluate_model(model, X, y):
         
         return accuracy, balanced_accuracy, kappa, brier, f1, cm
 
-# Funzione per salvare la matrice di confusione come immagine
-def save_confusion_matrix(cm, filename):
-    plt.figure(figsize=(6,6))
-    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False,
-                xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-    plt.title("Confusion Matrix")
-    plt.savefig(filename)
-    plt.close()
-
 def main():
     # Carico i dati normalizzati
     df = load_normalized_data(conf.data_path)
 
     # Preparo i data loader
-    X_train, X_val, X_test, y_train, y_val, y_test = prepare_data_loaders(df, conf.val_size, test_size=0.1)
+    X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
 
     # Definisco il modello LSTM
     model = LSTMModel(input_size=1, hidden_size=conf.hidden_size, num_layers=conf.num_layers, 
@@ -159,17 +150,15 @@ def main():
                         conf.learning_rate, patience=10)
 
     # Valutazione finale del modello sul validation set
-    val_accuracy, val_balanced_accuracy, val_kappa, val_brier, val_f1, val_cm = evaluate_model(model, X_val, y_val)
+    val_metrics = evaluate_model(model, X_val, y_val)
 
-    print(f"Test Accuracy: {val_accuracy}")
-    print(f"Test Balanced Accuracy: {val_balanced_accuracy}")
-    print(f"Test Cohen's Kappa: {val_kappa}")
-    print(f"Test Brier Score Loss: {val_brier}")
-    print(f"Test F1 Score: {val_f1}")
+    print(f'MODEL WITH PARAMETERS: num_epochs:{conf.num_epochs}, batch_size:{conf.batch_size}, hidden_size:{conf.hidden_size}, num_layers:{conf.num_layers}, dropout:{conf.dropout}, learning_rate:{conf.learning_rate}  \t\t=====================')
+    print(f'val Accuracy: {val_metrics[0]}')
+    print(f'val Balanced Accuracy: {val_metrics[1]}')
+    print(f"val Cohen's Kappa: {val_metrics[2]}")
+    print(f'val Brier Score Loss: {val_metrics[3]}')
+    print(f'val F1 Score: {val_metrics[4]}')
     
-    # Mostra la matrice di confusione per il test set
-    save_confusion_matrix(val_cm, os.path.join(parent_dir, "confusion_matrix_lstm_no_optuna.png"))
-
     # Salvataggio del modello
     model_save_path = os.path.join(parent_dir, conf.test_dir, "lstm_classifier_model.pkl")
     joblib.dump(model, model_save_path)

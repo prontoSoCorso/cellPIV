@@ -89,6 +89,7 @@ class Config_02_temporalData:
 
 class Config_03_LSTM:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
     test_dir     = utils.test_dir
@@ -119,7 +120,8 @@ class Config_03_LSTM:
 
 
 class Config_03_LSTM_WithOptuna:
-    device       = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
     test_dir     = utils.test_dir
@@ -139,14 +141,15 @@ class Config_03_LSTM_WithOptuna:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTM
-    num_epochs          = [300,400,500]
+    num_epochs          = [200,300,400]
     batch_size          = [8,16,32,64]  # Numero di sequenze prese
     dropout             = np.arange(0.1, 0.4, 0.05)
     hidden_size         = [32, 64, 128]
     num_layers          = [2,3,4]
+    learning_rate       = [random.uniform(1e-4, 1e-3) for _ in range(10)]
 
     sampler             = optuna.samplers.TPESampler(seed=seed)
-    n_startup_trials    = 10
+    n_startup_trials    = 20
     pruner              = optuna.pruners.MedianPruner(n_startup_trials=n_startup_trials)
     
 
@@ -160,8 +163,8 @@ class Config_03_train_rocket:
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
-    kernels     = [50, 100, 200, 300, 1000, 10000]
-    test_size   = 0.2
+    kernels     = [300] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    val_size   = 0.25
     img_size    = utils.img_size
     num_classes = utils.num_classes
 
@@ -182,6 +185,9 @@ class Config_03_train_rocket:
 
 
 class Config_03_train_lstmfcn:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
+    
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
     test_dir     = utils.test_dir
@@ -205,7 +211,7 @@ class Config_03_train_lstmfcn:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTMFCN
-    num_epochs      = 250
+    num_epochs      = 400
     batch_size      = 16                  # numero di sequenze prese
     dropout         = 0.2
     kernel_sizes    = (8,5,3) #def: 8,5,3
@@ -220,6 +226,9 @@ class Config_03_train_lstmfcn:
 
 
 class Config_03_train_lstmfcn_with_optuna:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
+    
     data_path   = Config_02_temporalData.output_csvNormalized_file_path
     test_dir    = utils.test_dir
 
@@ -366,3 +375,8 @@ class Config_03_train_ConvTran:
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
 
+
+
+class Config_04_test:
+    test_data_path = user_paths.path_excels + "BlastoTest.csv"
+    kernel = 300
