@@ -274,7 +274,7 @@ def main():
     sum_mean_mag_mat = []
 
     for class_sample in ['blasto','no_blasto']:
-        path_all_folders = myPaths.path_BlastoData + class_sample
+        path_all_folders = myPaths.path_excels + class_sample
         errors = []
 
         # Set the value to add based on the class_sample
@@ -290,12 +290,12 @@ def main():
                 if conf.save_images:
                     # Voglio salvare le immagini delle metriche di flusso ottico per ogni paziente
                     if 'no_blasto' in path_all_folders:
-                        output_folder = myPaths.path_BlastoData + "opticalFlowFrames/" + conf.method_optical_flow + "/no_blasto/" + sample_name + "/"
+                        output_folder = myPaths.path_excels + "opticalFlowFrames/" + conf.method_optical_flow + "/no_blasto/" + sample_name + "/"
                         if not os.path.exists(output_folder):
                             os.makedirs(output_folder)
 
                     else:
-                        output_folder = myPaths.path_BlastoData + "opticalFlowFrames/" + conf.method_optical_flow + "/blasto/"    + sample_name + "/"
+                        output_folder = myPaths.path_excels + "opticalFlowFrames/" + conf.method_optical_flow + "/blasto/"    + sample_name + "/"
                         if not os.path.exists(output_folder):
                             os.makedirs(output_folder)
 

@@ -13,7 +13,7 @@ sys.path.append(parent_dir)
 from config import Config_00_preprocessing as conf
 
 # Percorso del file CSV
-input_csv_path = conf.path_new_excel
+input_csv_path = conf.path_singleWithID_csv
 
 # Funzioni di utilità
 def load_data(file_path):
@@ -25,8 +25,8 @@ def calculate_n_images(df):
     df['n_images'] = df.apply(lambda row: int(row['tSB'] * 4) if row['BLASTO NY'] == 1 and not pd.isnull(row['tSB']) else 0, axis=1)
     return df
 
-def extract_year_from_slide(df):
-    df['year'] = df['slide'].str.split('.').str[0].str.split('D').str[-1]
+def extract_year_from_dish(df):
+    df['year'] = df['dish'].str.split('.').str[0].str.split('D').str[-1]
     return df
 
 def num_samples(df):
@@ -39,27 +39,27 @@ def num_non_blastocysts(df):
     return df[df['BLASTO NY'] == 0].shape[0]
 
 def num_samples_per_year(df):
-    df = extract_year_from_slide(df)
+    df = extract_year_from_dish(df)
     return df.groupby('year').size()
 
 def num_blastocysts_per_year(df):
-    df = extract_year_from_slide(df)
+    df = extract_year_from_dish(df)
     return df[df['BLASTO NY'] == 1].groupby('year').size()
 
 def num_non_blastocysts_per_year(df):
-    df = extract_year_from_slide(df)
+    df = extract_year_from_dish(df)
     return df[df['BLASTO NY'] == 0].groupby('year').size()
 
 def num_samples_from_year_to_year(df, year1, year2):
-    df = extract_year_from_slide(df)
+    df = extract_year_from_dish(df)
     return df[(df['year'] >= year1) & (df['year'] <= year2)].shape[0]
 
 def num_blastocysts_from_year_to_year(df, year1, year2):
-    df = extract_year_from_slide(df)
+    df = extract_year_from_dish(df)
     return df[(df['year'] >= year1) & (df['year'] <= year2) & (df['BLASTO NY'] == 1)].shape[0]
 
 def num_non_blastocysts_from_year_to_year(df, year1, year2):
-    df = extract_year_from_slide(df)
+    df = extract_year_from_dish(df)
     return df[(df['year'] >= year1) & (df['year'] <= year2) & (df['BLASTO NY'] == 0)].shape[0]
 
 if __name__ == '__main__':

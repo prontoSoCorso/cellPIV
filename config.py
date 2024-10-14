@@ -6,16 +6,25 @@ import numpy as np
 import torch
 import optuna
 
-giovanna = False
+# 0 giovanna, 1 lorenzo, 2 AWS
+sourceForPath = 2
 
 class user_paths:
     #Per computer fisso
-    if giovanna:
-        path_BlastoData = "/home/giovanna/Documents/Data/BlastoData/"
+    if sourceForPath == 0:
+        path_excels = "/home/giovanna/Documents/Data/BlastoData/"
+        path_BlastoData = path_excels
     
-    else:
-    #Per computer portatile
-        path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
+    elif sourceForPath == 1:
+        #Per computer portatile
+        path_excels = "C:/Users/loren/Documents/Data/BlastoData/"
+        path_BlastoData = path_excels
+
+    elif sourceForPath == 2:
+        #Per AWS
+        path_excels = "/home/ec2-user/cellPIV/"
+        path_BlastoData = "/mnt/s3bucket/blastocisti/"
+    
 
 
 class utils:
@@ -32,20 +41,19 @@ class utils:
     test_dir = "_04_test"
 
     # Test Data
-    test_path = ""
+    test_path = user_paths.path_excels + "BlastoLabels.xlsx"
 
 
 class Config_00_preprocessing:
-    path_old_excel          = user_paths.path_BlastoData + "BlastoLabels.xlsx"
-    path_single_csv         = user_paths.path_BlastoData + "BlastoLabels_singleFile.csv"
-    path_singleWithID_csv   = user_paths.path_BlastoData + "BlastoLabels_singleFileWithID.csv"
-    path_double_dish_excel  = user_paths.path_BlastoData + "pz con doppia dish.xlsx"
-
+    path_old_excel          = user_paths.path_excels + "BlastoLabels.xlsx"
+    path_single_csv         = user_paths.path_excels + "BlastoLabels_singleFile.csv"
+    path_singleWithID_csv   = user_paths.path_excels + "BlastoLabels_singleFileWithID.csv"
+    path_double_dish_excel  = user_paths.path_excels + "pz con doppia dish.xlsx"
 
 
 class Config_01_OpticalFlow:
     # Paths
-    project_name        = 'BlastoClass_y13-18_3days_288frames_optflow_LK'
+    project_name        = 'BlastoClass_y13-20_3days_288frames_optflow_LK'
     method_optical_flow = "LucasKanade"
 
     # LK parameters
@@ -68,8 +76,8 @@ class Config_01_OpticalFlow:
 class Config_02_temporalData:
     #Paths
     csv_file_path                   = Config_00_preprocessing.path_singleWithID_csv
-    output_csv_file_path            = user_paths.path_BlastoData + "FinalBlastoLabels.csv"
-    output_csvNormalized_file_path  = user_paths.path_BlastoData + "Normalized_Final_BlastoLabels.csv"
+    output_csv_file_path            = user_paths.path_excels + "FinalBlastoLabels.csv"
+    output_csvNormalized_file_path  = user_paths.path_excels + "Normalized_Final_BlastoLabels.csv"
 
     # Data
     temporalDataType = "sum_mean_mag_dict"
@@ -287,12 +295,8 @@ class Config_03_train_hivecote:
     
     model_name = 'HIVECOTEV2'
     dataset = "Blasto"
-    test_size = 0.1
     img_size = utils.img_size
     num_classes = utils.num_classes
-
-    # Nome dell'esperimento
-    exp_name = dataset + "," + model_name
 
     # Seed
     seed = utils.seed
@@ -324,7 +328,7 @@ class Config_03_train_ConvTran:
     # Input & Output
     project_name = utils.project_name
     data_path = Config_02_temporalData.output_csvNormalized_file_path
-    output_dir = user_paths.path_BlastoData
+    output_dir = user_paths.path_excels
     Norm = False        # Data Normalization
     val_ratio = 0.2     # Propotion of train-set to be used as validation
     print_interval = 10 # Print batch info every this many batches

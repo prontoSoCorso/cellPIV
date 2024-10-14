@@ -17,7 +17,6 @@ from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
 from config import utils as utils
 
-
 class InsufficientFramesError(Exception):
     """Eccezione sollevata quando il numero di frame è insufficiente."""
     pass

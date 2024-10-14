@@ -3,10 +3,12 @@ import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sktime.classification.deep_learning import LSTMFCNClassifier
-from sklearn.metrics import accuracy_score, classification_report, balanced_accuracy_score, cohen_kappa_score, brier_score_loss
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, balanced_accuracy_score, cohen_kappa_score, brier_score_loss
 import joblib  # Per il salvataggio del modello
 import timeit
 import optuna
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
@@ -44,9 +46,19 @@ def evaluate_model(model, X, y):
     balanced_accuracy = balanced_accuracy_score(y, y_pred)
     kappa = cohen_kappa_score(y, y_pred)
     brier = brier_score_loss(y, y_prob, pos_label=1)
-    report = classification_report(y, y_pred, target_names=["Class 0", "Class 1"])
-    return accuracy, balanced_accuracy, kappa, brier, report
+    f1 = f1_score(y, y_pred)
+    cm = confusion_matrix(y, y_pred)
+    return accuracy, balanced_accuracy, kappa, brier, f1, cm
 
+# Funzione per salvare la matrice di confusione come immagine
+def save_confusion_matrix(cm, filename):
+    plt.figure(figsize=(6, 6))
+    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    plt.savefig(filename)
+    plt.close()
 
 def objective(trial):
     # Definisce lo spazio di ricerca degli iperparametri
@@ -86,10 +98,12 @@ def objective(trial):
     # Valutazione del modello su train e val set
     val_metrics = evaluate_model(model, X_val, y_val)
 
-    # Stampa dei risultati
-    print(f'val Accuracy: {val_metrics[0]}')
-    print('val Classification Report:')
-    print(val_metrics[4])
+    # Stampa dei risultati con metriche estese
+    print(f'Validation Accuracy: {val_metrics[0]}')
+    print(f'Validation Balanced Accuracy: {val_metrics[1]}')
+    print(f"Validation Cohen's Kappa: {val_metrics[2]}")
+    print(f'Validation Brier Score Loss: {val_metrics[3]}')
+    print(f'Validation F1 Score: {val_metrics[4]}')
 
     return val_metrics[0]
 
@@ -98,15 +112,45 @@ def main():
     study = optuna.create_study(direction='maximize', sampler=conf.sampler, pruner=conf.pruner)
     study.optimize(objective, n_trials=100)
 
+    best_trial = study.best_trial
     print(f'Numero di trial: {len(study.trials)}')
-    print(f'Miglior trial: {study.best_trial.params}')
+    print(f'Migliore trial: {best_trial.number}, \nMigliore Accuracy: {best_trial.value}, \nBest trial params: {best_trial.params}')
 
-    # Salvataggio del modello
-    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstmfcnWithOptuna_classifier_model.pkl")
-    joblib.dump(study, model_save_path)
-    print(f'Modello salvato in: {model_save_path}')
+    #Devo riaddestrare il modello migliore. Infatti Il best_trial che si ottiene da Optuna contiene solo i parametri ottimali che 
+    # hanno prodotto la miglior performance, non il modello addestrato stesso.
+    # Ricostruisco il modello usando i migliori parametri trovati
+    df = load_normalized_data(conf.data_path)
+    X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
+    best_model = LSTMFCNClassifier(n_epochs=best_trial.params['n_epochs'],
+                                    batch_size=best_trial.params['batch_size'],
+                                    dropout=best_trial.params['dropout'],
+                                    kernel_sizes=best_trial.params['kernel_sizes'],
+                                    filter_sizes=best_trial.params['filter_sizes'],
+                                    lstm_size=best_trial.params['lstm_size'],
+                                    attention=best_trial.params['attention'],
+                                    random_state=conf.seed_everything(conf.seed),
+                                    verbose=conf.verbose
+                                    )
+    
+    best_model = train_model(best_model, X_train, y_train)
 
+    # Valutazione del modello su train e val set
+    val_metrics = evaluate_model(best_model, X_val, y_val)
 
+    # Stampa dei risultati con metriche estese
+    print(f'Validation Accuracy: {val_metrics[0]}')
+    print(f'Validation Balanced Accuracy: {val_metrics[1]}')
+    print(f"Validation Cohen's Kappa: {val_metrics[2]}")
+    print(f'Validation Brier Score Loss: {val_metrics[3]}')
+    print(f'Validation F1 Score: {val_metrics[4]}')
+
+    # Salva la matrice di confusione per il validation set
+    save_confusion_matrix(val_metrics[5], f'confusion_matrix_lstmfcn_.png')
+
+    # Salvataggio del modello addestrato
+    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstmfcn_with_optuna_best_model.pkl")
+    joblib.dump(best_model, model_save_path)
+    print(f'Modello addestrato salvato in: {model_save_path}')
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()

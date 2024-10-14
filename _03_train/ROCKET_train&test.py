@@ -1,7 +1,6 @@
 import sys
 import os
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sktime.classification.kernel_based import RocketClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix, f1_score
 import joblib  # Per il salvataggio del modello

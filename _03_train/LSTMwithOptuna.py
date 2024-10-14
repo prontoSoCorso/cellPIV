@@ -1,15 +1,16 @@
 import os
 import sys
 import pandas as pd
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report, balanced_accuracy_score, cohen_kappa_score, brier_score_loss
+from sklearn.metrics import accuracy_score, classification_report, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, f1_score, confusion_matrix
 import optuna
 import joblib
 import timeit
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Aggiungi il percorso del progetto al sys.path
 current_file_path = os.path.abspath(__file__)
@@ -77,13 +78,12 @@ def train_model(trial, model, X_train, y_train, X_val, y_val, num_epochs, batch_
             loss.backward()
             optimizer.step()
 
-        # Valutazione intermedia su X_val
         if (epoch+1) % 10 == 0:
-            val_accuracy, _, _, _, _ = evaluate_model(model, X_val, y_val)
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Accuracy: {val_accuracy:.4f}')
+            val_metrics = evaluate_model(model, X_val, y_val)
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Accuracy: {val_metrics[0]:.4f}')
 
             # Report della prestazione del trial per Optuna
-            trial.report(val_accuracy, epoch)
+            trial.report(val_metrics[0], epoch)
 
             # Controlla se il trial deve essere fermato per pruning
             if trial.should_prune():
@@ -106,8 +106,19 @@ def evaluate_model(model, X, y):
         balanced_accuracy = balanced_accuracy_score(y.cpu().numpy(), y_pred)
         kappa = cohen_kappa_score(y.cpu().numpy(), y_pred)
         brier = brier_score_loss(y.cpu().numpy(), y_prob, pos_label=1)
-        report = classification_report(y.cpu().numpy(), y_pred, target_names=["Class 0", "Class 1"])
-        return accuracy, balanced_accuracy, kappa, brier, report
+        f1 = f1_score(y.cpu().numpy(), y_pred)
+        cm = confusion_matrix(y.cpu().numpy(), y_pred)
+        return accuracy, balanced_accuracy, kappa, brier, f1, cm
+
+# Funzione per salvare la matrice di confusione come immagine
+def save_confusion_matrix(cm, filename):
+    plt.figure(figsize=(6, 6))
+    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    plt.savefig(filename)
+    plt.close()
 
 def objective(trial):
     # Definisce lo spazio di ricerca degli iperparametri
@@ -136,8 +147,10 @@ def objective(trial):
 
     # Stampa dei risultati
     print(f'val Accuracy: {val_metrics[0]}')
-    print('val Classification Report:')
-    print(val_metrics[4])
+    print(f'val Balanced Accuracy: {val_metrics[1]}')
+    print(f"val Cohen's Kappa: {val_metrics[2]}")
+    print(f'val Brier Score Loss: {val_metrics[3]}')
+    print(f'val F1 Score: {val_metrics[4]}')
 
     return val_metrics[0]
 
@@ -146,13 +159,40 @@ def main():
     study = optuna.create_study(direction='maximize', sampler=conf.sampler, pruner=conf.pruner)
     study.optimize(objective, n_trials=50)
 
+    best_trial = study.best_trial
     print(f'Numero di trial: {len(study.trials)}')
-    print(f'Miglior trial: {study.best_trial.params}')
+    print(f'Migliore trial: {best_trial.number}, \nMigliore Accuracy: {best_trial.value}, \nBest trial params: {best_trial.params}')
 
-    # Salvataggio del modello
+    #Devo riaddestrare il modello migliore. Infatti Il best_trial che si ottiene da Optuna contiene solo i parametri ottimali che 
+    # hanno prodotto la miglior performance, non il modello addestrato stesso. Quindi, se dovessi salvare il best_trial, salverei
+    # semplicemente i dati riguardo ai parametri, ma non il modello LSTM addestrato.
+    # Ricostruisco il modello usando i migliori parametri trovati
+    best_model = LSTMModel(input_size=1, hidden_size=best_trial.params['hidden_size'], 
+                        num_layers=best_trial.params['num_layers'], 
+                        dropout=best_trial.params['dropout'], num_classes=conf.num_classes).to(conf.device)
+
+    # Addestro il modello di nuovo con i dati e i parametri ottimali
+    df = load_normalized_data(conf.data_path)
+    X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
+    best_model.fit(X_train, y_train)
+
+    # Valutazione finale del modello
+    val_metrics = evaluate_model(best_model, X_val, y_val)
+
+    # Stampa dei risultati
+    print(f'val Accuracy: {val_metrics[0]}')
+    print(f'val Balanced Accuracy: {val_metrics[1]}')
+    print(f"val Cohen's Kappa: {val_metrics[2]}")
+    print(f'val Brier Score Loss: {val_metrics[3]}')
+    print(f'val F1 Score: {val_metrics[4]}')
+
+    # Salva la matrice di confusione
+    save_confusion_matrix(val_metrics[5], f'confusion_matrix_lstm_.png')
+    
+    # Salvataggio del modello addestrato
     model_save_path = os.path.join(parent_dir, conf.test_dir, "lstm_model_with_optuna.pkl")
-    joblib.dump(study, model_save_path)
-    print(f'Modello salvato in: {model_save_path}')
+    joblib.dump(best_model, model_save_path)
+    print(f"Modello addestrato salvato in: {model_save_path}")
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()
