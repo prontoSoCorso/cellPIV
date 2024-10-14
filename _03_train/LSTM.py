@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
+from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
 import timeit
 import joblib
 import seaborn as sns
@@ -49,19 +49,16 @@ def prepare_data_loaders(df, val_size=0.3, test_size=0.1):
     X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y = df['BLASTO NY'].values  # Colonna target
 
-    # Splitting the data into train, validation and test sets
-    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=(val_size + test_size), random_state=conf.seed)
-    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=(test_size / (val_size + test_size)), random_state=conf.seed)
+    # Suddivisione del dataset in train e validation set
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=val_size, random_state=conf.seed)
 
-    # Convert to PyTorch tensors
-    X_train_tensor = torch.tensor(X_train, dtype=torch.float32).unsqueeze(-1)  # Aggiungi dimensione input_size=1
-    X_val_tensor = torch.tensor(X_val, dtype=torch.float32).unsqueeze(-1)      # Aggiungi dimensione input_size=1
-    X_test_tensor = torch.tensor(X_test, dtype=torch.float32).unsqueeze(-1)    # Aggiungi dimensione input_size=1
+    # Converti i dati in tensori PyTorch e aggiungi input_size=1 espandendo la dimensione finale
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32).unsqueeze(-1)  # [batch_size, seq_length, input_size=1]
+    X_val_tensor = torch.tensor(X_val, dtype=torch.float32).unsqueeze(-1)
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
     y_val_tensor = torch.tensor(y_val, dtype=torch.long)
-    y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
-    return X_train_tensor, X_val_tensor, X_test_tensor, y_train_tensor, y_val_tensor, y_test_tensor
+    return X_train_tensor, X_val_tensor, y_train_tensor, y_val_tensor
 
 def train_model(model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate, patience):
     criterion = nn.CrossEntropyLoss()
@@ -90,11 +87,12 @@ def train_model(model, X_train, y_train, X_val, y_val, num_epochs, batch_size, l
         
         # Valutazione su validation set dopo ogni epoca
         model.eval()
-        val_accuracy, val_balanced_accuracy, val_kappa, val_brier, val_cm = evaluate_model(model, X_val, y_val)
-        val_loss = criterion(model(X_val.to(device)), y_val.to(device)).item()
+        val_accuracy, val_balanced_accuracy, val_kappa, val_brier, val_f1, val_cm = evaluate_model(model, X_val, y_val)
+        val_loss = criterion(model(X_val.to(conf.device)), y_val.to(conf.device)).item()
 
         print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}')
-        print(f"Validation Balanced Accuracy: {val_balanced_accuracy:.4f}, Validation Cohen's Kappa: {val_kappa:.4f}, Validation Brier Score Loss: {val_brier:.4f}")
+        print(f'Validation Accuracy: {val_accuracy:.4f}, F1 Score: {val_f1:.4f}, Balanced Accuracy: {val_balanced_accuracy:.4f}')
+        print(f"Cohen's Kappa: {val_kappa:.4f}, Brier Score Loss: {val_brier:.4f}")
 
         # Early stopping logic
         if val_loss < best_val_loss:
@@ -128,17 +126,21 @@ def evaluate_model(model, X, y):
         balanced_accuracy = balanced_accuracy_score(y.cpu().numpy(), y_pred)
         kappa = cohen_kappa_score(y.cpu().numpy(), y_pred)
         brier = brier_score_loss(y.cpu().numpy(), y_prob, pos_label=1)
+        f1 = f1_score(y.cpu().numpy(), y_pred)
         cm = confusion_matrix(y.cpu().numpy(), y_pred)
         
-        return accuracy, balanced_accuracy, kappa, brier, cm
+        return accuracy, balanced_accuracy, kappa, brier, f1, cm
 
-def plot_confusion_matrix(cm):
+# Funzione per salvare la matrice di confusione come immagine
+def save_confusion_matrix(cm, filename):
     plt.figure(figsize=(6,6))
-    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False,
+                xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.title("Confusion Matrix")
-    plt.show()
+    plt.savefig(filename)
+    plt.close()
 
 def main():
     # Carico i dati normalizzati
@@ -156,17 +158,17 @@ def main():
     model = train_model(model, X_train, y_train, X_val, y_val, conf.num_epochs, conf.batch_size, 
                         conf.learning_rate, patience=10)
 
-    # Valutazione finale del modello su test set
-    test_accuracy, test_balanced_accuracy, test_kappa, test_brier, test_cm = evaluate_model(model, X_test, y_test)
+    # Valutazione finale del modello sul validation set
+    val_accuracy, val_balanced_accuracy, val_kappa, val_brier, val_f1, val_cm = evaluate_model(model, X_val, y_val)
 
-    # Stampa delle metriche sul test set
-    print(f"Test Accuracy: {test_accuracy}")
-    print(f"Test Balanced Accuracy: {test_balanced_accuracy}")
-    print(f"Test Cohen's Kappa: {test_kappa}")
-    print(f"Test Brier Score Loss: {test_brier}")
+    print(f"Test Accuracy: {val_accuracy}")
+    print(f"Test Balanced Accuracy: {val_balanced_accuracy}")
+    print(f"Test Cohen's Kappa: {val_kappa}")
+    print(f"Test Brier Score Loss: {val_brier}")
+    print(f"Test F1 Score: {val_f1}")
     
     # Mostra la matrice di confusione per il test set
-    plot_confusion_matrix(test_cm)
+    save_confusion_matrix(val_cm, os.path.join(parent_dir, "confusion_matrix_lstm_no_optuna.png"))
 
     # Salvataggio del modello
     model_save_path = os.path.join(parent_dir, conf.test_dir, "lstm_classifier_model.pkl")
