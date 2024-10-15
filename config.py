@@ -37,12 +37,6 @@ class utils:
     # Seed everything
     seed = 2024
 
-    # Test dir
-    test_dir = "_04_test"
-
-    # Test Data
-    test_path = user_paths.path_excels + "BlastoLabels.xlsx"
-
 
 class Config_00_preprocessing:
     path_old_excel          = user_paths.path_excels + "BlastoLabels.xlsx"
@@ -74,16 +68,39 @@ class Config_01_OpticalFlow:
 
 
 class Config_02_temporalData:
+    # Data
+    temporalDataType = "sum_mean_mag_dict" # [sum_mean_mag_dict, hybrid_dict, vorticity_dict, mean_magnitude_dict]    
+    normalization_type = "TrainTest_ALL" # [PerPatient, TrainTest_ALL, None]
+
     #Paths
     csv_file_path                   = Config_00_preprocessing.path_singleWithID_csv
     output_csv_file_path            = user_paths.path_excels + "FinalBlastoLabels.csv"
-    output_csvNormalized_file_path  = user_paths.path_excels + "Normalized_Final_BlastoLabels.csv"
+    output_csvNormalized_file_path  = user_paths.path_excels + f"Normalized_Final_BlastoLabels_{temporalDataType}.csv"
+    
+    output_csvNormalized_AllTrain_file_path  = user_paths.path_excels + f"Normalized_AllTrain_Final_BlastoLabels_{temporalDataType}.csv"
+    output_csvNormalized_AllVal_file_path  = user_paths.path_excels + f"Normalized_AllVal_Final_BlastoLabels_{temporalDataType}.csv"
+    
+    train_val_data_path     = output_csvNormalized_file_path            # Se ho fatto normalizzazione per paziente
+    train_data_path         = output_csvNormalized_AllTrain_file_path   # File che ottengo se faccio prima lo split e poi la normalizzazione di train e val, file di train
+    val_data_path           = output_csvNormalized_AllVal_file_path     # File che ottengo se faccio prima lo split e poi la normalizzazione di train e val, file di val
 
-    # Data
-    temporalDataType = "sum_mean_mag_dict"
+    output_csv_file_path_test       = user_paths.path_excels + "FinalBlastoLabels_test.csv"
+    test_data_path                  = user_paths.path_excels + f"Normalized_Final_BlastoLabels_test_{temporalDataType}.csv"
+    test_NormALL_data_path          = user_paths.path_excels + f"Normalized_ALLTest_Final_BlastoLabels_{temporalDataType}.csv"
 
     # Vars
     n_last_colums_check_max = 8
+    do_only_normalization = True
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
 
 
 
@@ -92,7 +109,9 @@ class Config_03_LSTM:
     multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
-    test_dir     = utils.test_dir
+    test_path    = Config_02_temporalData.test_data_path
+
+    test_dir     = "_04_test"
     
     num_classes = utils.num_classes
     train_size  = 0.8
@@ -100,7 +119,7 @@ class Config_03_LSTM:
 
     # Seed
     seed = utils.seed
-    def seed_everything(seed=0):
+    def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -109,7 +128,7 @@ class Config_03_LSTM:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTM
-    num_epochs      = 500
+    num_epochs      = 200
     batch_size      = 32
     learning_rate   = 1e-3
     hidden_size     = 128
@@ -124,7 +143,9 @@ class Config_03_LSTM_WithOptuna:
     multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
-    test_dir     = utils.test_dir
+    test_path    = Config_02_temporalData.test_data_path
+
+    test_dir     = "_04_test"
     
     num_classes = utils.num_classes
     train_size  = 0.8
@@ -132,7 +153,7 @@ class Config_03_LSTM_WithOptuna:
 
     # Seed
     seed = utils.seed
-    def seed_everything(seed=0):
+    def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -153,17 +174,16 @@ class Config_03_LSTM_WithOptuna:
     pruner              = optuna.pruners.MedianPruner(n_startup_trials=n_startup_trials)
     
 
-
-
 class Config_03_train_rocket:
     project_name    = utils.project_name
     data_path       = Config_02_temporalData.output_csvNormalized_file_path
-    test_dir        = utils.test_dir
-    test_path       = utils.test_path
+    test_path       = Config_02_temporalData.test_data_path
+
+    test_dir     = "_04_test"
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
-    kernels     = [300] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [300,500,1000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     val_size   = 0.25
     img_size    = utils.img_size
     num_classes = utils.num_classes
@@ -173,7 +193,33 @@ class Config_03_train_rocket:
 
     # Seed
     seed = utils.seed
-    def seed_everything(seed=0):
+    def seed_everything(seed):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+
+
+class Config_03_train_rocket_normALL:
+    project_name    = utils.project_name
+    data_path_train = Config_02_temporalData.output_csvNormalized_AllTrain_file_path
+    data_path_val   = Config_02_temporalData.output_csvNormalized_AllVal_file_path
+    test_path       = Config_02_temporalData.test_NormALL_data_path
+
+    test_dir     = "_04_test"
+
+    model_name  = 'Rocket'
+    dataset     = "Blasto"
+    kernels     = [50,100,300] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    val_size   = 0.25
+    img_size    = utils.img_size
+    num_classes = utils.num_classes
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -190,7 +236,9 @@ class Config_03_train_lstmfcn:
     
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
-    test_dir     = utils.test_dir
+    test_path    = Config_02_temporalData.test_data_path
+
+    test_dir     = "_04_test"
     
     model_name  = 'LSTMFCN'
     dataset     = "Blasto"
@@ -202,7 +250,7 @@ class Config_03_train_lstmfcn:
 
     # Seed
     seed = utils.seed
-    def seed_everything(seed=0):
+    def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -211,15 +259,14 @@ class Config_03_train_lstmfcn:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTMFCN
-    num_epochs      = 400
-    batch_size      = 16                  # numero di sequenze prese
+    num_epochs      = 500
+    batch_size      = 32                  # numero di sequenze prese
     dropout         = 0.2
     kernel_sizes    = (8,5,3) #def: 8,5,3
     filter_sizes    = (256,128,128)
-    lstm_size       = 6                      # Numero di layer LSTM
+    lstm_size       = 4                      # Numero di layer LSTM
     attention       = False
     verbose         = 2
-
 
     # Nome dell'esperimento
     exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size) + "," + str(kernel_sizes) + "," + str(filter_sizes) + "," + str(lstm_size) + "," + str(attention)
@@ -230,7 +277,9 @@ class Config_03_train_lstmfcn_with_optuna:
     multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     
     data_path   = Config_02_temporalData.output_csvNormalized_file_path
-    test_dir    = utils.test_dir
+    test_path   = Config_02_temporalData.test_data_path
+
+    test_dir     = "_04_test"
 
     train_size  = 0.8
     val_size    = 0.2
@@ -240,7 +289,7 @@ class Config_03_train_lstmfcn_with_optuna:
 
     # Seed
     seed = utils.seed
-    def seed_everything(seed=0):
+    def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -255,7 +304,7 @@ class Config_03_train_lstmfcn_with_optuna:
     # Parametri LSTMFCN
     min_num_epochs      = 50
     max_num_epochs      = 300
-    num_epochs          = 1500
+    num_epochs          = 300
 
     batch_size          = [16,32]            # numero di sequenze prese
     
@@ -274,7 +323,7 @@ class Config_03_train_lstmfcn_with_optuna:
     '''
     Con questa ricerca:
     
-    in_num_epochs      = 50
+    in_num_epochs       = 50
     max_num_epochs      = 300
     num_epochs          = 500
 
@@ -300,7 +349,9 @@ class Config_03_train_lstmfcn_with_optuna:
 class Config_03_train_hivecote:
     project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
-    test_dir     = utils.test_dir
+    test_path    = Config_02_temporalData.test_data_path
+
+    test_dir     = "_04_test"
     
     model_name = 'HIVECOTEV2'
     dataset = "Blasto"
@@ -309,7 +360,7 @@ class Config_03_train_hivecote:
 
     # Seed
     seed = utils.seed
-    def seed_everything(seed=0):
+    def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -337,11 +388,12 @@ class Config_03_train_ConvTran:
     # Input & Output
     project_name = utils.project_name
     data_path = Config_02_temporalData.output_csvNormalized_file_path
+    test_path = Config_02_temporalData.test_data_path    
+    test_dir     = "_04_test"                                               
     output_dir = user_paths.path_excels
     Norm = False        # Data Normalization
     val_ratio = 0.2     # Propotion of train-set to be used as validation
     print_interval = 10 # Print batch info every this many batches
-    test_dir = utils.test_dir
     tensorboard_dir = "_98_ConvTranSummary"
 
     # Transformers Parameters
@@ -360,6 +412,10 @@ class Config_03_train_ConvTran:
     val_interval = 2    # Evaluate on validation every XX epochs
     key_metric = 'accuracy' # choices={'loss', 'accuracy', 'precision'}, help='Metric used for defining best epoch'
     num_classes = utils.num_classes
+
+    # Add Learning Rate Scheduler
+    scheduler_patience = 5    # Number of epochs with no improvement after which learning rate will be reduced
+    scheduler_factor = 0.5    # Factor by which the learning rate will be reduced
     
     # System
     gpu = 0             # GPU index, -1 for CPU
@@ -367,7 +423,7 @@ class Config_03_train_ConvTran:
     
     # Seed
     seed = utils.seed
-    def seed_everything(seed=0):
+    def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
         torch.manual_seed(seed)
@@ -377,6 +433,47 @@ class Config_03_train_ConvTran:
 
 
 
+class Config_03_KNN:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
+
+    data_path    = Config_02_temporalData.output_csvNormalized_file_path
+    test_path    = Config_02_temporalData.test_data_path
+    
+    model_name  = 'LSTMFCN'
+    dataset     = "Blasto"
+    train_size  = 0.8
+    val_size    = 0.2
+
+    img_size    = utils.img_size
+    num_classes = utils.num_classes
+
+    # Seed
+    seed = utils.seed
+    def seed_everything(seed):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+
+    # Parametri LSTMFCN
+    num_epochs      = 500
+    batch_size      = 32                  # numero di sequenze prese
+    dropout         = 0.2
+    kernel_sizes    = (8,5,3) #def: 8,5,3
+    filter_sizes    = (256,128,128)
+    lstm_size       = 4                      # Numero di layer LSTM
+    attention       = False
+    verbose         = 2
+
+
 class Config_04_test:
-    test_data_path = user_paths.path_excels + "BlastoTest.csv"
+    if Config_02_temporalData.normalization_type == "PerPatient":
+        test_path = Config_02_temporalData.test_data_path
+    else:
+        test_path = Config_02_temporalData.test_NormALL_data_path
     kernel = 300
+
+    test_dir = "_04_test"

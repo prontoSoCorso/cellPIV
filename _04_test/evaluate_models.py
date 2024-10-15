@@ -17,8 +17,8 @@ sys.path.append(parent_dir)
 from config import Config_04_test as conf
 
 # Funzione per caricare i dati normalizzati da CSV
-def load_test_data(test_data_path):
-    return pd.read_csv(test_data_path)
+def load_test_data(test_path):
+    return pd.read_csv(test_path)
 
 # Funzione per valutare il modello con metriche estese
 def evaluate_model(model, X, y):
@@ -45,7 +45,7 @@ def save_confusion_matrix(cm, filename):
 
 # ======= Funzioni per ogni modello =======
 def main_ROCKET():
-    df = load_test_data(conf.test_data_path)
+    df = load_test_data(conf.test_path)
     X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y = df['BLASTO NY'].values  # Colonna target
 
@@ -64,7 +64,7 @@ def main_ROCKET():
 
 
 def main_LSTM():
-    df = load_test_data(conf.test_data_path)
+    df = load_test_data(conf.test_path)
     X = df.iloc[:, 3:].values
     y = df['BLASTO NY'].values
 
@@ -83,7 +83,7 @@ def main_LSTM():
 
 
 def main_LSTMFCN():
-    df = load_test_data(conf.test_data_path)
+    df = load_test_data(conf.test_path)
     X = df.iloc[:, 3:].values
     y = df['BLASTO NY'].values
 
@@ -102,7 +102,7 @@ def main_LSTMFCN():
 
 
 def main_HIVECOTE2():
-    df = load_test_data(conf.test_data_path)
+    df = load_test_data(conf.test_path)
     X = df.iloc[:, 3:].values
     y = df['BLASTO NY'].values
 
@@ -121,7 +121,7 @@ def main_HIVECOTE2():
 
 
 def main_ConvTran():
-    df = load_test_data(conf.test_data_path)
+    df = load_test_data(conf.test_path)
     X = df.iloc[:, 3:].values
     y = df['BLASTO NY'].values
 

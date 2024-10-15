@@ -79,6 +79,7 @@ def main():
                               attention=conf.attention,
                               random_state=conf.seed,
                               verbose=conf.verbose
+                              
                               )
 
     # Addestramento del modello
@@ -107,7 +108,7 @@ def main():
     save_confusion_matrix(val_metrics[5], 'confusion_matrix_LSTMFCN.png')
 
     # Salvataggio del modello
-    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstmfcn_sktime_classifier_model.pkl")
+    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstmfcn_model_best.pkl")
     joblib.dump(model, model_save_path)
     print(f'Modello salvato in: {model_save_path}')
 

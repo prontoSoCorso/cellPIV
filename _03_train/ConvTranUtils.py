@@ -42,13 +42,16 @@ def Initialization(config):
     logger.info(f"Using device: {device}")
     return device
 
-def load_my_data(data_path, val_ratio=0.2, batch_size=16):
+def load_my_data(data_path, test_path, val_ratio=0.2, batch_size=16):
     data = pd.read_csv(data_path)
     labels = data.iloc[:, 2].values
     series_data = data.iloc[:, 3:].values.reshape(data.shape[0], 1, -1)
 
-    X_train, X_temp, y_train, y_temp = train_test_split(series_data, labels, test_size=val_ratio, random_state=42, stratify=labels)
-    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp)
+    data_test = pd.read_csv(test_path)
+    y_test = data_test.iloc[:, 2].values
+    X_test = data_test.iloc[:, 3:].values.reshape(data_test.shape[0], 1, -1)
+
+    X_train, X_val, y_train, y_val = train_test_split(series_data, labels, test_size=val_ratio, random_state=42, stratify=labels)
 
     train_dataset = CustomDataset(X_train, y_train)
     val_dataset = CustomDataset(X_val, y_val)

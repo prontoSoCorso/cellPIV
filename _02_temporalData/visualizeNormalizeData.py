@@ -16,7 +16,6 @@ from config import Config_02_temporalData as conf
 df_original = pd.read_csv(conf.output_csv_file_path)
 df_norm = pd.read_csv(conf.output_csvNormalized_file_path)
 
-
 # Plot dati normalizzati
 patient_id_example = 55
 
@@ -45,4 +44,4 @@ plt.xlabel('Time Point')
 plt.xticks(range(0, 290, 20))  # Show labels every 10th time point
 plt.ylabel('Value')
 plt.legend()
-plt.show()
+plt.savefig("ProvaNorm.jpg")

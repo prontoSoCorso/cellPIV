@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     # Load Data
     logger.info("Loading Data ...")
-    train_loader, val_loader, test_loader = load_my_data(config.data_path, config.val_ratio, config.batch_size)
+    train_loader, val_loader, test_loader = load_my_data(config.data_path, config.test_path, config.val_ratio, config.batch_size)
 
     # Aggiungi numero di etichette uniche
     config.num_labels = len(set(train_loader.dataset.labels))
