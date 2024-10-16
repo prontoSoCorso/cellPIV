@@ -137,7 +137,7 @@ def main_ConvTran():
 # Funzione principale con switch
 def main():
     #model_name = input("Scegli il modello da valutare (ROCKET, LSTM, LSTMFCN, HIVECOTE2, ConvTran): ").upper()
-    model_name = "ConvTran"
+    model_name = "ROCKET"
 
     if model_name == "ROCKET":
         main_ROCKET()

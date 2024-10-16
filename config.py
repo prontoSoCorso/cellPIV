@@ -181,15 +181,10 @@ class Config_03_train_rocket:
 
     test_dir     = "_04_test"
 
-    model_name  = 'Rocket'
-    dataset     = "Blasto"
-    kernels     = [100,300,500,1000,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [100,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     val_size   = 0.25
     img_size    = utils.img_size
     num_classes = utils.num_classes
-
-    # Nome dell'esperimento
-    exp_name = dataset + "," + model_name
 
     # Seed
     seed = utils.seed
@@ -211,7 +206,7 @@ class Config_03_train_rocket_normALL:
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
-    kernels     = [300] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [100,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     val_size   = 0.25
     img_size    = utils.img_size
     num_classes = utils.num_classes

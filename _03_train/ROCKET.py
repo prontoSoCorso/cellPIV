@@ -117,9 +117,10 @@ def main():
     
     X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y = df['BLASTO NY'].values  # Colonna target
+
     model = RocketClassifier(num_kernels=best_kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)
     model = train_model(model, X, y)
-    best_model_path = os.path.join(parent_dir, conf.test_dir, f"rocket_classifier_model_{kernel}_kernels.pkl")
+    best_model_path = os.path.join(parent_dir, conf.test_dir, f"rocket_classifier_model_{best_kernel}_kernels.pkl")
     joblib.dump(model, best_model_path)
     print(f'Modello salvato in: {best_model_path}')
     

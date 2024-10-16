@@ -59,7 +59,7 @@ def main():
     y = df['BLASTO NY'].values  # Colonna target
 
     # Definisce il modello KNNClassifier
-    model = KNeighborsTimeSeriesClassifier(n_neighbors=11, 
+    model = KNeighborsTimeSeriesClassifier(n_neighbors=7, 
                                            weights='distance', #uniform di default, se no distance
                                            algorithm='brute',
                                            distance='dtw',
