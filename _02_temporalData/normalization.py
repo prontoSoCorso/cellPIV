@@ -62,6 +62,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_02_temporalData as conf
+from _02_temporalData import normalization_test
 
 def load_pickled_files(directory):
     files = os.listdir(directory)
@@ -117,20 +118,25 @@ def normalize_train_val(df_train, df_val):
     normalized_val = (time_series_val - min_val) / (max_val - min_val)
     normalized_val[time_series_val == 0] = 0
 
+    # Uso min e max del train per chiamare funzione che normalizza test
+    print("=====VALORI DI MIN E MAX PER NORMALIZZARE TRAIN=====")
+    print(f"min val = {min_val}")
+    print(f"max val = {max_val}")
+    normalization_test.main(min_val=min_val, max_val=max_val)
+
     return normalized_train, normalized_val
 
 
 if __name__ == '__main__':
     csv_file_path = conf.csv_file_path
     output_csv_file_path = conf.output_csv_file_path
-    output_csv_file_path_test = conf.output_csv_file_path_test  #lo uso quando considero file di test
     output_csv_normalized_file_path = conf.output_csvNormalized_file_path
     output_csvNormalized_AllTrain_file_path = conf.output_csvNormalized_AllTrain_file_path
     output_csvNormalized_AllVal_file_path = conf.output_csvNormalized_AllVal_file_path
 
 
     if conf.do_only_normalization:
-        df_merged = pd.read_csv(output_csv_file_path_test) #  output_csv_file_path / output_csv_file_path_test
+        df_merged = pd.read_csv(output_csv_file_path) #  output_csv_file_path / output_csv_file_path_test
     
     else:
         # PARTE DI CREAZIONE DEL FILE CSV A PARTIRE DA UN FILE DICT SELEZIONATO

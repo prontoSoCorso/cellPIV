@@ -128,11 +128,11 @@ class Config_03_LSTM:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTM
-    num_epochs      = 200
-    batch_size      = 32
-    learning_rate   = 1e-3
+    num_epochs      = 100
+    batch_size      = 16
+    learning_rate   = 1e-4
     hidden_size     = 128
-    num_layers      = 4
+    num_layers      = 3
     dropout         = 0.25
     bidirectional   = False
 
@@ -183,7 +183,7 @@ class Config_03_train_rocket:
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
-    kernels     = [300,500,1000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [100,300,500,1000,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     val_size   = 0.25
     img_size    = utils.img_size
     num_classes = utils.num_classes
@@ -203,7 +203,6 @@ class Config_03_train_rocket:
 
 
 class Config_03_train_rocket_normALL:
-    project_name    = utils.project_name
     data_path_train = Config_02_temporalData.output_csvNormalized_AllTrain_file_path
     data_path_val   = Config_02_temporalData.output_csvNormalized_AllVal_file_path
     test_path       = Config_02_temporalData.test_NormALL_data_path
@@ -212,7 +211,7 @@ class Config_03_train_rocket_normALL:
 
     model_name  = 'Rocket'
     dataset     = "Blasto"
-    kernels     = [50,100,300] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [300] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     val_size   = 0.25
     img_size    = utils.img_size
     num_classes = utils.num_classes
@@ -234,19 +233,13 @@ class Config_03_train_lstmfcn:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     
-    project_name = utils.project_name
     data_path    = Config_02_temporalData.output_csvNormalized_file_path
     test_path    = Config_02_temporalData.test_data_path
 
     test_dir     = "_04_test"
     
-    model_name  = 'LSTMFCN'
-    dataset     = "Blasto"
     train_size  = 0.8
     val_size    = 0.2
-
-    img_size    = utils.img_size
-    num_classes = utils.num_classes
 
     # Seed
     seed = utils.seed
@@ -259,17 +252,20 @@ class Config_03_train_lstmfcn:
             torch.cuda.manual_seed_all(seed)
 
     # Parametri LSTMFCN
-    num_epochs      = 500
-    batch_size      = 32                  # numero di sequenze prese
-    dropout         = 0.2
+    num_epochs      = 100
+    batch_size      = 16                     # numero di sequenze prese
+    dropout         = 0.3
     kernel_sizes    = (8,5,3) #def: 8,5,3
-    filter_sizes    = (256,128,128)
+    filter_sizes    = (128,256,128)
     lstm_size       = 4                      # Numero di layer LSTM
     attention       = False
     verbose         = 2
 
-    # Nome dell'esperimento
-    exp_name = dataset + "," + model_name + "," + str(num_epochs) + "," + str(batch_size) + "," + str(kernel_sizes) + "," + str(filter_sizes) + "," + str(lstm_size) + "," + str(attention)
+    learning_rate   = 1e-4
+    hidden_size = 128
+    bidirectionale = False
+    num_classes = 2
+    num_layers = 4
 
 
 class Config_03_train_lstmfcn_with_optuna:
@@ -386,26 +382,22 @@ class Config_03_train_hivecote:
 
 class Config_03_train_ConvTran:
     # Input & Output
-    project_name = utils.project_name
-    data_path = Config_02_temporalData.output_csvNormalized_file_path
-    test_path = Config_02_temporalData.test_data_path    
     test_dir     = "_04_test"                                               
     output_dir = user_paths.path_excels
     Norm = False        # Data Normalization
     val_ratio = 0.2     # Propotion of train-set to be used as validation
     print_interval = 10 # Print batch info every this many batches
-    tensorboard_dir = "_98_ConvTranSummary"
-
+    
     # Transformers Parameters
     Net_Type = 'C-T'    # choices={'T', 'C-T'}, help="Network Architecture. Convolution (C)", "Transformers (T)") (def = C-T)
-    emb_size = 16       # Internal dimension of transformer embeddings (def = 16)
-    dim_ff = 256        # Dimension of dense feedforward part of transformer layer (def = 256)
+    emb_size = 64       # Internal dimension of transformer embeddings (def = 16)
+    dim_ff = 128        # Dimension of dense feedforward part of transformer layer (def = 256)
     num_heads = 8       # Number of multi-headed attention heads (def = 8)
     Fix_pos_encode = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
     Rel_pos_encode = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
 
     # Training Parameters/Hyper-Parameters
-    epochs = 50        # Number of training epochs
+    epochs = 100        # Number of training epochs
     batch_size = 16     # Training batch size
     lr = 1e-3           # Learning rate
     dropout = 0.2       # Dropout regularization ratio
@@ -418,7 +410,7 @@ class Config_03_train_ConvTran:
     scheduler_factor = 0.5    # Factor by which the learning rate will be reduced
     
     # System
-    gpu = 0             # GPU index, -1 for CPU
+    gpu = -1             # GPU index, -1 for CPU
     console = False     # Optimize printout for console output; otherwise for file
     
     # Seed
@@ -434,20 +426,6 @@ class Config_03_train_ConvTran:
 
 
 class Config_03_KNN:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
-
-    data_path    = Config_02_temporalData.output_csvNormalized_file_path
-    test_path    = Config_02_temporalData.test_data_path
-    
-    model_name  = 'LSTMFCN'
-    dataset     = "Blasto"
-    train_size  = 0.8
-    val_size    = 0.2
-
-    img_size    = utils.img_size
-    num_classes = utils.num_classes
-
     # Seed
     seed = utils.seed
     def seed_everything(seed):
@@ -458,15 +436,6 @@ class Config_03_KNN:
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
 
-    # Parametri LSTMFCN
-    num_epochs      = 500
-    batch_size      = 32                  # numero di sequenze prese
-    dropout         = 0.2
-    kernel_sizes    = (8,5,3) #def: 8,5,3
-    filter_sizes    = (256,128,128)
-    lstm_size       = 4                      # Numero di layer LSTM
-    attention       = False
-    verbose         = 2
 
 
 class Config_04_test:
@@ -477,3 +446,10 @@ class Config_04_test:
     kernel = 300
 
     test_dir = "_04_test"
+
+
+class paths_for_models:
+    data_path_train = Config_02_temporalData.output_csvNormalized_AllTrain_file_path
+    data_path_val   = Config_02_temporalData.output_csvNormalized_AllVal_file_path
+    test_path       = Config_02_temporalData.test_NormALL_data_path
+    test_dir        = "_04_test"

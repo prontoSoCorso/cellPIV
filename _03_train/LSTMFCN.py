@@ -1,13 +1,14 @@
 import sys
 import os
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sktime.classification.deep_learning import LSTMFCNClassifier
 from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
 import joblib  # Per il salvataggio del modello
 import timeit
 import seaborn as sns
 import matplotlib.pyplot as plt
+import keras
+
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
@@ -17,25 +18,18 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_train_lstmfcn as conf
+from config import paths_for_models as paths_for_models
+
 
 # Funzione per caricare i dati normalizzati da CSV
 def load_normalized_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
-# Funzione per preparare i data loader (in questo caso utilizziamo sklearn)
-def prepare_data_loaders(df, val_size=0.3):
-    X = df.iloc[:, 3:].values
-    y = df['BLASTO NY'].values
-
-    # Splitting the data into train, validation, and test sets
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=val_size, random_state=conf.seed_everything(conf.seed))
-
-    return X_train, X_val, y_train, y_val
-
 # Funzione per addestrare il modello
 def train_model(model, X_train, y_train):
     model.fit(X_train, y_train)
     return model
+
 
 # Funzione per valutare il modello con metriche estese
 def evaluate_model(model, X, y):
@@ -61,13 +55,19 @@ def save_confusion_matrix(cm, filename):
 
 
 def main():
-    csv_file_path = conf.data_path
+    # Carico i dati normalizzati
+    df_train = load_normalized_data(paths_for_models.data_path_train)
+    df_val = load_normalized_data(paths_for_models.data_path_val)
 
-    # Carica i dati normalizzati dal file CSV
-    df = load_normalized_data(csv_file_path)
+    # Combina i due DataFrame in un unico DataFrame
+    df = pd.concat([df_train, df_val], ignore_index=True)
+    
+    X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
+    y = df['BLASTO NY'].values  # Colonna target
 
-    # Prepara i data loader
-    X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
+    my_callbacks = [
+        keras.callbacks.EarlyStopping(patience=5)
+    ]
 
     # Definisce il modello LSTMFCNClassifier con attenzione
     model = LSTMFCNClassifier(n_epochs=conf.num_epochs, 
@@ -78,16 +78,15 @@ def main():
                               lstm_size=conf.lstm_size,
                               attention=conf.attention,
                               random_state=conf.seed,
-                              verbose=conf.verbose
-                              
+                              verbose=conf.verbose,
+                              callbacks = my_callbacks
                               )
 
     # Addestramento del modello
-    model = train_model(model, X_train, y_train)
+    model = train_model(model, X, y)
 
     # Valutazione del modello su train e validation set
-    train_metrics = evaluate_model(model, X_train, y_train)
-    val_metrics = evaluate_model(model, X_val, y_val)
+    train_metrics = evaluate_model(model, X, y)
 
     # Stampa delle metriche per il train set
     print(f'===== SCORE LSTMFCN CON SKTIME =====')
@@ -97,20 +96,27 @@ def main():
     print(f'Train Brier Score Loss: {train_metrics[3]}')
     print(f'Train F1 Score: {train_metrics[4]}')
     
-    # Stampa delle metriche per il validation set
-    print(f'Validation Accuracy: {val_metrics[0]}')
-    print(f'Validation Balanced Accuracy: {val_metrics[1]}')
-    print(f"Validation Cohen's Kappa: {val_metrics[2]}")
-    print(f'Validation Brier Score Loss: {val_metrics[3]}')
-    print(f'Validation F1 Score: {val_metrics[4]}')
+    # Testo sul csv di Test
+    df_test = load_normalized_data(paths_for_models.test_path)
+    X_test = df_test.iloc[:, 3:].values
+    y_test = df_test['BLASTO NY'].values
 
-    # Salva la matrice di confusione per il validation set
-    save_confusion_matrix(val_metrics[5], 'confusion_matrix_LSTMFCN.png')
+    test_metrics = evaluate_model(model, X_test, y_test)
+
+    print(f'=====LSTMFCN RESULTS=====')
+    print(f'Test Accuracy: {test_metrics[0]}')
+    print(f'Test Balanced Accuracy: {test_metrics[1]}')
+    print(f"Test Cohen's Kappa: {test_metrics[2]}")
+    print(f'Test Brier Score Loss: {test_metrics[3]}')
+    print(f'Test F1 Score: {test_metrics[4]}')
+
+    save_confusion_matrix(test_metrics[5], "confusion_matrix_lstmfcn.png")
 
     # Salvataggio del modello
     model_save_path = os.path.join(parent_dir, conf.test_dir, "lstmfcn_model_best.pkl")
     joblib.dump(model, model_save_path)
     print(f'Modello salvato in: {model_save_path}')
+
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()

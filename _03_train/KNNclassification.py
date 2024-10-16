@@ -15,7 +15,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_03_KNN as conf  # Aggiorna l'import se necessario
+from config import paths_for_models as paths_for_models
 
 # Funzione per caricare i dati normalizzati da CSV
 def load_normalized_data(csv_file_path):
@@ -50,12 +50,16 @@ def save_confusion_matrix(cm, filename):
 
 def main():
     # Carica i dati normalizzati dal file CSV per il training
-    df_train = load_normalized_data(conf.data_path)
-    X_train = df_train.iloc[:, 3:].values
-    y_train = df_train['BLASTO NY'].values
+    df_train = load_normalized_data(paths_for_models.data_path_train)
+    df_val  = load_normalized_data(paths_for_models.data_path_val)
+    
+    df = pd.concat([df_train, df_val], ignore_index=True)
+    
+    X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
+    y = df['BLASTO NY'].values  # Colonna target
 
-    # Definisce il modello HIVECOTEV2Classifier
-    model = KNeighborsTimeSeriesClassifier(n_neighbors=9, 
+    # Definisce il modello KNNClassifier
+    model = KNeighborsTimeSeriesClassifier(n_neighbors=11, 
                                            weights='distance', #uniform di default, se no distance
                                            algorithm='brute',
                                            distance='dtw',
@@ -66,21 +70,11 @@ def main():
                                            n_jobs=-1)
 
     # Addestramento del modello
-    model = train_model(model, X_train, y_train)
-
-    # Valutazione del modello su train e test set
-    train_metrics = evaluate_model(model, X_train, y_train)
-
-    # Stampa dei risultati per il train set
-    print(f'Train Accuracy: {train_metrics[0]}')
-    print(f'Train Balanced Accuracy: {train_metrics[1]}')
-    print(f"Train Cohen's Kappa: {train_metrics[2]}")
-    print(f'Train Brier Score Loss: {train_metrics[3]}')
-    print(f'Train F1 Score: {train_metrics[4]}')
-
+    model = train_model(model, X, y)
+    print("=====Addestramento completato=====")
 
     # Carico dati normalizzati del test per il test e creo X e labels
-    df_test = load_normalized_data(conf.test_path)
+    df_test = load_normalized_data(paths_for_models.test_path)
     X_test = df_test.iloc[:, 3:].values
     y_test = df_test['BLASTO NY'].values
 
@@ -93,14 +87,13 @@ def main():
     print(f'Test Brier Score Loss: {test_metrics[3]}')
     print(f'Test F1 Score: {test_metrics[4]}')
     
-    save_confusion_matrix(test_metrics[5], "confusion_matrix_lstm.png")
+    save_confusion_matrix(test_metrics[5], "confusion_matrix_KNN.png")
 
-    '''
     # Salvataggio del modello
-    model_save_path = os.path.join(parent_dir, conf.test_dir, "hivecotev2_classifier_model.pkl")
+    model_save_path = os.path.join(parent_dir, paths_for_models.test_dir, "KNN_classifier_model.pkl")
     joblib.dump(model, model_save_path)
     print(f'Modello salvato in: {model_save_path}')
-    '''
+    
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()

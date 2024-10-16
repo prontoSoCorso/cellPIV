@@ -4,10 +4,8 @@ import sys
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
 import timeit
-import joblib
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -19,6 +17,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_LSTM as conf
+from config import paths_for_models as paths_for_models
 device = conf.device
 
 # Definizione del modello LSTM con PyTorch
@@ -45,37 +44,36 @@ class LSTMModel(nn.Module):
 def load_normalized_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
-def prepare_data_loaders(df, val_size=0.3):
-    X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
-    y = df['BLASTO NY'].values  # Colonna target
-
-    # Suddivisione del dataset in train e validation set
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=val_size, random_state=conf.seed)
+def prepare_data_loaders(df_train, df_val):
+    # Combina i due DataFrame in un unico DataFrame
+    df = pd.concat([df_train, df_val], ignore_index=True)
+    
+    X_train = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
+    y_train = df['BLASTO NY'].values  # Colonna target
 
     # Converti i dati in tensori PyTorch e aggiungi input_size=1 espandendo la dimensione finale
-    X_train_tensor = torch.tensor(X_train, dtype=torch.float32).unsqueeze(-1)  # [batch_size, seq_length, input_size=1]
-    X_val_tensor = torch.tensor(X_val, dtype=torch.float32).unsqueeze(-1)
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32).unsqueeze(-1)
     y_train_tensor = torch.tensor(y_train, dtype=torch.long)
-    y_val_tensor = torch.tensor(y_val, dtype=torch.long)
 
-    return X_train_tensor, X_val_tensor, y_train_tensor, y_val_tensor
+    return X_train_tensor, y_train_tensor
 
-def train_model(model, X_train, y_train, X_val, y_val, num_epochs, batch_size, learning_rate, patience):
-    # Usa DataParallel per distribuire il modello su più GPU se disponibili
-    if torch.cuda.device_count() > 1:
-        model = nn.DataParallel(model)
-    
+# Funzione per salvare la matrice di confusione come immagine
+def save_confusion_matrix(cm, filename):
+    plt.figure(figsize=(6, 6))
+    sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    plt.savefig(filename)
+    plt.close()
+
+def train_model(model, X_train, y_train, num_epochs, batch_size, learning_rate):
     model = model.to(conf.device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     
     train_dataset = torch.utils.data.TensorDataset(X_train, y_train)
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
-
-    # Early stopping setup
-    best_val_loss = float('inf')
-    best_model = None
-    epochs_no_improve = 0
 
     for epoch in range(num_epochs):
         model.train()
@@ -91,77 +89,65 @@ def train_model(model, X_train, y_train, X_val, y_val, num_epochs, batch_size, l
             optimizer.step()
         
         if (epoch+1) % 10 == 0:
-            # Valutazione su validation set ogni 10 epoche
-            val_metrics = evaluate_model(model, X_val, y_val)
-            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}, Validation Accuracy: {val_metrics[0]:.4f}')
-            val_loss = criterion(model(X_val.to(conf.device)), y_val.to(conf.device)).item()
-
-            # Early stopping logic
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
-                best_model = model.state_dict()
-                epochs_no_improve = 0
-            else:
-                epochs_no_improve += 1
-                if epochs_no_improve >= patience:
-                    print(f"Early stopping at epoch {epoch+1}")
-                    break
-
-    # Load the best model if early stopping occurred
-    if best_model:
-        model.load_state_dict(best_model)
-
+            print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+            
     return model
 
 def evaluate_model(model, X, y):
     model.eval()
     with torch.no_grad():
-        X = X.to(device)
-        y = y.to(device)
+        X = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)
         
         outputs = model(X)
         _, predicted = torch.max(outputs, 1)
         y_pred = predicted.cpu().numpy()
         y_prob = torch.softmax(outputs, dim=1)[:, 1].cpu().numpy()
         
-        accuracy = accuracy_score(y.cpu().numpy(), y_pred)
-        balanced_accuracy = balanced_accuracy_score(y.cpu().numpy(), y_pred)
-        kappa = cohen_kappa_score(y.cpu().numpy(), y_pred)
-        brier = brier_score_loss(y.cpu().numpy(), y_prob, pos_label=1)
-        f1 = f1_score(y.cpu().numpy(), y_pred)
-        cm = confusion_matrix(y.cpu().numpy(), y_pred)
+        accuracy = accuracy_score(y, y_pred)
+        balanced_accuracy = balanced_accuracy_score(y, y_pred)
+        kappa = cohen_kappa_score(y, y_pred)
+        brier = brier_score_loss(y, y_prob, pos_label=1)
+        f1 = f1_score(y, y_pred)
+        cm = confusion_matrix(y, y_pred)
         
         return accuracy, balanced_accuracy, kappa, brier, f1, cm
 
 def main():
     # Carico i dati normalizzati
-    df = load_normalized_data(conf.data_path)
+    df_train = load_normalized_data(paths_for_models.data_path_train)
+    df_val = load_normalized_data(paths_for_models.data_path_val)
 
     # Preparo i data loader
-    X_train, X_val, y_train, y_val = prepare_data_loaders(df, conf.val_size)
-
+    X_train, y_train = prepare_data_loaders(df_train, df_val)
+    
     # Definisco il modello LSTM
     model = LSTMModel(input_size=1, hidden_size=conf.hidden_size, num_layers=conf.num_layers, 
                       dropout=conf.dropout, num_classes=conf.num_classes, 
-                      bidirectional=conf.bidirectional).to(device)
+                      bidirectional=conf.bidirectional)
     
     # Addestramento del modello con valutazione sul validation set e early stopping
-    model = train_model(model, X_train, y_train, X_val, y_val, conf.num_epochs, conf.batch_size, 
-                        conf.learning_rate, patience=10)
+    model = train_model(model, X_train, y_train, conf.num_epochs, conf.batch_size, 
+                        conf.learning_rate)
 
-    # Valutazione finale del modello sul validation set
-    val_metrics = evaluate_model(model, X_val, y_val)
 
-    print(f'MODEL WITH PARAMETERS: num_epochs:{conf.num_epochs}, batch_size:{conf.batch_size}, hidden_size:{conf.hidden_size}, num_layers:{conf.num_layers}, dropout:{conf.dropout}, learning_rate:{conf.learning_rate}  \t\t=====================')
-    print(f'val Accuracy: {val_metrics[0]}')
-    print(f'val Balanced Accuracy: {val_metrics[1]}')
-    print(f"val Cohen's Kappa: {val_metrics[2]}")
-    print(f'val Brier Score Loss: {val_metrics[3]}')
-    print(f'val F1 Score: {val_metrics[4]}')
-    
+    df_test = load_normalized_data(paths_for_models.test_path)
+    X_test = df_test.iloc[:, 3:].values
+    y_test = df_test['BLASTO NY'].values
+
+    test_metrics = evaluate_model(model, X_test, y_test)
+
+    print(f'=====LSTM RESULTS=====')
+    print(f'Test Accuracy: {test_metrics[0]}')
+    print(f'Test Balanced Accuracy: {test_metrics[1]}')
+    print(f"Test Cohen's Kappa: {test_metrics[2]}")
+    print(f'Test Brier Score Loss: {test_metrics[3]}')
+    print(f'Test F1 Score: {test_metrics[4]}')
+
+    save_confusion_matrix(test_metrics[5], "confusion_matrix_lstm.png")
+
     # Salvataggio del modello
-    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstm_classifier_model.pkl")
-    joblib.dump(model, model_save_path)
+    model_save_path = os.path.join(parent_dir, conf.test_dir, "lstm_classifier_model.pth")
+    torch.save(model, model_save_path)  # Salvataggio del modello con torch
     print(f'Modello salvato in: {model_save_path}')
 
 if __name__ == "__main__":

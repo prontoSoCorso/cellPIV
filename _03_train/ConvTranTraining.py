@@ -1,6 +1,9 @@
 import torch
 import logging
-from sklearn.metrics import precision_score, recall_score, f1_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import f1_score, accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
+
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +15,7 @@ class SupervisedTrainer:
         self.criterion = criterion
         self.optimizer = optimizer
         self.print_interval = print_interval
-        self.writer = writer  # SummaryWriter per TensorBoard
+        self.writer = writer
         self.is_training = is_training
         self.total_correct = 0
         self.total_samples = 0
@@ -82,34 +85,86 @@ class SupervisedTrainer:
                 # Collect all predictions and true targets for additional metrics
                 preds_list.extend(predicted.cpu().numpy())
                 targets_list.extend(targets.cpu().numpy())
-
-                accuracy = self.total_correct / self.total_samples
-
-            accuracy = self.total_correct / self.total_samples
-            precision = precision_score(targets_list, preds_list, average='binary')
-            recall = recall_score(targets_list, preds_list, average='binary')
-            f1 = f1_score(targets_list, preds_list, average='binary')
-
-            #Log delle metriche su TensorBoard 
-            if self.writer is not None and epoch is not None and not self.is_training:
-                self.writer.add_scalar('Accuracy/val', accuracy, epoch)
-                self.writer.add_scalar('Precision/val', precision, epoch)
-                self.writer.add_scalar('Recall/val', recall, epoch)
-                self.writer.add_scalar('F1_Score/val', f1, epoch)
-
-            # Logga la perdita e l'accuratezza di validazione su TensorBoard
-            if self.writer is not None and epoch is not None and not self.is_training:
-                self.writer.add_scalar('Loss/val', loss.item(), epoch * len(self.data_loader) + i)
-                self.writer.add_scalar('Accuracy/val', accuracy, epoch * len(self.data_loader) + i)
-
+                
+            # Calcolo delle metriche
+            accuracy = self.total_correct / self.total_samples if self.total_samples > 0 else 0
+            
         # Evito divisione per zero
         if len(all_metrics) == 0:
             return float('inf'), all_metrics  # Restituisco infinito se non ci sono metriche
 
-        return sum(all_metrics) / len(all_metrics), all_metrics
+        val_loss = sum(all_metrics) / len(all_metrics)
+        return  val_loss, accuracy
     
+
     def get_accuracy(self):
         return self.total_correct / self.total_samples if self.total_samples > 0 else 0
+
+
+    # Metodo per la valutazione finale sul test (include metriche avanzate e salvataggio della matrice di confusione)
+    def evaluate_test(self, save_conf_matrix=False, conf_matrix_filename='conf_matrix.png'):
+        self.model.eval()
+        targets_list = []
+        preds_list = []
+        probs_list = []
+
+        with torch.no_grad():
+            for i, (inputs, targets) in enumerate(self.data_loader):
+                inputs, targets = inputs.to(self.device), targets.to(self.device)
+                outputs = self.model(inputs)
+
+                # Calcolo delle predizioni
+                _, predicted = outputs.max(1)
+                probs = torch.softmax(outputs, dim=1).cpu().numpy()[:, 1]  # Probabilità per la classe positiva
+
+                # Salva predizioni e target
+                preds_list.extend(predicted.cpu().numpy())
+                targets_list.extend(targets.cpu().numpy())
+                probs_list.extend(probs)
+
+        # Calcolo delle metriche
+        accuracy = accuracy_score(targets_list, preds_list)
+        balanced_accuracy = balanced_accuracy_score(targets_list, preds_list)
+        kappa = cohen_kappa_score(targets_list, preds_list)
+        brier = brier_score_loss(targets_list, probs_list, pos_label=1)
+        f1 = f1_score(targets_list, preds_list, average='binary')
+        cm = confusion_matrix(targets_list, preds_list)
+
+        # Stampa e log delle metriche
+        logger.info(f"Accuracy: {accuracy}")
+        logger.info(f"Balanced Accuracy: {balanced_accuracy}")
+        logger.info(f"Cohen Kappa: {kappa}")
+        logger.info(f"Brier Score: {brier}")
+        logger.info(f"F1 Score: {f1}")
+        print(f"=====ConvTran Test Metrics=====\n"
+              f"Accuracy: {accuracy}\n"
+              f"Balanced Accuracy: {balanced_accuracy}\n"
+              f"Cohen Kappa: {kappa}\n"
+              f"Brier Score: {brier}\n"
+              f"F1 Score: {f1}\n")
+
+        if save_conf_matrix:
+            self.save_confusion_matrix(cm, conf_matrix_filename)
+
+        return {
+            'accuracy': accuracy,
+            'balanced_accuracy': balanced_accuracy,
+            'kappa': kappa,
+            'brier': brier,
+            'f1_score': f1,
+            'confusion_matrix': cm
+        }
+
+    # Metodo per salvare la matrice di confusione
+    @staticmethod
+    def save_confusion_matrix(cm, filename):
+        plt.figure(figsize=(6, 6))
+        sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
+        plt.xlabel("Predicted")
+        plt.ylabel("Actual")
+        plt.title("Confusion Matrix")
+        plt.savefig(filename)
+        plt.close()
 
 
 def train_runner(config, model, trainer, val_evaluator, save_path):

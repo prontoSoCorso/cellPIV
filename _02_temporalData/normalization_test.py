@@ -44,13 +44,16 @@ def normalize_group_per_patient(group, check_number_last_column_changed):
     return normalized
 
 
-def normalize_ALL(df_test):
+def normalize_ALL(df_test, min_val, max_val):
     # Separo metadati e serie temporali
     time_series_test = df_test.iloc[:, 3:]
 
     # Calcolo il minimo e massimo del train da utilizzare anche per il validation
-    min_test = time_series_test[time_series_test > 0].quantile(0.10).min()
-    max_test = time_series_test[time_series_test > 0].quantile(0.90).max()
+    print("=====VALORI DI MIN E MAX CHE USO NEL TEST=====")
+    print(f"min val = {min_val}")
+    print(f"max val = {max_val}")
+    min_test = min_val
+    max_test = max_val
 
     # Normalizzo il train
     normalized_test = (time_series_test - min_test) / (max_test - min_test)
@@ -59,7 +62,7 @@ def normalize_ALL(df_test):
     return normalized_test
 
 
-if __name__ == '__main__':
+def main(min_val, max_val):
     csv_file_path = conf.output_csv_file_path_test
     output_csvNormalized_AllTest_file_path = conf.test_NormALL_data_path
     output_csvNormalized_Test_file_path = conf.test_data_path
@@ -87,7 +90,7 @@ if __name__ == '__main__':
 
     elif conf.normalization_type == "TrainTest_ALL":
         # Normalizzazione train e validation
-        normalized_test = normalize_ALL(df_test)
+        normalized_test = normalize_ALL(df_test, min_val, max_val)
 
         # Salvo i dati normalizzati per train e validation
         train_metadata = df_test.iloc[:, :3]

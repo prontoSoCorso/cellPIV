@@ -1,9 +1,6 @@
 import os
 import sys
 import logging
-import pandas as pd
-from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
 from art import *
 
 # Import Project Modules
@@ -20,6 +17,7 @@ from _99_ConvTranModel.loss import get_loss_module
 from _99_ConvTranModel.utils import load_model
 from ConvTranTraining import SupervisedTrainer, train_runner
 from config import Config_03_train_ConvTran
+from config import paths_for_models as paths_for_models
 
 logger = logging.getLogger('__main__')
 
@@ -29,7 +27,7 @@ if __name__ == '__main__':
 
     # Load Data
     logger.info("Loading Data ...")
-    train_loader, val_loader, test_loader = load_my_data(config.data_path, config.test_path, config.val_ratio, config.batch_size)
+    train_loader, val_loader, test_loader = load_my_data(paths_for_models.data_path_train, paths_for_models.data_path_val, paths_for_models.test_path, config.val_ratio, config.batch_size)
 
     # Aggiungi numero di etichette uniche
     config.num_labels = len(set(train_loader.dataset.labels))
@@ -46,32 +44,29 @@ if __name__ == '__main__':
     optimizer = get_optimizer("RAdam")(model.parameters(), lr=config.lr)
     loss_module = get_loss_module()
 
-    # Creazione di SummaryWriter
-    tensorboard_writer = SummaryWriter(os.path.join(parent_dir, config.tensorboard_dir))
-
     # Training
     save_path = os.path.join(parent_dir, config.test_dir, 'convTran_classifier_model.pkl')
 
     trainer = SupervisedTrainer(
         model, train_loader, device, loss_module, optimizer, 
-        print_interval=config.print_interval, writer=tensorboard_writer
+        print_interval=config.print_interval
     )
     val_evaluator = SupervisedTrainer(
         model, val_loader, device, loss_module, 
-        print_interval=config.print_interval, writer=tensorboard_writer, is_training=False
+        print_interval=config.print_interval, is_training=False
     )
 
     train_runner(config=config, model=model, trainer=trainer, val_evaluator=val_evaluator, save_path=save_path)
     
-    # Dopo l'addestramento, chiudere il writer
-    tensorboard_writer.close()
-
+    # Carica il modello migliore e valuta sul test set
     best_model, optimizer, start_epoch = load_model(model, save_path, optimizer)
     best_model.to(device)
 
     best_test_evaluator = SupervisedTrainer(
-        best_model, test_loader, device, loss_module, 
-        print_interval=config.print_interval, writer=tensorboard_writer, is_training=False
-    )
-    best_aggr_metrics_test, all_metrics = best_test_evaluator.evaluate(keep_all=True)
-    logger.info(f"Best Model Test Summary: {best_aggr_metrics_test}")
+    best_model, test_loader, device, loss_module, 
+    print_interval=config.print_interval, is_training=False
+)
+
+# Esegui la valutazione e salva la matrice di confusione
+test_metrics = best_test_evaluator.evaluate_test(save_conf_matrix=True, conf_matrix_filename='confusion_matrix_ConvTran.png')
+logger.info(f"Best Model Test Metrics: {test_metrics}")

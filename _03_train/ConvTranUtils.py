@@ -7,6 +7,7 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 
+
 logging.basicConfig(format='%(asctime)s | %(levelname)s : %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -42,16 +43,18 @@ def Initialization(config):
     logger.info(f"Using device: {device}")
     return device
 
-def load_my_data(data_path, test_path, val_ratio=0.2, batch_size=16):
-    data = pd.read_csv(data_path)
-    labels = data.iloc[:, 2].values
-    series_data = data.iloc[:, 3:].values.reshape(data.shape[0], 1, -1)
+def load_my_data(train_path, val_path, test_path, val_ratio=0.2, batch_size=16):
+    data_train = pd.read_csv(train_path)
+    X_train = data_train.iloc[:, 3:].values.reshape(data_train.shape[0], 1, -1)
+    y_train = data_train.iloc[:, 2].values
+
+    data_val = pd.read_csv(val_path)
+    X_val = data_val.iloc[:, 3:].values.reshape(data_val.shape[0], 1, -1)
+    y_val = data_val.iloc[:, 2].values
 
     data_test = pd.read_csv(test_path)
-    y_test = data_test.iloc[:, 2].values
     X_test = data_test.iloc[:, 3:].values.reshape(data_test.shape[0], 1, -1)
-
-    X_train, X_val, y_train, y_val = train_test_split(series_data, labels, test_size=val_ratio, random_state=42, stratify=labels)
+    y_test = data_test.iloc[:, 2].values
 
     train_dataset = CustomDataset(X_train, y_train)
     val_dataset = CustomDataset(X_val, y_val)

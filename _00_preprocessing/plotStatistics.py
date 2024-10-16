@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import os
 
 # Dati dell'output
-samples_per_year = {'2011': 1, '2013': 321, '2014': 711, '2015': 635, '2016': 607, '2017': 620, '2018': 692, '2019': 660, '2020': 559}
-blastocysts_per_year = {'2011': 1, '2013': 160, '2014': 424, '2015': 364, '2016': 361, '2017': 348, '2018': 392, '2019': 415, '2020': 467}
+samples_per_year = {'2013': 321, '2014': 711, '2015': 635, '2016': 607, '2017': 620, '2018': 692, '2019': 660, '2020': 559}
+blastocysts_per_year = {'2013': 160, '2014': 424, '2015': 364, '2016': 361, '2017': 348, '2018': 392, '2019': 415, '2020': 467}
 non_blastocysts_per_year = {'2013': 161, '2014': 287, '2015': 271, '2016': 246, '2017': 272, '2018': 300, '2019': 245, '2020': 92}
 
 # Convertiamo i dati in dataframe per facilitare la creazione del grafico
@@ -43,7 +43,10 @@ for bar, percentage in zip(bars1, df_blastocysts_per_year['Percentage']):
     axs1[0].text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{percentage:.2f}%', ha='center', va='bottom')
 
 plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.show()
+plt.savefig("zzzzzzzfigura1", dpi=300)
+
+
+
 
 # Seconda figura: Non-Blastocysts e Testi
 fig2, axs2 = plt.subplots(2, 1, figsize=(10, 10))
@@ -82,4 +85,4 @@ axs2[1].text(0.5, 0.5, textstr, transform=axs2[1].transAxes, fontsize=14,
              verticalalignment='center', horizontalalignment='center', weight='bold')
 
 plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.show()
+plt.savefig("zzzzzzfig2", dpi=300)
