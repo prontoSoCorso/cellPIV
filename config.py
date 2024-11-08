@@ -1,22 +1,31 @@
 ''' Configuration file for the project'''
 
+import os
 import torch
 import random
 import numpy as np
 import torch
 import optuna
 
+# Rileva il percorso della cartella "cellPIV" in modo dinamico
+current_file_path = os.path.abspath(__file__)
+parent_dir = os.path.dirname(current_file_path)
+while os.path.basename(parent_dir) != "cellPIV":
+    parent_dir = os.path.dirname(parent_dir)
+
 # 0 giovanna, 1 lorenzo, 2 AWS
-sourceForPath = 2
+sourceForPath = 0
 
 class user_paths:
-    #Per computer fisso
     if sourceForPath == 0:
-        path_excels = "/home/giovanna/Documents/Data/BlastoData/"
-        path_BlastoData = path_excels
+        #Per computer fisso giovanna
+        path_excels = parent_dir 
+        path_BlastoData = "/home/giovanna/Desktop/CorsoData/blastocisti/"  #Tutto il dataset fino al 2018 incluso
+        #path_BlastoData = "/home/giovanna/Documents/Data/BlastoData/"      #Per usare solo 2013 e 2014
+        #path_BlastoData = "/home/giovanna/Documents/Data/BlastoDataProva/"  #Solo 20 video
     
     elif sourceForPath == 1:
-        #Per computer portatile
+        #Per computer portatile lorenzo
         path_excels = "C:/Users/loren/Documents/Data/BlastoData/"
         path_BlastoData = path_excels
 
@@ -25,7 +34,6 @@ class user_paths:
         path_excels = "/home/ec2-user/cellPIV/"
         path_BlastoData = "/mnt/s3bucket/blastocisti/"
     
-
 
 class utils:
     # Dim
@@ -46,25 +54,46 @@ class Config_00_preprocessing:
 
 
 class Config_01_OpticalFlow:
-    # Paths
-    project_name        = 'BlastoClass_y13-20_3days_288frames_optflow_LK'
-    method_optical_flow = "LucasKanade"
+    #method_optical_flow = "LucasKanade"
+    method_optical_flow = "Farneback"
 
-    # LK parameters
-    winSize         = 10
-    maxLevelPyramid = 3
-    maxCorners      = 300
-    qualityLevel    = 0.3
-    minDistance     = 10
-    blockSize       = 7
+    if method_optical_flow == "LucasKanade":
+        # LUCAS KANADE
+        # LK parameters
+        winSize         = 10
+        maxLevelPyramid = 3
+        maxCorners      = 300
+        qualityLevel    = 0.3
+        minDistance     = 10
+        blockSize       = 7
 
-    # Var
-    img_size                    = utils.img_size
-    save_images                 = 0
-    num_minimum_frames          = 300
-    num_initial_frames_to_cut   = 5
-    num_forward_frame           = 4   # Numero di frame per sum_mean_mag
-    
+        # Var
+        img_size                    = utils.img_size
+        save_images                 = 0
+        num_minimum_frames          = 300
+        num_initial_frames_to_cut   = 5
+        num_forward_frame           = 4   # Numero di frame per sum_mean_mag
+        
+    elif method_optical_flow == "Farneback":
+        # FARNEBACK
+        # Farneback parameters
+        pyr_scale = 0.5
+        levels = 3
+        winSize = 10
+        iterations = 4
+        poly_n = 5
+        poly_sigma = 1.2
+        flags = 0
+
+        # Var
+        img_size = utils.img_size
+        save_images = 0
+        num_minimum_frames = 580 #300 per 3 giorni, 390 per 4 giorni, 490 per 5 giorni, 580 per 6 giorni, 680 per 7 giorni
+        num_initial_frames_to_cut = 5
+        num_forward_frame = 4   # Numero di frame per sum_mean_mag
+
+    else:
+        raise SystemExit("\n===== Scegliere un metodo di flusso ottico valido nel config =====\n")
 
 
 class Config_02_temporalData:

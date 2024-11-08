@@ -15,13 +15,18 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import utils
-from config import Config_01_OpticalFlow as conf
+from config import Config_01_OpticalFlow_LK as conf
 from config import user_paths as myPaths
+from config import utils as utils
 
 class InsufficientFramesError(Exception):
     """Eccezione sollevata quando il numero di frame è insufficiente."""
     pass
+
+class InvalidImageSizeError(Exception):
+    """Eccezione sollevata quando un'immagine non ha la dimensione 500x500."""
+    pass
+
 
 def compute_optical_flowPyrLK(prev_frame, current_frame):
     # Parametri per il tracciamento dei punti di interesse
@@ -93,6 +98,8 @@ def process_frames(folder_path, output_folder):
 
     # Read the first frame
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)
+    if prev_frame.shape[:2] != target_size:
+        raise InvalidImageSizeError(f"L'immagine {frame_files[0]} non è di dimensione 500x500")
     prev_frame = cv2.resize(prev_frame, target_size)
 
     # METRICHE
@@ -111,6 +118,8 @@ def process_frames(folder_path, output_folder):
 
         # Read the current frame
         current_frame = cv2.imread(os.path.join(folder_path, frame_file), cv2.IMREAD_GRAYSCALE)
+        if current_frame.shape[:2] != target_size:
+            raise InvalidImageSizeError(f"L'immagine {frame_file} non è di dimensione 500x500")
         current_frame = cv2.resize(current_frame, target_size)
 
         # Compute optical flow

@@ -3,7 +3,7 @@ import pickle
 import cv2
 import numpy as np
 import timeit
-from myFunctions import calculate_vorticity, sort_files_by_slice_number
+from myFunctions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
 
 import sys
 # Configurazione dei percorsi e dei parametri
@@ -13,7 +13,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_01_OpticalFlow_LK as conf
+from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
 from config import utils as utils
 
@@ -25,42 +25,9 @@ class InvalidImageSizeError(Exception):
     """Eccezione sollevata quando un'immagine non ha la dimensione 500x500."""
     pass
 
-def compute_optical_flowPyrLK(prev_frame, current_frame):
-    # Parametri per il tracciamento dei punti di interesse
-    # Lucas-Kanade è l'algoritmo e nei parametri "maxLevel" si riferisce alla profondità della piramide
-    lk_params = dict(winSize=(conf.winSize, conf.winSize),
-                     maxLevel=conf.maxLevelPyramid,
-                     criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-
-    # Trovo i punti di interesse nel frame precedente
-    # goodFeaturesToTrack() trova i punti di interesse nel prev_frame. 
-    # Questi punti di interesse sono selezionati utilizzando l'algoritmo di Shi-Tomasi
-    prev_pts = cv2.goodFeaturesToTrack(prev_frame, maxCorners=conf.maxCorners, qualityLevel=conf.qualityLevel, minDistance=conf.minDistance, blockSize=conf.blockSize)
-    # maxCorners è il numero massimo di punti di interesse
-    # qualityLevel è qualità richiesta (tengo bassa)
-    # minDistance è minima distanza tra due punti di interesse (ne viene mantenuto solo uno se sono più vicini di minDistance)
-    # blockSize è dimensione block per algoritmo. 
-    # Se l'immagine contiene dettagli fini, è consigliabile utilizzare una finestra più piccola per individuare i punti chiave in aree più precise
-
-    # Calcolo il flusso ottico tra i frame
-    next_pts, status, _ = cv2.calcOpticalFlowPyrLK(prev_frame, current_frame, prev_pts, None, **lk_params)
-
-    # Filtro i punti di interesse e calcolo il flusso ottico
-    good_prev = prev_pts[status == 1]
-    good_next = next_pts[status == 1]
-    flow = good_next - good_prev
-    # calcolato il flusso ottico sottraendo le posizioni dei punti di interesse nel frame
-    # corrente dalle posizioni nel frame precedente
-
-    # Calcola la magnitudo e l'angolo del flusso ottico
-    magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1])
-
-    # Converti l'angolo in gradi
-    angle_degrees = np.rad2deg(angle) % 360
-
-    return magnitude, angle_degrees, flow, prev_pts
-
-
+class InvalidOpticalFlowMethodError(Exception):
+    """Eccezione sollevata quando il metodo scelto di flusso ottico non è LK o Farneback"""
+    SystemExit()
 
 def process_frames(folder_path, dish_well):
     target_size = (utils.img_size, utils.img_size)    # Impongo dimensione immagini
@@ -76,7 +43,7 @@ def process_frames(folder_path, dish_well):
     # Invece a 261/262 ho un mini shift di immagini (senza apparente motivo), quindi taglio ancora prima
     # Non prendo i primi n frame (5) perché spesso possono presentare dei problemi, come sfocature o traslazioni 
     # ingiustificate e potrebbero essere un motivo di confondimento per i modelli
-    frame_files = frame_files[conf.num_initial_frames_to_cut:utils.num_frames]
+    frame_files = frame_files[conf.num_initial_frames_to_cut:]
 
     # Read the first frame
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)
@@ -103,8 +70,13 @@ def process_frames(folder_path, dish_well):
             raise InvalidImageSizeError(f"L'immagine {frame_file} non è di dimensione 500x500")
         current_frame = cv2.resize(current_frame, target_size)
 
-        # Compute optical flow
-        magnitude, angle_degrees, flow, _ = compute_optical_flowPyrLK(prev_frame, current_frame)
+        if conf.method_optical_flow == "LucasKanade":
+            # Compute optical flow
+            magnitude, angle_degrees, flow, _   = compute_optical_flowPyrLK(prev_frame, current_frame)
+        elif conf.method_optical_flow == "Farneback":
+            magnitude, angle_degrees, flow      = compute_optical_flowFarneback(prev_frame, current_frame)
+        else:
+            raise InvalidOpticalFlowMethodError(f" Il metodo selezionato, {conf.method_optical_flow} non è implementato")
 
         # Calculate metrics
         mean_magnitude.append(np.mean(magnitude))
@@ -157,28 +129,31 @@ def main():
     vorticity_dict = {}
     hybrid_dict = {}
     sum_mean_mag_dict = {}
+    print(f"\n===== Metodo utilizzato per il calcolo del flusso ottico: {conf.method_optical_flow} =====\n")
 
     for class_sample in ['blasto','no_blasto']:
         path_all_folders = myPaths.path_BlastoData + class_sample
+        total_videos = len(os.listdir(path_all_folders))
         errors = []
 
-        for sample in os.listdir(path_all_folders):
+        for idx, sample in enumerate(os.listdir(path_all_folders), start=1):
             n_video += 1
             if class_sample == "blasto":
                 n_video_blasto += 1
             else:
                 n_video_no_blasto += 1
 
+            print(f"Calcolando il flusso ottico del video {idx}/{total_videos} di {'blasto' if class_sample == 'blasto' else 'no_blasto'}")
+
             try:
                 sample_path = os.path.join(path_all_folders, sample)
-
-                # Non voglio salvare le immagini delle metriche di flusso ottico per ogni paziente
                 mean_magnitude, vorticity, hybrid, sum_mean_mag = process_frames(sample_path, sample)
                 
                 mean_magnitude_dict[sample] = mean_magnitude
                 vorticity_dict[sample] = vorticity
                 hybrid_dict[sample] = hybrid
                 sum_mean_mag_dict[sample] = sum_mean_mag
+
                 if class_sample == "blasto":
                     n_video_success_blasto += 1
                 else:
@@ -209,18 +184,33 @@ def main():
     # Ottengo il percorso della cartella "_02_temporalData"
     temporal_data_directory = os.path.join(parent_dir, '_02_temporalData')
 
-    # Salvataggio della lista come file utilizzando pickle nella cartella corrente
-    with open(os.path.join(temporal_data_directory, 'mean_magnitude_dict.pkl'), 'wb') as mm:
-        pickle.dump(mean_magnitude_dict, mm)
+    if conf.method_optical_flow == "LucasKanade":
+        # Salvataggio della lista come file utilizzando pickle nella cartella corrente
+        with open(os.path.join(temporal_data_directory, 'mean_magnitude_dict_LK.pkl'), 'wb') as mm:
+            pickle.dump(mean_magnitude_dict, mm)
 
-    with open(os.path.join(temporal_data_directory, 'vorticity_dict.pkl'), 'wb') as v:
-        pickle.dump(vorticity_dict, v)
+        with open(os.path.join(temporal_data_directory, 'vorticity_dict_LK.pkl'), 'wb') as v:
+            pickle.dump(vorticity_dict, v)
 
-    with open(os.path.join(temporal_data_directory, 'hybrid_dict.pkl'), 'wb') as h:
-        pickle.dump(hybrid_dict, h)
+        with open(os.path.join(temporal_data_directory, 'hybrid_dict_LK.pkl'), 'wb') as h:
+            pickle.dump(hybrid_dict, h)
 
-    with open(os.path.join(temporal_data_directory, 'sum_mean_mag_dict.pkl'), 'wb') as smm:
-        pickle.dump(sum_mean_mag_dict, smm)
+        with open(os.path.join(temporal_data_directory, 'sum_mean_mag_dict_LK.pkl'), 'wb') as smm:
+            pickle.dump(sum_mean_mag_dict, smm)
+
+    if conf.method_optical_flow == "Farneback":
+        # Salvataggio della lista come file utilizzando pickle nella cartella corrente
+        with open(os.path.join(temporal_data_directory, 'mean_magnitude_dict_F.pkl'), 'wb') as mm:
+            pickle.dump(mean_magnitude_dict, mm)
+
+        with open(os.path.join(temporal_data_directory, 'vorticity_dict_F.pkl'), 'wb') as v:
+            pickle.dump(vorticity_dict, v)
+
+        with open(os.path.join(temporal_data_directory, 'hybrid_dict_F.pkl'), 'wb') as h:
+            pickle.dump(hybrid_dict, h)
+
+        with open(os.path.join(temporal_data_directory, 'sum_mean_mag_dict_F.pkl'), 'wb') as smm:
+            pickle.dump(sum_mean_mag_dict, smm)
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()
