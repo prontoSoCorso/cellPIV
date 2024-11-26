@@ -123,6 +123,8 @@ def main():
     n_video_error_no_blasto = 0
     n_video_success_blasto = 0
     n_video_success_no_blasto = 0
+    errors_blasto = []
+    errors_no_blasto = []
 
     # Initialize dicts to store metrics for all videos
     mean_magnitude_dict = {}
@@ -134,7 +136,6 @@ def main():
     for class_sample in ['blasto','no_blasto']:
         path_all_folders = myPaths.path_BlastoData + class_sample
         total_videos = len(os.listdir(path_all_folders))
-        errors = []
 
         for idx, sample in enumerate(os.listdir(path_all_folders), start=1):
             n_video += 1
@@ -162,17 +163,19 @@ def main():
             except Exception as e:
                 if class_sample == "blasto":
                     n_video_error_blasto += 1
+                    errors_blasto.append(sample)
                 else:
                     n_video_error_no_blasto += 1
+                    errors_no_blasto.append(sample)
                 print('-------------------')
                 print(f"Error in sample: {sample}")
                 print(e)
-                errors.append(sample)
                 print('-------------------')
                 continue
-                
-        print(f'Errors in {class_sample}:', errors)
-
+        
+        print('===================')
+        print("Terminata Elaborazione...")
+        print('===================')
 
     # Stampo quanti frame con successo e quanti errori
     print('===================')
@@ -181,36 +184,24 @@ def main():
     print(f"Sono state elaborate con successo {n_video_success_blasto} serie temporali per blasto e {n_video_success_no_blasto} per no_blasto")
     print(f"Non sono state elaborate le serie temporali di {n_video_error_blasto} video blasto e {n_video_error_no_blasto} video no_blasto")
 
+    print('===================')
+    print('===================')
+    print(f'Errors in "blasto":', errors_blasto)
+
+    print('===================')
+    print('===================')
+    print(f'Errors in "no_blasto":', errors_no_blasto)
+    
     # Ottengo il percorso della cartella "_02_temporalData"
     temporal_data_directory = os.path.join(parent_dir, '_02_temporalData')
 
-    if conf.method_optical_flow == "LucasKanade":
-        # Salvataggio della lista come file utilizzando pickle nella cartella corrente
-        with open(os.path.join(temporal_data_directory, 'mean_magnitude_dict_LK.pkl'), 'wb') as mm:
-            pickle.dump(mean_magnitude_dict, mm)
-
-        with open(os.path.join(temporal_data_directory, 'vorticity_dict_LK.pkl'), 'wb') as v:
-            pickle.dump(vorticity_dict, v)
-
-        with open(os.path.join(temporal_data_directory, 'hybrid_dict_LK.pkl'), 'wb') as h:
-            pickle.dump(hybrid_dict, h)
-
-        with open(os.path.join(temporal_data_directory, 'sum_mean_mag_dict_LK.pkl'), 'wb') as smm:
-            pickle.dump(sum_mean_mag_dict, smm)
-
-    if conf.method_optical_flow == "Farneback":
-        # Salvataggio della lista come file utilizzando pickle nella cartella corrente
-        with open(os.path.join(temporal_data_directory, 'mean_magnitude_dict_F.pkl'), 'wb') as mm:
-            pickle.dump(mean_magnitude_dict, mm)
-
-        with open(os.path.join(temporal_data_directory, 'vorticity_dict_F.pkl'), 'wb') as v:
-            pickle.dump(vorticity_dict, v)
-
-        with open(os.path.join(temporal_data_directory, 'hybrid_dict_F.pkl'), 'wb') as h:
-            pickle.dump(hybrid_dict, h)
-
-        with open(os.path.join(temporal_data_directory, 'sum_mean_mag_dict_F.pkl'), 'wb') as smm:
-            pickle.dump(sum_mean_mag_dict, smm)
+    # Salvataggio della lista come file utilizzando pickle nella cartella corrente
+    for dict_name, dict_data in zip(
+        ['mean_magnitude_dict', 'vorticity_dict', 'hybrid_dict', 'sum_mean_mag_dict'],
+        [mean_magnitude_dict, vorticity_dict, hybrid_dict, sum_mean_mag_dict]):
+        file_path = os.path.join(temporal_data_directory, f"{dict_name}_{conf.method_optical_flow}.pkl")
+        with open(file_path, 'wb') as f:
+            pickle.dump(dict_data, f)
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()
