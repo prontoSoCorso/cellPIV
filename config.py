@@ -4,7 +4,6 @@ import os
 import torch
 import random
 import numpy as np
-import torch
 import optuna
 
 # Rileva il percorso della cartella "cellPIV" in modo dinamico
@@ -13,21 +12,21 @@ parent_dir = os.path.dirname(current_file_path)
 while os.path.basename(parent_dir) != "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 
-# 0 giovanna, 1 lorenzo, 2 AWS
+# 0 newPC, 1 lorenzo, 2 AWS
 sourceForPath = 0
 
 class user_paths:
     if sourceForPath == 0:
-        #Per computer fisso giovanna
+        #Per computer fisso nuovo
         path_excels = parent_dir 
-        path_BlastoData = "/home/giovanna/Desktop/CorsoData/blastocisti/"  #Tutto il dataset fino al 2018 incluso
-        #path_BlastoData = "/home/giovanna/Documents/Data/BlastoData/"      #Per usare solo 2013 e 2014
-        #path_BlastoData = "/home/giovanna/Documents/Data/BlastoDataProva/"  #Solo 20 video
+        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti/"
+        #path_BlastoData = "/home/phd2/Scrivania/Data/BlastoData/"      #Per usare solo 2013 e 2014
+        #path_BlastoData = "/home/phd2/Scrivania/Data/BlastoDataProva/"  #Solo 20 video
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
-        path_excels = "C:/Users/loren/Documents/Data/BlastoData/"
-        path_BlastoData = path_excels
+        path_excels = parent_dir
+        path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
 
     elif sourceForPath == 2:
         #Per AWS
@@ -38,19 +37,20 @@ class user_paths:
 class utils:
     # Dim
     img_size                    = 500
-    num_frames                  = 288
+    num_frames_3Days            = 288
+    num_frames_7Days            = 672
     num_classes                 = 2
-    project_name                = "BlastoClass_y13-14_3days_288frames_optflow_LK"
+    project_name                = "BlastoClass_7days_672frames_optflow_LK"
 
     # Seed everything
     seed = 2024
 
 
 class Config_00_preprocessing:
-    path_old_excel          = user_paths.path_excels + "BlastoLabels.xlsx"
-    path_single_csv         = user_paths.path_excels + "BlastoLabels_singleFile.csv"
-    path_singleWithID_csv   = user_paths.path_excels + "BlastoLabels_singleFileWithID.csv"
-    path_double_dish_excel  = user_paths.path_excels + "pz con doppia dish.xlsx"
+    path_old_excel          = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
+    path_single_csv         = os.path.join(user_paths.path_excels, "BlastoLabels_singleFile.csv")
+    path_singleWithID_csv   = os.path.join(user_paths.path_excels, "BlastoLabels_singleFileWithID.csv")
+    path_double_dish_excel  = os.path.join(user_paths.path_excels, "pz con doppia dish.xlsx")
 
 
 class Config_01_OpticalFlow:

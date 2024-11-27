@@ -76,7 +76,7 @@ def process_frames(folder_path, dish_well):
     # Invece a 261/262 ho un mini shift di immagini (senza apparente motivo), quindi taglio ancora prima
     # Non prendo i primi n frame (5) perché spesso possono presentare dei problemi, come sfocature o traslazioni 
     # ingiustificate e potrebbero essere un motivo di confondimento per i modelli
-    frame_files = frame_files[conf.num_initial_frames_to_cut:utils.num_frames]
+    frame_files = frame_files[conf.num_initial_frames_to_cut:utils.num_frames_3Days]
 
     # Read the first frame
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)

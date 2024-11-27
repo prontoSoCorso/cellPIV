@@ -50,7 +50,7 @@ def process_frames(folder_path, dish_well):
     frame_files = sort_files_by_slice_number(os.listdir(folder_path))
 
     # Controllo se il numero di frame è sufficiente
-    if len(frame_files) < 300:
+    if len(frame_files) < conf.num_minimum_frames:
         raise InsufficientFramesError(f"Il numero di frame nel file {dish_well} è minore di {conf.num_minimum_frames}: {len(frame_files)}")
 
     # Intorno al frame 290 ho sempre picco dovuto al cambio terreno (giorno 3 se frame ogni 15 min)
@@ -245,7 +245,7 @@ def main():
     print(f"Errori: {n_video_error_blasto} blasto e {n_video_error_no_blasto} no_blasto")
 
     # Ottengo il percorso della cartella "_02_temporalData"
-    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData')
+    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData', 'files')
 
     # Salvataggio della lista come file utilizzando pickle nella cartella corrente
     for dict_name, dict_data in zip(
