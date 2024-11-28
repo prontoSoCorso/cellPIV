@@ -61,7 +61,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_02_temporalData as conf
+from config import Config_02b_normalization as conf
 from _02_temporalData import normalization_test
 
 def load_pickled_files(directory):

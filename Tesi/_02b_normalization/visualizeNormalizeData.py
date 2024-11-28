@@ -11,7 +11,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_02_temporalData as conf
+from config import Config_02b_normalization as conf
 
 df_original = pd.read_csv(conf.output_csv_file_path)
 df_norm = pd.read_csv(conf.output_csvNormalized_file_path)
