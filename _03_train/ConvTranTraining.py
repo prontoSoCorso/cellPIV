@@ -1,11 +1,8 @@
 import torch
-import logging
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import f1_score, accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
 
-
-logger = logging.getLogger(__name__)
 
 class SupervisedTrainer:
     def __init__(self, model, data_loader, device, criterion, optimizer=None, print_interval=100, writer=None, is_training=True):
@@ -102,7 +99,7 @@ class SupervisedTrainer:
 
 
     # Metodo per la valutazione finale sul test (include metriche avanzate e salvataggio della matrice di confusione)
-    def evaluate_test(self, save_conf_matrix=False, conf_matrix_filename='conf_matrix.png'):
+    def evaluate_test(self, save_conf_matrix=False, conf_matrix_filename='conf_matrix_ConvTran.png'):
         self.model.eval()
         targets_list = []
         preds_list = []
@@ -122,7 +119,7 @@ class SupervisedTrainer:
                 targets_list.extend(targets.cpu().numpy())
                 probs_list.extend(probs)
 
-        # Calcolo delle metriche
+        # Calcolo metriche
         accuracy = accuracy_score(targets_list, preds_list)
         balanced_accuracy = balanced_accuracy_score(targets_list, preds_list)
         kappa = cohen_kappa_score(targets_list, preds_list)
@@ -130,12 +127,7 @@ class SupervisedTrainer:
         f1 = f1_score(targets_list, preds_list, average='binary')
         cm = confusion_matrix(targets_list, preds_list)
 
-        # Stampa e log delle metriche
-        logger.info(f"Accuracy: {accuracy}")
-        logger.info(f"Balanced Accuracy: {balanced_accuracy}")
-        logger.info(f"Cohen Kappa: {kappa}")
-        logger.info(f"Brier Score: {brier}")
-        logger.info(f"F1 Score: {f1}")
+        # Stampa metriche
         print(f"=====ConvTran Test Metrics=====\n"
               f"Accuracy: {accuracy}\n"
               f"Balanced Accuracy: {balanced_accuracy}\n"
@@ -174,14 +166,14 @@ def train_runner(config, model, trainer, val_evaluator, save_path):
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(trainer.optimizer, mode='min', factor=config.scheduler_factor, patience=config.scheduler_patience)
 
     for epoch in range(config.epochs):  # Config non è dizionario, uso notazione a punto per accedere agli attributi
-        logger.info(f'Epoch {epoch+1}/{config.epochs}')
+        print(f'Epoch {epoch+1}/{config.epochs}')
         trainer.train_epoch(epoch)
 
         if epoch % config.val_interval == 0:
             val_loss, _ = val_evaluator.evaluate(epoch, keep_all = True)
-            logger.info(f'Validation Loss: {val_loss}')
+            print(f'Validation Loss: {val_loss}')
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 torch.save(model.state_dict(), save_path)
-                logger.info(f'Saved best model at epoch {epoch+1}')
+                print(f'Saved best model at epoch {epoch+1}')

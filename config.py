@@ -111,11 +111,20 @@ class Config_02b_normalization:
     # Data
     temporalDataType            = Config_02_temporalData.dict
 
+    # Boolean per gestire dati a 3 o a 7 giorni
+    Only3Days = True
+
     #Paths
-    csv_file_path                   = Config_02_temporalData.output_final_csv_path
-    output_normalized_train_path    = os.path.join(user_paths.path_excels, f"Normalized_train_{temporalDataType}.csv")
-    output_normalized_val_path      = os.path.join(user_paths.path_excels, f"Normalized_val_{temporalDataType}.csv")
-    output_normalized_test_path     = os.path.join(user_paths.path_excels, f"Normalized_test_{temporalDataType}.csv")
+    csv_file_path            = Config_02_temporalData.output_final_csv_path
+    normalized_train_path    = os.path.join(user_paths.path_excels, f"Normalized_train_{temporalDataType}.csv")
+    normalized_val_path      = os.path.join(user_paths.path_excels, f"Normalized_val_{temporalDataType}.csv")
+    normalized_test_path     = os.path.join(user_paths.path_excels, f"Normalized_test_{temporalDataType}.csv")
+
+    #Paths 3 Days
+    csv_file_path               = Config_02_temporalData.output_final_csv_path
+    normalized_train_path_3Days = os.path.join(user_paths.path_excels, f"Normalized_train_3Days_{temporalDataType}.csv")
+    normalized_val_path_3Days   = os.path.join(user_paths.path_excels, f"Normalized_val_3Days_{temporalDataType}.csv")
+    normalized_test_path_3Days  = os.path.join(user_paths.path_excels, f"Normalized_test_3Days_{temporalDataType}.csv")
 
     # Vars
     n_last_colums_check_max = 8
@@ -132,100 +141,14 @@ class Config_02b_normalization:
 
 
 
-
-
-
-
-
-
-
-
-
-
-class Config_03_LSTM:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
-    project_name = utils.project_name
-    data_path    = Config_02b_normalization.output_csvNormalized_file_path
-    test_path    = Config_02b_normalization.test_data_path
-
-    test_dir     = "_04_test"
-    
-    num_classes = utils.num_classes
-    train_size  = 0.8
-    val_size    = 0.2
-
-    # Seed
-    seed = utils.seed
-    def seed_everything(seed):
-        random.seed(seed)
-        np.random.seed(seed)
-        torch.manual_seed(seed)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed(seed)
-            torch.cuda.manual_seed_all(seed)
-
-    # Parametri LSTM
-    num_epochs      = 100
-    batch_size      = 16
-    learning_rate   = 1e-4
-    hidden_size     = 128
-    num_layers      = 3
-    dropout         = 0.25
-    bidirectional   = False
-
-
-
-class Config_03_LSTM_WithOptuna:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
-    project_name = utils.project_name
-    data_path    = Config_02b_normalization.output_csvNormalized_file_path
-    test_path    = Config_02b_normalization.test_data_path
-
-    test_dir     = "_04_test"
-    
-    num_classes = utils.num_classes
-    train_size  = 0.8
-    val_size    = 0.2
-
-    # Seed
-    seed = utils.seed
-    def seed_everything(seed):
-        random.seed(seed)
-        np.random.seed(seed)
-        torch.manual_seed(seed)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed(seed)
-            torch.cuda.manual_seed_all(seed)
-
-    # Parametri LSTM
-    num_epochs          = [200,300,400]
-    batch_size          = [8,16,32,64]  # Numero di sequenze prese
-    dropout             = np.arange(0.1, 0.4, 0.05)
-    hidden_size         = [32, 64, 128]
-    num_layers          = [2,3,4]
-    learning_rate       = [random.uniform(1e-4, 1e-3) for _ in range(10)]
-
-    sampler             = optuna.samplers.TPESampler(seed=seed)
-    n_startup_trials    = 20
-    pruner              = optuna.pruners.MedianPruner(n_startup_trials=n_startup_trials)
-    
-
-class Config_03_train_rocket:
+class Config_03_train:
     project_name    = utils.project_name
-    data_path       = Config_02b_normalization.output_csvNormalized_file_path
-    test_path       = Config_02b_normalization.test_data_path
-
-    test_dir     = "_04_test"
-
-    kernels     = [100,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
-    val_size   = 0.25
-    img_size    = utils.img_size
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     num_classes = utils.num_classes
-
-    # Seed
+    img_size    = utils.img_size
     seed = utils.seed
+    test_dir    = "_04_test"
     def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
@@ -233,5 +156,64 @@ class Config_03_train_rocket:
         if torch.cuda.is_available():
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
+
+    Only3Days = False
+    if Only3Days:
+        train_path      = Config_02b_normalization.normalized_train_path_3Days
+        val_path        = Config_02b_normalization.normalized_val_path_3Days
+        test_path       = Config_02b_normalization.normalized_test_path_3Days
+    else:
+        train_path      = Config_02b_normalization.normalized_train_path
+        val_path        = Config_02b_normalization.normalized_val_path
+        test_path       = Config_02b_normalization.normalized_test_path
+
+    
+    # ROCKET
+    kernels     = [100,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+
+
+    # LSTM-FCN
+    num_epochs_FCN      = 1000
+    batch_size_FCN      = 16                     # numero di sequenze prese (con 16 arrivo a 84%)
+    dropout_FCN         = 0.3
+    kernel_sizes_FCN    = (8,5,3) #def: 8,5,3
+    filter_sizes_FCN    = (128,256,128)
+    lstm_size_FCN       = 4                      # Numero di layer LSTM (con 4 arrivo a 84%)
+    attention_FCN       = False
+    verbose_FCN         = 2
+    learning_rate_FCN   = 1e-4
+    hidden_size_FCN     = 128
+    bidirectionale_FCN  = False
+    num_layers_FCN      = 4
+    final_epochs_FCN    = 500
+
+
+    # ConvTran
+    # ConvTran - Input & Output                                  
+    output_dir = user_paths.path_excels
+    Norm = False        # Data Normalization
+    val_ratio = 0.2     # Propotion of train-set to be used as validation
+    print_interval = 25 # Print batch info every this many batches
+    # ConvTran - Transformers Parameters
+    Net_Type = 'C-T'    # choices={'T', 'C-T'}, help="Network Architecture. Convolution (C)", "Transformers (T)") (def = C-T)
+    emb_size = 128       # Internal dimension of transformer embeddings (def = 16)
+    dim_ff = emb_size*2       # Dimension of dense feedforward part of transformer layer (def = 256)
+    num_heads = 8       # Number of multi-headed attention heads (def = 8)
+    Fix_pos_encode = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
+    Rel_pos_encode = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
+    # ConvTran - Training Parameters/Hyper-Parameters
+    epochs = 100        # Number of training epochs
+    batch_size = 16     # Training batch size
+    lr = 1e-3           # Learning rate
+    dropout = 0.2       # Dropout regularization ratio
+    val_interval = 2    # Evaluate on validation every XX epochs
+    key_metric = 'accuracy' # choices={'loss', 'accuracy', 'precision'}, help='Metric used for defining best epoch'
+    num_classes = utils.num_classes
+    # ConvTran - Add Learning Rate Scheduler
+    scheduler_patience = 5    # Number of epochs with no improvement after which learning rate will be reduced
+    scheduler_factor = 0.5    # Factor by which the learning rate will be reduced
+    # ConvTran - System
+    gpu = -1             # GPU index, -1 for CPU
+    console = False     # Optimize printout for console output; otherwise for file
 
 

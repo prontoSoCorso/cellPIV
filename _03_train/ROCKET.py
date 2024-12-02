@@ -15,8 +15,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_03_train_rocket_normALL as conf
-from config import paths_for_models as paths_for_models
+from config import Config_03_train as conf
 
 # Funzione per caricare i dati normalizzati da CSV
 def load_normalized_data(csv_file_path):
@@ -56,14 +55,18 @@ def main():
     best_model_path = None
 
     # Carico i dati normalizzati
-    df_train = load_normalized_data(paths_for_models.data_path_train)
-    df_val = load_normalized_data(paths_for_models.data_path_val)
+    df_train = load_normalized_data(conf.train_path)
+    df_val = load_normalized_data(conf.val_path)
+    df_test = load_normalized_data(conf.test_path)
 
     X_train = df_train.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y_train = df_train['BLASTO NY'].values  # Colonna target
 
     X_val = df_val.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y_val = df_val['BLASTO NY'].values  # Colonna target
+
+    X_test = df_test.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
+    y_test = df_test['BLASTO NY'].values  # Colonna target
 
     for kernel in conf.kernels:
         conf.kernels = kernel
@@ -76,10 +79,10 @@ def main():
 
         # Valutazione del modello su train e test set
         train_metrics = evaluate_model(model, X_train, y_train)
-        test_metrics = evaluate_model(model, X_val, y_val)
-
+        val_metrics = evaluate_model(model, X_val, y_val)
+        
         # Salva l'accuratezza del test nel dizionario
-        accuracy_dict[kernel] = test_metrics[0]
+        accuracy_dict[kernel] = val_metrics[0]
 
         # Stampa dei risultati per il train set
         print(f'=====RESULTS WITH {kernel} KERNELS=====')
@@ -90,11 +93,11 @@ def main():
         print(f'Train F1 Score with {kernel} kernels: {train_metrics[4]}')
 
         # Stampa dei risultati per il test set
-        print(f'Test Accuracy with {kernel} kernels: {test_metrics[0]}')
-        print(f'Test Balanced Accuracy with {kernel} kernels: {test_metrics[1]}')
-        print(f"Test Cohen's Kappa with {kernel} kernels: {test_metrics[2]}")
-        print(f'Test Brier Score Loss with {kernel} kernels: {test_metrics[3]}')
-        print(f'Test F1 Score with {kernel} kernels: {test_metrics[4]}')
+        print(f'Val Accuracy with {kernel} kernels: {val_metrics[0]}')
+        print(f'Val Balanced Accuracy with {kernel} kernels: {val_metrics[1]}')
+        print(f"Val Cohen's Kappa with {kernel} kernels: {val_metrics[2]}")
+        print(f'Val Brier Score Loss with {kernel} kernels: {val_metrics[3]}')
+        print(f'Val F1 Score with {kernel} kernels: {val_metrics[4]}')
 
         # Aggiorna il modello migliore se l'accuratezza sul test è la migliore trovata finora
         if accuracy_dict[kernel] > best_accuracy:
@@ -108,10 +111,6 @@ def main():
     print(f"Il modello migliore è con {best_kernel} kernel, con un'accuratezza del {best_accuracy:.4f}")
 
     # Rialleno il modello su tutti i dati con il numero di kernel migliore che ho trovato e lo salvo
-    # Carica i dati normalizzati
-    df_train = load_normalized_data(conf.data_path_train)
-    df_val = load_normalized_data(conf.data_path_val)
-
     # Combina i due DataFrame in un unico DataFrame
     df = pd.concat([df_train, df_val], ignore_index=True)
     
@@ -120,6 +119,16 @@ def main():
 
     model = RocketClassifier(num_kernels=best_kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)
     model = train_model(model, X, y)
+
+    # Valutazione finale sul test set
+    final_test_metrics = evaluate_model(model, X_test, y_test)
+    print("\n=====FINAL TEST RESULTS=====")
+    print(f"Test Accuracy: {final_test_metrics[0]:.4f}")
+    print(f"Test Balanced Accuracy: {final_test_metrics[1]:.4f}")
+    print(f"Test Cohen's Kappa: {final_test_metrics[2]:.4f}")
+    print(f"Test Brier Score Loss: {final_test_metrics[3]:.4f}")
+    print(f"Test F1 Score: {final_test_metrics[4]:.4f}")
+
     best_model_path = os.path.join(parent_dir, conf.test_dir, f"rocket_classifier_model_{best_kernel}_kernels.pkl")
     joblib.dump(model, best_model_path)
     print(f'Modello salvato in: {best_model_path}')

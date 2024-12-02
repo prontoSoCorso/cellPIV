@@ -411,6 +411,13 @@ class Config_03_train_hivecote:
     
 
 class Config_03_train_ConvTran:
+    #Paths
+    temporalDataType         = Config_02_temporalData.dict
+    csv_file_path            = Config_02_temporalData.output_final_csv_path
+    normalized_train_path    = os.path.join(user_paths.path_excels, f"Normalized_train_{temporalDataType}.csv")
+    normalized_val_path      = os.path.join(user_paths.path_excels, f"Normalized_val_{temporalDataType}.csv")
+    normalized_test_path     = os.path.join(user_paths.path_excels, f"Normalized_test_{temporalDataType}.csv")
+
     # Input & Output
     test_dir     = "_04_test"                                               
     output_dir = user_paths.path_excels
