@@ -78,43 +78,6 @@ def main_ROCKET():
     save_confusion_matrix(test_metrics[5], f"confusion_matrix_rocket_{conf.kernel}_kernels.png")
 
 
-def main_LSTM():
-    df = load_test_data(conf.test_path)
-    X = df.iloc[:, 3:].values
-    y = df['BLASTO NY'].values
-
-    best_model_path = os.path.join(parent_dir, paths_for_models.test_dir, "lstm_classifier_model1.pth")
-    best_model = torch.load(best_model_path)
-    test_metrics = evaluate_model(best_model, X, y)
-
-    print(f'=====LSTM RESULTS=====')
-    print(f'Test Accuracy: {test_metrics[0]}')
-    print(f'Test Balanced Accuracy: {test_metrics[1]}')
-    print(f"Test Cohen's Kappa: {test_metrics[2]}")
-    print(f'Test Brier Score Loss: {test_metrics[3]}')
-    print(f'Test F1 Score: {test_metrics[4]}')
-
-    save_confusion_matrix(test_metrics[5], "confusion_matrix_lstm.png")
-
-
-def main_HIVECOTE2():
-    df = load_test_data(conf.test_path)
-    X = df.iloc[:, 3:].values
-    y = df['BLASTO NY'].values
-
-    best_model_path = os.path.join(parent_dir, conf.test_dir, "hivecote2_model_best.pkl")
-    best_model = joblib.load(best_model_path)
-    test_metrics = evaluate_model(best_model, X, y)
-
-    print(f'=====HIVECOTE2 RESULTS=====')
-    print(f'Test Accuracy: {test_metrics[0]}')
-    print(f'Test Balanced Accuracy: {test_metrics[1]}')
-    print(f"Test Cohen's Kappa: {test_metrics[2]}")
-    print(f'Test Brier Score Loss: {test_metrics[3]}')
-    print(f'Test F1 Score: {test_metrics[4]}')
-
-    save_confusion_matrix(test_metrics[5], "confusion_matrix_hivecote2.png")
-
 
 def main_ConvTran():
     df = load_test_data(conf.test_path)
@@ -136,19 +99,17 @@ def main_ConvTran():
 
 # Funzione principale con switch
 def main():
-    #model_name = input("Scegli il modello da valutare (ROCKET, LSTM, LSTMFCN, HIVECOTE2, ConvTran): ").upper()
+    #model_name = input("Scegli il modello da valutare (ROCKET, LSTMFCN, ConvTran): ").upper()
     model_name = "ROCKET"
 
     if model_name == "ROCKET":
         main_ROCKET()
     elif model_name == "LSTM":
         main_LSTM()
-    elif model_name == "HIVECOTE2":
-        main_HIVECOTE2()
     elif model_name == "ConvTran":
         main_ConvTran()
     else:
-        print("Modello non valido. Scegli tra: ROCKET, LSTM, LSTMFCN, HIVECOTE2, ConvTran.")
+        print("Modello non valido. Scegli tra: ROCKET, LSTMFCN, ConvTran.")
         main()
 
 

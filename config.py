@@ -103,7 +103,7 @@ class Config_02_temporalData:
     dictAndOptFlowType          = dict + "_" + OptFlow + ".csv"
     temporal_csv_path           = os.path.join(parent_dir, '_02_temporalData', 'final_series', dictAndOptFlowType)
     csv_file_Danilo_path        = Config_00_preprocessing.path_singleWithID_csv
-    output_final_csv_path       = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
+    final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
 
 
 
@@ -115,13 +115,13 @@ class Config_02b_normalization:
     Only3Days = True
 
     #Paths
-    csv_file_path            = Config_02_temporalData.output_final_csv_path
+    csv_file_path            = Config_02_temporalData.final_csv_path
     normalized_train_path    = os.path.join(user_paths.path_excels, f"Normalized_train_{temporalDataType}.csv")
     normalized_val_path      = os.path.join(user_paths.path_excels, f"Normalized_val_{temporalDataType}.csv")
     normalized_test_path     = os.path.join(user_paths.path_excels, f"Normalized_test_{temporalDataType}.csv")
 
     #Paths 3 Days
-    csv_file_path               = Config_02_temporalData.output_final_csv_path
+    csv_file_path               = Config_02_temporalData.final_csv_path
     normalized_train_path_3Days = os.path.join(user_paths.path_excels, f"Normalized_train_3Days_{temporalDataType}.csv")
     normalized_val_path_3Days   = os.path.join(user_paths.path_excels, f"Normalized_val_3Days_{temporalDataType}.csv")
     normalized_test_path_3Days  = os.path.join(user_paths.path_excels, f"Normalized_test_3Days_{temporalDataType}.csv")
@@ -169,7 +169,7 @@ class Config_03_train:
 
     
     # ROCKET
-    kernels     = [100,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [100,300,500,1000,2500] #provato con [50,100,200,300,500,1000,5000,10000,20000]
 
 
     # LSTM-FCN

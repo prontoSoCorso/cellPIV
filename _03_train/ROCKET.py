@@ -129,7 +129,7 @@ def main():
     print(f"Test Brier Score Loss: {final_test_metrics[3]:.4f}")
     print(f"Test F1 Score: {final_test_metrics[4]:.4f}")
 
-    best_model_path = os.path.join(parent_dir, conf.test_dir, f"rocket_classifier_model_{best_kernel}_kernels.pkl")
+    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_rocket_model.pkl")
     joblib.dump(model, best_model_path)
     print(f'Modello salvato in: {best_model_path}')
     

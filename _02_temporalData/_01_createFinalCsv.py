@@ -17,7 +17,7 @@ from config import Config_02_temporalData as conf
 # Percorsi dei file
 temporal_data_path = conf.temporal_csv_path
 labels_data_path = conf.csv_file_Danilo_path
-output_path = conf.output_final_csv_path
+output_path = conf.final_csv_path
 
 # Leggi i file CSV
 temporal_data = pd.read_csv(temporal_data_path)

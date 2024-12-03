@@ -191,7 +191,7 @@ def main():
     model.load_state_dict(torch.load(best_model_path, weights_only=True))
 
     # Riallenamento su train + validation
-    combined_data = torch.utils.data.ConcatDataset([train_data, val_data])
+    combined_data = torch.utils.data.ConcatDataset([train_data])
     combined_loader = DataLoader(combined_data, batch_size=conf.batch_size_FCN, shuffle=True)
 
     for epoch in range(num_epochs_final_train):
@@ -203,6 +203,10 @@ def main():
             loss = criterion(outputs, y)
             loss.backward()
             optimizer.step()
+
+    # Salva il modello dopo il riallenamento
+    torch.save(model.state_dict(), best_model_path)
+    print(f"Final model saved at: {best_model_path}")
 
     # Test finale
     test_loss, test_accuracy, test_balanced_accuracy, test_kappa, test_brier, test_f1, test_cm = evaluate_model(model, test_loader, criterion)
