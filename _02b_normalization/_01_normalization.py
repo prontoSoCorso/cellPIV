@@ -20,6 +20,9 @@ from config import utils
 def load_data():
     data = pd.read_csv(conf.csv_file_path)
 
+    if conf.Only5Days:
+        data = data.iloc[:,:utils.num_frames_5Days]
+
     if conf.Only3Days:
         data = data.iloc[:,:utils.num_frames_3Days]
 
@@ -104,15 +107,25 @@ def save_data(train_data, val_data, test_data):
         print(f"Validation salvato in: {conf.normalized_val_path_3Days}")
         print(f"Test salvato in: {conf.normalized_test_path_3Days}")
 
+    elif conf.Only5Days:
+        train_data.to_csv(conf.normalized_train_path_5Days, index=False)
+        val_data.to_csv(conf.normalized_val_path_5Days, index=False)
+        test_data.to_csv(conf.normalized_test_path_5Days, index=False)
+        print("Dati salvati con successo nei file CSV a 5 giorni normalizzati.")
+        print("=======================================================")
+        print(f"Train salvato in: {conf.normalized_train_path_5Days}")
+        print(f"Validation salvato in: {conf.normalized_val_path_5Days}")
+        print(f"Test salvato in: {conf.normalized_test_path_5Days}")
+    
     else:
-        train_data.to_csv(conf.normalized_train_path, index=False)
-        val_data.to_csv(conf.normalized_val_path, index=False)
-        test_data.to_csv(conf.normalized_test_path, index=False)
+        train_data.to_csv(conf.normalized_train_path_7Days, index=False)
+        val_data.to_csv(conf.normalized_val_path_7Days, index=False)
+        test_data.to_csv(conf.normalized_test_path_7Days, index=False)
         print("Dati salvati con successo nei file CSV a 7 giorni normalizzati.")
         print("=======================================================")
-        print(f"Train salvato in: {conf.normalized_train_path}")
-        print(f"Validation salvato in: {conf.normalized_val_path}")
-        print(f"Test salvato in: {conf.normalized_test_path}")
+        print(f"Train salvato in: {conf.normalized_train_path_7Days}")
+        print(f"Validation salvato in: {conf.normalized_val_path_7Days}")
+        print(f"Test salvato in: {conf.normalized_test_path_7Days}")
 
 
 def main():

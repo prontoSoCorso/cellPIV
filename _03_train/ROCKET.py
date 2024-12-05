@@ -3,10 +3,10 @@ import os
 import pandas as pd
 from sktime.classification.kernel_based import RocketClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix, f1_score
-import joblib  # Per il salvataggio del modello
 import timeit
 import seaborn as sns
 import matplotlib.pyplot as plt
+import torch
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
@@ -18,7 +18,7 @@ sys.path.append(parent_dir)
 from config import Config_03_train as conf
 
 # Funzione per caricare i dati normalizzati da CSV
-def load_normalized_data(csv_file_path):
+def load_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
 # Funzione per addestrare il modello
@@ -54,10 +54,16 @@ def main():
     best_kernel = None
     best_model_path = None
 
+    # Specifica il numero di giorni desiderati
+    selected_days = "5Days"
+
+    # Ottieni i percorsi dal config
+    train_path, val_path, test_path = conf.get_paths(selected_days)
+
     # Carico i dati normalizzati
-    df_train = load_normalized_data(conf.train_path)
-    df_val = load_normalized_data(conf.val_path)
-    df_test = load_normalized_data(conf.test_path)
+    df_train = load_data(train_path)
+    df_val = load_data(val_path)
+    df_test = load_data(test_path)
 
     X_train = df_train.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y_train = df_train['BLASTO NY'].values  # Colonna target
@@ -129,8 +135,8 @@ def main():
     print(f"Test Brier Score Loss: {final_test_metrics[3]:.4f}")
     print(f"Test F1 Score: {final_test_metrics[4]:.4f}")
 
-    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_rocket_model.pkl")
-    joblib.dump(model, best_model_path)
+    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_rocket_model_{selected_days}.pth")
+    torch.save(model, best_model_path)
     print(f'Modello salvato in: {best_model_path}')
     
 

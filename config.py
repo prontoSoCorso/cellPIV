@@ -8,9 +8,9 @@ import optuna
 
 # Rileva il percorso della cartella "cellPIV" in modo dinamico
 current_file_path = os.path.abspath(__file__)
-parent_dir = os.path.dirname(current_file_path)
-while os.path.basename(parent_dir) != "cellPIV":
-    parent_dir = os.path.dirname(parent_dir)
+PROJECT_ROOT = os.path.dirname(current_file_path)
+while os.path.basename(PROJECT_ROOT) != "cellPIV":
+    PROJECT_ROOT = os.path.dirname(PROJECT_ROOT)
 
 # 0 newPC, 1 lorenzo, 2 AWS
 sourceForPath = 0
@@ -18,14 +18,14 @@ sourceForPath = 0
 class user_paths:
     if sourceForPath == 0:
         #Per computer fisso nuovo
-        path_excels = parent_dir 
+        path_excels = PROJECT_ROOT 
         path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti/"
         #path_BlastoData = "/home/phd2/Scrivania/Data/BlastoData/"      #Per usare solo 2013 e 2014
         #path_BlastoData = "/home/phd2/Scrivania/Data/BlastoDataProva/"  #Solo 20 video
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
-        path_excels = parent_dir
+        path_excels = PROJECT_ROOT
         path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
 
     elif sourceForPath == 2:
@@ -37,8 +37,10 @@ class user_paths:
 class utils:
     # Dim
     img_size                    = 500
-    num_frames_3Days            = 288
-    num_frames_7Days            = 672
+    framePerDay                 = 96
+    num_frames_3Days            = framePerDay * 3
+    num_frames_5Days            = framePerDay * 5
+    num_frames_7Days            = framePerDay * 7
     num_classes                 = 2
     project_name                = "BlastoClass_7days_672frames_optflow_LK"
 
@@ -101,7 +103,7 @@ class Config_02_temporalData:
     dict                        = "sum_mean_mag"
     OptFlow                     = Config_01_OpticalFlow.method_optical_flow
     dictAndOptFlowType          = dict + "_" + OptFlow + ".csv"
-    temporal_csv_path           = os.path.join(parent_dir, '_02_temporalData', 'final_series', dictAndOptFlowType)
+    temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series', dictAndOptFlowType)
     csv_file_Danilo_path        = Config_00_preprocessing.path_singleWithID_csv
     final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
 
@@ -111,14 +113,9 @@ class Config_02b_normalization:
     # Data
     temporalDataType            = Config_02_temporalData.dict
 
-    # Boolean per gestire dati a 3 o a 7 giorni
-    Only3Days = True
-
-    #Paths
-    csv_file_path            = Config_02_temporalData.final_csv_path
-    normalized_train_path    = os.path.join(user_paths.path_excels, f"Normalized_train_{temporalDataType}.csv")
-    normalized_val_path      = os.path.join(user_paths.path_excels, f"Normalized_val_{temporalDataType}.csv")
-    normalized_test_path     = os.path.join(user_paths.path_excels, f"Normalized_test_{temporalDataType}.csv")
+    # Per gestire dati a 3, 5 o 7 giorni
+    Only3Days = 0
+    Only5Days = 0
 
     #Paths 3 Days
     csv_file_path               = Config_02_temporalData.final_csv_path
@@ -126,8 +123,17 @@ class Config_02b_normalization:
     normalized_val_path_3Days   = os.path.join(user_paths.path_excels, f"Normalized_val_3Days_{temporalDataType}.csv")
     normalized_test_path_3Days  = os.path.join(user_paths.path_excels, f"Normalized_test_3Days_{temporalDataType}.csv")
 
-    # Vars
-    n_last_colums_check_max = 8
+    #Paths 5 Days
+    csv_file_path               = Config_02_temporalData.final_csv_path
+    normalized_train_path_5Days = os.path.join(user_paths.path_excels, f"Normalized_train_5Days_{temporalDataType}.csv")
+    normalized_val_path_5Days   = os.path.join(user_paths.path_excels, f"Normalized_val_5Days_{temporalDataType}.csv")
+    normalized_test_path_5Days  = os.path.join(user_paths.path_excels, f"Normalized_test_5Days_{temporalDataType}.csv")
+
+    #Paths 7 Days
+    csv_file_path               = Config_02_temporalData.final_csv_path
+    normalized_train_path_7Days = os.path.join(user_paths.path_excels, f"Normalized_train_7Days_{temporalDataType}.csv")
+    normalized_val_path_7Days   = os.path.join(user_paths.path_excels, f"Normalized_val_7Days_{temporalDataType}.csv")
+    normalized_test_path_7Days  = os.path.join(user_paths.path_excels, f"Normalized_test_7Days_{temporalDataType}.csv")
 
     # Seed
     seed = utils.seed
@@ -157,17 +163,36 @@ class Config_03_train:
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
 
-    Only3Days = False
-    if Only3Days:
-        train_path      = Config_02b_normalization.normalized_train_path_3Days
-        val_path        = Config_02b_normalization.normalized_val_path_3Days
-        test_path       = Config_02b_normalization.normalized_test_path_3Days
-    else:
-        train_path      = Config_02b_normalization.normalized_train_path
-        val_path        = Config_02b_normalization.normalized_val_path
-        test_path       = Config_02b_normalization.normalized_test_path
+    # Dizionari per gestire percorsi in modo dinamico
+    frame_options = {
+        "3Days": {
+            "train_path": Config_02b_normalization.normalized_train_path_3Days,
+            "val_path"  : Config_02b_normalization.normalized_val_path_3Days,
+            "test_path" : Config_02b_normalization.normalized_test_path_3Days,
+        },
+        "5Days": {
+            "train_path": Config_02b_normalization.normalized_train_path_5Days,
+            "val_path"  : Config_02b_normalization.normalized_val_path_5Days,
+            "test_path" : Config_02b_normalization.normalized_test_path_5Days,
+        },
+        "7Days": {
+            "train_path": Config_02b_normalization.normalized_train_path_7Days,
+            "val_path"  : Config_02b_normalization.normalized_val_path_7Days,
+            "test_path" : Config_02b_normalization.normalized_test_path_7Days,
+        }
+    }
 
+    # Metodo per ottenere i percorsi in base ai giorni selezionati
+    @classmethod
+    def get_paths(cls, selected_days="5Days"):
+        if selected_days in cls.frame_options:
+            paths = cls.frame_options[selected_days]
+            return paths["train_path"], paths["val_path"], paths["test_path"]
+        else:
+            raise ValueError(f"Opzione non valida per il numero di giorni: {selected_days}")
     
+
+
     # ROCKET
     kernels     = [100,300,500,1000,2500] #provato con [50,100,200,300,500,1000,5000,10000,20000]
 

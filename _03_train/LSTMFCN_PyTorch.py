@@ -112,10 +112,16 @@ class LSTMFCN(nn.Module):
 
 # Funzione principale
 def main():
-    # Carico i dati
-    df_train = load_data(conf.train_path)
-    df_val = load_data(conf.val_path)
-    df_test = load_data(conf.test_path)
+    # Specifica il numero di giorni desiderati
+    selected_days = "5Days"
+
+    # Ottieni i percorsi dal config
+    train_path, val_path, test_path = conf.get_paths(selected_days)
+
+    # Carico i dati normalizzati
+    df_train = load_data(train_path)
+    df_val = load_data(val_path)
+    df_test = load_data(test_path)
 
     # Preparo i dati
     def prepare_data(df):
@@ -150,7 +156,7 @@ def main():
     # Addestramento e validazione
     best_val_accuracy = 0
     num_epochs_final_train = 10
-    best_model_path = os.path.join(parent_dir, conf.test_dir, "best_lstm_fcn_model.pth")
+    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_lstm_fcn_model_{selected_days}.pth")
 
     for epoch in range(conf.num_epochs_FCN):
         model.train()
@@ -191,7 +197,7 @@ def main():
     model.load_state_dict(torch.load(best_model_path, weights_only=True))
 
     # Riallenamento su train + validation
-    combined_data = torch.utils.data.ConcatDataset([train_data])
+    combined_data = torch.utils.data.ConcatDataset([train_data, val_data])
     combined_loader = DataLoader(combined_data, batch_size=conf.batch_size_FCN, shuffle=True)
 
     for epoch in range(num_epochs_final_train):
