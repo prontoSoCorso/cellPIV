@@ -1,11 +1,19 @@
+import os
 
-import pandas as pd
+# Percorso della directory principale
+path = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
 
-# Leggi i due fogli in DataFrame di pandas
-df = pd.read_excel("/home/phd2/Scrivania/CorsoRepo/cellPIV/DB morpheus UniPV.xlsx")
+# Contatore per le sottocartelle
+total_subfolders = 0
 
-print(df["slide_well"].value_counts())
+# Itera su ogni cartella nella directory principale
+for folder in os.listdir(path):
+    folder_path = os.path.join(path, folder)
+    
+    # Controlla se è una directory
+    if os.path.isdir(folder_path):
+        # Conta le sottocartelle all'interno della cartella
+        subfolders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
+        total_subfolders += len(subfolders)
 
-
-
-
+print(f"Numero totale di sottocartelle: {total_subfolders}")

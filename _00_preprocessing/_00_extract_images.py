@@ -1,78 +1,83 @@
 import sqlite3
 import os
-import argparse
 
-"""
-Extract frames from PDB files
-"""
-def writeTofile(data, filename):
-    # Convert binary data to proper format and write it on Hard Disk
+def write_to_file(data, filename):
+    """Scrive i dati binari su disco."""
     with open(filename, 'wb') as file:
         file.write(data)
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Extract embryo frames from PDB files')
-    parser.add_argument('--input_dir', dest='input_dir',
-                        type=str,
-                        help='input directory with PDB files')
-    parser.add_argument('--output_dir', dest='output_dir',
-                        type=str,
-                        help='output directory')
-    args = parser.parse_args()
-
-    dir_out = args.output_dir
-
-    pdb2number_p = {}
+def extract_frames(input_dir, output_dir, log_file):
+    """Estrae i frame dai file .pdb mantenendo la struttura iniziale."""
+    metrics = {}  # Dizionario per tracciare i video estratti e gli errori per anno
     sep = "_"
+    
     try:
-        # the first layer is the "year" folder
-        for year in os.listdir(args.input_dir):
-            if os.path.isdir(args.input_dir+year):
-                # enter and look inside each subfolder
-                for subfolder in os.listdir(args.input_dir+year):
-                    for file in os.listdir(args.input_dir+year+'/'+subfolder):
-                        print(file)
-                        if os.path.isdir(file):
-                            print(args.input_dir+year+'/'+subfolder+'/'+file+' is a directory')
-                        else: # it's a file
-                            # check if it is PDB
+        for year in os.listdir(input_dir):
+            year_path = os.path.join(input_dir, year)
+            print(year)
+            if (int(year)==2020 and os.path.isdir(year_path)):
+                print(f"========== Estraendo anno {year} ==========")
+                metrics[year] = {"videos_extracted": 0, "errors": 0}  # Inizializza le metriche per l'anno
+                output_year_dir = os.path.join(output_dir, year)
+                os.makedirs(output_year_dir, exist_ok=True)
+
+                for subfolder in os.listdir(year_path):
+                    subfolder_path = os.path.join(year_path, subfolder)
+                    
+                    if os.path.isdir(subfolder_path):
+                        for file in os.listdir(subfolder_path):
+                            print(file)
                             if file.endswith('.pdb'):
-                                pdb_file = args.input_dir+year+'/'+subfolder+'/'+file
-                                pdb_name = pdb_file.split("/")[-1].split(".pdb")[0]
-                                print(pdb_name)
+                                pdb_file = os.path.join(subfolder_path, file)
+                                pdb_name = os.path.splitext(file)[0]
 
-                                con = sqlite3.connect(pdb_file)
-                                cur = con.cursor()
-                                res = cur.execute("SELECT * FROM IMAGES")
-                                images = res.fetchall()
+                                try:
+                                    con = sqlite3.connect(pdb_file)
+                                    cur = con.cursor()
+                                    res = cur.execute("SELECT * FROM IMAGES")
+                                    images = res.fetchall()
 
-                                well_list = []
-                                for row in images:
-                                    well_list.append(row[0])
-                                well_list = list(set(well_list))
+                                    wells = {row[0] for row in images}
 
-                                if pdb_name in pdb2number_p.keys():
-                                    print(pdb_name)
-                                else:
-                                    pdb2number_p[pdb_name] = len(well_list)
-                                # each folder -> 1 embryo (max 12 for each PDB)
-                                for well in well_list:
-                                    os.mkdir(dir_out + str(pdb_name)+ sep + str(well))
+                                    for well in wells:
+                                        video_dir = os.path.join(output_year_dir, f"{pdb_name}{sep}{well}")
+                                        os.makedirs(video_dir, exist_ok=True)
+                                        metrics[year]["videos_extracted"] += 1  # Incrementa il conteggio video
 
-                                
-                                for row in images:
-                                    id_im = pdb_name + sep + str(row[0]) + sep + str(row[1]) + sep + str(
-                                        row[2]) + sep + str(row[3])
+                                    for row in images:
+                                        well_id = row[0]
+                                        timestamp = f"{row[1]}_{row[2]}_{row[3]}"
+                                        image_data = row[4]
 
-                                    resumeFile = row[4]
+                                        image_filename = f"{pdb_name}{sep}{well_id}{sep}{timestamp}.jpg"
+                                        image_path = os.path.join(output_year_dir, f"{pdb_name}{sep}{well_id}", image_filename)
 
-                                    photoPath = dir_out + str(pdb_name) + sep + str(row[0]) + "/" + id_im + ".jpg"
-                                    writeTofile(resumeFile, photoPath)
+                                        write_to_file(image_data, image_path)
 
-                                cur.close()
+                                    cur.close()
+                                except Exception as e:
+                                    print(f"========== Errore con il file {pdb_file}: {e} ==========")
+                                    metrics[year]["errors"] += 1  # Incrementa il conteggio errori
             else:
-                print(year+' not a folder')
-
+                print(f"{year_path} non è una directory.")
     except Exception as e:
-        print(e)
+        print(f"Errore generale: {e}")
 
+    # Salva i risultati in un file di log
+    try:
+        with open(log_file, "w") as log:
+            for year, data in metrics.items():
+                log.write(f"Anno: {year}\n")
+                log.write(f"  Video estratti: {data['videos_extracted']}\n")
+                log.write(f"  Errori: {data['errors']}\n\n")
+        print(f"Risultati salvati in {log_file}")
+    except Exception as e:
+        print(f"Errore durante il salvataggio del log: {e}")
+
+if __name__ == '__main__':
+    # Percorsi specificati direttamente nel codice
+    input_dir = "/home/phd2/Scrivania/CorsoData/ScopeData"
+    output_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
+    log_file = "/home/phd2/Scrivania/CorsoData/estrazione_log.txt"
+
+    extract_frames(input_dir, output_dir, log_file)

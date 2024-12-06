@@ -14,6 +14,7 @@ while os.path.basename(PROJECT_ROOT) != "cellPIV":
 
 # 0 newPC, 1 lorenzo, 2 AWS
 sourceForPath = 0
+print(sourceForPath)
 
 class user_paths:
     if sourceForPath == 0:
