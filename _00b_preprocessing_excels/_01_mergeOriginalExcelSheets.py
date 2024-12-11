@@ -13,7 +13,7 @@ sys.path.append(parent_dir)
 from config import Config_00_preprocessing as conf
 
 # Leggi il file Excel senza password (tolta manualmente)
-xls = pd.ExcelFile(conf.path_old_excel, engine='openpyxl')
+xls = pd.ExcelFile(conf.path_original_excel, engine='openpyxl')
 
 # Leggi i due fogli in DataFrame di pandas
 sheet1 = pd.read_excel(xls, sheet_name="blasto NO SI")

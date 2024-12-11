@@ -50,7 +50,8 @@ class utils:
 
 
 class Config_00_preprocessing:
-    path_old_excel          = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
+    path_original_excel     = os.path.join(user_paths.path_excels, "DB morpheus UniPV.xlsx")
+    #path_original_excel     = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
     path_single_csv         = os.path.join(user_paths.path_excels, "_00_preprocessing", "BlastoLabels_singleFile.csv")
     path_singleWithID_csv   = os.path.join(user_paths.path_excels, "_00_preprocessing", "BlastoLabels_singleFileWithID.csv")
     path_double_dish_excel  = os.path.join(user_paths.path_excels, "pz con doppia dish.xlsx")
