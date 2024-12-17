@@ -19,6 +19,7 @@ while os.path.basename(parent_dir) != "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_02_temporalData as conf
+from config import utils
 
 # Imposta il backend grafico interattivo
 try:
@@ -30,7 +31,13 @@ except Exception as e:
 data = pd.read_csv(conf.final_csv_path)
 
 # Seleziona le colonne delle feature
-features = data.iloc[:, 3:672+3]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
+selected_days = "3Days"
+
+if selected_days == "3Days":
+    features = data.iloc[:, 3:utils.num_frames_3Days]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
+else:
+    features = data.iloc[:, 3:utils.num_frames_7Days]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
+
 labels = data["BLASTO NY"]
 
 # Standardizzazione delle feature
@@ -54,17 +61,16 @@ for label, color in colors.items():
     subset = umap_df[umap_df["Label"] == label]
     plt.scatter(subset["Dim1"], subset["Dim2"], c=color, label=f"Classe {label}", alpha=0.7)
 
-plt.title("Visualizzazione UMAP")
+plt.title(f"Visualizzazione UMAP, {selected_days}")
 plt.xlabel("Dimensione 1")
 plt.ylabel("Dimensione 2")
 plt.legend()
 plt.grid(True)
 
-# Mostra il grafico o salva l'immagine
-try:
-    plt.show()  # Mostra il grafico interattivo
-except Exception as e:
-    print(f"Impossibile mostrare il grafico interattivo: {e}")
-    output_path = "/path/dove/salvare/umap_visualization.png"
-    plt.savefig(output_path)
-    print(f"Grafico salvato in: {output_path}")
+# Salva immagine
+output_path = os.path.join(parent_dir, f"umap_{selected_days}.png")
+plt.savefig(output_path)
+print(f"Grafico salvato in: {output_path}")
+
+# Mostra grafico
+plt.show()  # Mostra il grafico interattivo

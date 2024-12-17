@@ -101,7 +101,3 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
     angle_degrees = np.rad2deg(angle) % 360
 
     return magnitude, angle_degrees, flow, prev_pts
-
-
-
-
