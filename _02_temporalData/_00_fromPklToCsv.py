@@ -21,10 +21,7 @@ sys.path.append(parent_dir)
 from config import utils as conf
 from config import Config_02_temporalData as tempData
 
-# Carica il file .pkl (Da cambiare in base al file che voglio convertire)
-dict_in = "sum_mean_mag" + "_dict" + "_Farneback" + ".pkl"
-
-with open(os.path.join(current_dir, dict_in), 'rb') as f:
+with open(os.path.join(current_dir, tempData.path_pkl), 'rb') as f:
     data = pickle.load(f)
 
 # Processa i dati

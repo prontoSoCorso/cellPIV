@@ -52,8 +52,7 @@ class utils:
 class Config_00_preprocessing:
     path_original_excel     = os.path.join(user_paths.path_excels, "DB morpheus UniPV.xlsx")
     #path_original_excel     = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
-    path_single_csv         = os.path.join(user_paths.path_excels, "_00_preprocessing", "BlastoLabels_singleFile.csv")
-    path_singleWithID_csv   = os.path.join(user_paths.path_excels, "_00_preprocessing", "BlastoLabels_singleFileWithID.csv")
+    path_addedID_csv        = os.path.join(user_paths.path_excels, "_00b_preprocessing_excels", "DB_Morpheus_withID.csv")
     path_double_dish_excel  = os.path.join(user_paths.path_excels, "pz con doppia dish.xlsx")
 
 
@@ -92,7 +91,7 @@ class Config_01_OpticalFlow:
         # Var
         img_size = utils.img_size
         save_images = 0
-        num_minimum_frames = 580 #300 per 3 giorni, 390 per 4 giorni, 490 per 5 giorni, 580 per 6 giorni, 680 per 7 giorni
+        num_minimum_frames = 300
         num_initial_frames_to_cut = 5
         num_forward_frame = 4   # Numero di frame per sum_mean_mag
 
@@ -104,11 +103,17 @@ class Config_01_OpticalFlow:
 class Config_02_temporalData:
     dict                        = "sum_mean_mag"
     OptFlow                     = Config_01_OpticalFlow.method_optical_flow
+    type_files                  = "files_7Days_Farneback"
+    dict_in                     = dict + "_dict_" + OptFlow + ".pkl"
+    
+    path_pkl                    = os.path.join(type_files, dict_in)
     dictAndOptFlowType          = dict + "_" + OptFlow + ".csv"
-    temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series', dictAndOptFlowType)
-    csv_file_Danilo_path        = Config_00_preprocessing.path_singleWithID_csv
-    final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
 
+    # Path in cui salvo il file csv che ottengo leggendo i pkl delle serie temporali e che sarà poi quello usato per creare il csv finale
+    temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series', dictAndOptFlowType)
+    csv_file_Danilo_path        = Config_00_preprocessing.path_addedID_csv  # File che ho ottenuto dal preprocessing degli excel (singolo csv con ID)
+    # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
+    final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
 
 
 class Config_02b_normalization:
@@ -116,7 +121,7 @@ class Config_02b_normalization:
     temporalDataType            = Config_02_temporalData.dict
 
     # Per gestire dati a 3, 5 o 7 giorni
-    Only3Days = 0
+    Only3Days = 1
     Only5Days = 0
 
     #Paths 3 Days
@@ -186,7 +191,7 @@ class Config_03_train:
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @classmethod
-    def get_paths(cls, selected_days="5Days"):
+    def get_paths(cls, selected_days="7Days"):
         if selected_days in cls.frame_options:
             paths = cls.frame_options[selected_days]
             return paths["train_path"], paths["val_path"], paths["test_path"]
@@ -196,7 +201,7 @@ class Config_03_train:
 
 
     # ROCKET
-    kernels     = [100,300,500,1000,2500] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [100,300,500,1000,2500,5000,7500,10000,12500,15000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
 
 
     # LSTM-FCN
@@ -217,30 +222,30 @@ class Config_03_train:
 
     # ConvTran
     # ConvTran - Input & Output                                  
-    output_dir = user_paths.path_excels
-    Norm = False        # Data Normalization
-    val_ratio = 0.2     # Propotion of train-set to be used as validation
-    print_interval = 25 # Print batch info every this many batches
+    output_dir      = user_paths.path_excels
+    Norm            = False        # Data Normalization
+    val_ratio       = 0.2     # Propotion of train-set to be used as validation
+    print_interval  = 50 # Print batch info every this many batches
     # ConvTran - Transformers Parameters
-    Net_Type = 'C-T'    # choices={'T', 'C-T'}, help="Network Architecture. Convolution (C)", "Transformers (T)") (def = C-T)
-    emb_size = 128       # Internal dimension of transformer embeddings (def = 16)
-    dim_ff = emb_size*2       # Dimension of dense feedforward part of transformer layer (def = 256)
-    num_heads = 8       # Number of multi-headed attention heads (def = 8)
-    Fix_pos_encode = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
-    Rel_pos_encode = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
+    Net_Type        = 'C-T'    # choices={'T', 'C-T'}, help="Network Architecture. Convolution (C)", "Transformers (T)") (def = C-T)
+    emb_size        = 128       # Internal dimension of transformer embeddings (def = 16)
+    dim_ff          = emb_size*2       # Dimension of dense feedforward part of transformer layer (def = 256)
+    num_heads       = 8       # Number of multi-headed attention heads (def = 8)
+    Fix_pos_encode  = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
+    Rel_pos_encode  = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
     # ConvTran - Training Parameters/Hyper-Parameters
-    epochs = 100        # Number of training epochs
-    batch_size = 16     # Training batch size
-    lr = 1e-3           # Learning rate
-    dropout = 0.2       # Dropout regularization ratio
-    val_interval = 2    # Evaluate on validation every XX epochs
-    key_metric = 'accuracy' # choices={'loss', 'accuracy', 'precision'}, help='Metric used for defining best epoch'
-    num_classes = utils.num_classes
+    epochs          = 100        # Number of training epochs
+    batch_size      = 16     # Training batch size
+    lr              = 1e-3           # Learning rate
+    dropout         = 0.2       # Dropout regularization ratio
+    val_interval    = 1    # Evaluate on validation every XX epochs
+    key_metric      = 'accuracy' # choices={'loss', 'accuracy', 'precision'}, help='Metric used for defining best epoch'
+    num_classes     = utils.num_classes
     # ConvTran - Add Learning Rate Scheduler
-    scheduler_patience = 5    # Number of epochs with no improvement after which learning rate will be reduced
-    scheduler_factor = 0.5    # Factor by which the learning rate will be reduced
+    scheduler_patience  = 5    # Number of epochs with no improvement after which learning rate will be reduced
+    scheduler_factor    = 0.5    # Factor by which the learning rate will be reduced
     # ConvTran - System
-    gpu = -1             # GPU index, -1 for CPU
-    console = False     # Optimize printout for console output; otherwise for file
+    gpu             = -1             # GPU index, -1 for CPU
+    console         = False     # Optimize printout for console output; otherwise for file
 
 

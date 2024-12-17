@@ -13,7 +13,7 @@ sys.path.append(parent_dir)
 from config import Config_00_preprocessing as conf
 
 # Percorso del file CSV
-input_csv_path = conf.path_singleWithID_csv
+input_csv_path = conf.path_addedID_csv
 
 # Funzioni di utilità
 def load_data(file_path):

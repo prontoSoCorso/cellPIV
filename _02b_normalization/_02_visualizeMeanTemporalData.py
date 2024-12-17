@@ -13,7 +13,6 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_02b_normalization as conf
-from config import paths_for_models as paths_for_models
 
 # Funzione per creare il plot
 def create_plot(blasto, no_blasto, title, filename):
@@ -53,84 +52,30 @@ def create_plot(blasto, no_blasto, title, filename):
 
 if __name__ == "__main__":
     
-    if conf.normalization_type == "PerPatient":
-        # Carico il file CSV
-        df_train_val = pd.read_csv(conf.train_val_data_path)
+    
+    df_train = pd.read_csv(paths_for_models.data_path_train)
+    df_val = pd.read_csv(paths_for_models.data_path_val)
 
-        # Creo DataFrame in modo da avere ogni paziente con una sola riga
-        patient_info = df_train_val.groupby('patient_id').agg({
-            'BLASTO NY': 'max'  # Prendo la classe "BLASTO NY" prevalente per ogni paziente
-        }).reset_index()
+    # Separare i dati in base a BLASTO NY per train
+    blasto_train = df_train[df_train['BLASTO NY'] == 1]
+    no_blasto_train = df_train[df_train['BLASTO NY'] == 0]
 
-        # Divido in train e validation mantenendo le proporzioni di BLASTO NY
-        train_patients, val_patients = train_test_split(
-            patient_info, test_size=0.3, random_state=conf.seed_everything(conf.seed), stratify=patient_info['BLASTO NY']
-        )
+    # Separare i dati in base a BLASTO NY per validation
+    blasto_val = df_val[df_val['BLASTO NY'] == 1]
+    no_blasto_val = df_val[df_val['BLASTO NY'] == 0]
 
-        # Creo i DataFrame di train e validation usando il "patient" come criterio
-        df_train = df_train_val[df_train_val['patient_id'].isin(train_patients['patient_id'])]
-        df_val = df_train_val[df_train_val['patient_id'].isin(val_patients['patient_id'])]
+    # Creare i plot per train e validation
+    create_plot(blasto_train, no_blasto_train, 'Media dei valori temporali - Train Set', f'mean_train_data_normALL{conf.seed}_{conf.temporalDataType}.jpg')
+    create_plot(blasto_val, no_blasto_val, 'Media dei valori temporali - Validation Set', f'mean_val_data_normALL{conf.seed}_{conf.temporalDataType}.jpg')
 
-        # Separare i dati in base a BLASTO NY per train
-        blasto_train = df_train[df_train['BLASTO NY'] == 1]
-        no_blasto_train = df_train[df_train['BLASTO NY'] == 0]
+    # Carico i dati di test e creo il grafico per test
+    df_test = pd.read_csv(paths_for_models.test_path)
 
-        # Separare i dati in base a BLASTO NY per validation
-        blasto_val = df_val[df_val['BLASTO NY'] == 1]
-        no_blasto_val = df_val[df_val['BLASTO NY'] == 0]
+    blasto_test = df_test[df_test['BLASTO NY'] == 1]
+    no_blasto_test = df_test[df_test['BLASTO NY'] == 0]
 
-        # Creare i plot per train e validation
-        create_plot(blasto_train, no_blasto_train, 'Media dei valori temporali - Train Set', f'mean_train_data_normXpatient{conf.seed}_{conf.temporalDataType}.jpg')
-        create_plot(blasto_val, no_blasto_val, 'Media dei valori temporali - Validation Set', f'mean_val_data_normXpatient{conf.seed}_{conf.temporalDataType}.jpg')
+    create_plot(blasto_test, no_blasto_test, 'Media dei valori temporali - Test Set', f'mean_test_data_{conf.seed}_{conf.temporalDataType}.jpg')
+    
 
-        '''
-        # Carico i dati di test e creo il grafico per test
-        df_test = pd.read_csv(conf.test_data_path)
-
-        blasto_test = df_test[df_test['BLASTO NY'] == 1]
-        no_blasto_test = df_test[df_test['BLASTO NY'] == 0]
-
-        create_plot(blasto_test, no_blasto_test, 'Media dei valori temporali - Test Set', f'mean_test_data_{conf.seed}_{conf.temporalDataType}.jpg')
-        '''
-
-        print(f"salvati dati relativi a normalizzazione per paziente con seed {conf.seed} e su dati di {conf.temporalDataType}")
-
-
-
-
-
-    elif conf.normalization_type == "TrainTest_ALL":
-        df_train = pd.read_csv(paths_for_models.data_path_train)
-        df_val = pd.read_csv(paths_for_models.data_path_val)
-
-        # Separare i dati in base a BLASTO NY per train
-        blasto_train = df_train[df_train['BLASTO NY'] == 1]
-        no_blasto_train = df_train[df_train['BLASTO NY'] == 0]
-
-        # Separare i dati in base a BLASTO NY per validation
-        blasto_val = df_val[df_val['BLASTO NY'] == 1]
-        no_blasto_val = df_val[df_val['BLASTO NY'] == 0]
-
-        # Creare i plot per train e validation
-        create_plot(blasto_train, no_blasto_train, 'Media dei valori temporali - Train Set', f'mean_train_data_normALL{conf.seed}_{conf.temporalDataType}.jpg')
-        create_plot(blasto_val, no_blasto_val, 'Media dei valori temporali - Validation Set', f'mean_val_data_normALL{conf.seed}_{conf.temporalDataType}.jpg')
-
-        # Carico i dati di test e creo il grafico per test
-        df_test = pd.read_csv(paths_for_models.test_path)
-
-        blasto_test = df_test[df_test['BLASTO NY'] == 1]
-        no_blasto_test = df_test[df_test['BLASTO NY'] == 0]
-
-        create_plot(blasto_test, no_blasto_test, 'Media dei valori temporali - Test Set', f'mean_test_data_{conf.seed}_{conf.temporalDataType}.jpg')
-        
-
-        print(f"salvati dati relativi a normalizzazione su tutte le serie temporali con seed {conf.seed} e su dati di {conf.temporalDataType}")
-
-
-
-    elif conf.normalization_type == "None":
-        print("Nessuna normalizzazione fatta")
-
-
-
+    print(f"salvati dati relativi a normalizzazione su tutte le serie temporali con seed {conf.seed} e su dati di {conf.temporalDataType}")
 

@@ -6,6 +6,7 @@ import timeit
 from datetime import datetime, timedelta
 import time
 from myFunctions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
+from PIL import Image, ImageFile
 
 import sys
 # Configurazione dei percorsi e dei parametri
@@ -19,6 +20,8 @@ from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
 from config import utils as utils
 
+
+
 class InsufficientFramesError(Exception):
     """Eccezione sollevata quando il numero di frame è insufficiente."""
     pass
@@ -30,6 +33,22 @@ class InvalidImageSizeError(Exception):
 class InvalidOpticalFlowMethodError(Exception):
     """Eccezione sollevata quando il metodo scelto di flusso ottico non è LK o Farneback"""
     SystemExit()
+
+# Funzione per correggere immagini troncate
+def fix_truncated_jpeg(file_path):
+    """
+    Tenta di correggere un file JPEG troncato.
+    """
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+    try:
+        with Image.open(file_path) as img:
+            # Salva il file correggendo eventuali problemi di fine file
+            corrected_path = file_path + "_fixed.jpg"
+            img.save(corrected_path, "JPEG")
+        return corrected_path
+    except Exception as e:
+        print(f"Errore nella correzione del file {file_path}: {e}")
+        return None
 
 # Funzione per salvare il checkpoint
 def save_checkpoint(data, filepath):
@@ -60,7 +79,16 @@ def process_frames(folder_path, dish_well):
     frame_files = frame_files[conf.num_initial_frames_to_cut:]
 
     # Read the first frame
-    prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)
+    first_frame_path = os.path.join(folder_path, frame_files[0])
+    prev_frame = cv2.imread(first_frame_path, cv2.IMREAD_GRAYSCALE)
+    
+    if prev_frame is None:
+        corrected_path = fix_truncated_jpeg(first_frame_path)
+        if corrected_path:
+            prev_frame = cv2.imread(corrected_path, cv2.IMREAD_GRAYSCALE)
+        if prev_frame is None:
+            raise ValueError(f"Non è stato possibile leggere il frame iniziale: {first_frame_path}")
+
     if prev_frame.shape[:2] != target_size:
         raise InvalidImageSizeError(f"L'immagine {frame_files[0]} non è di dimensione 500x500")
     prev_frame = cv2.resize(prev_frame, target_size)
@@ -75,7 +103,16 @@ def process_frames(folder_path, dish_well):
 
     for frame_file in frame_files[1:]:
         # Read the current frame
-        current_frame = cv2.imread(os.path.join(folder_path, frame_file), cv2.IMREAD_GRAYSCALE)
+        current_frame_path = os.path.join(folder_path, frame_file)
+        current_frame = cv2.imread(current_frame_path, cv2.IMREAD_GRAYSCALE)
+        
+        if current_frame is None:
+            corrected_path = fix_truncated_jpeg(current_frame_path)
+            if corrected_path:
+                current_frame = cv2.imread(corrected_path, cv2.IMREAD_GRAYSCALE)
+            if current_frame is None:
+                raise ValueError(f"Non è stato possibile leggere il frame: {current_frame_path}")
+        
         if current_frame.shape[:2] != target_size:
             raise InvalidImageSizeError(f"L'immagine {frame_file} non è di dimensione 500x500")
         current_frame = cv2.resize(current_frame, target_size)
@@ -121,8 +158,9 @@ def main():
     checkpoint_path = os.path.join(parent_dir, "_01_opticalFlows", "checkpoint.pkl")
     checkpoint_data = load_checkpoint(checkpoint_path)
 
-    # Imposto l'ora di fine, n ore dall'inizio
-    end_time = datetime.now() + timedelta(hours=35)
+    # Imposto l'ora per salvataggio checkpoint, n ore dall'inizio
+    delta_time = 1 #hours
+    end_time = datetime.now() + timedelta(hours=delta_time)
     
     if checkpoint_data:
         print('\n================================================')
@@ -231,8 +269,8 @@ def main():
                 save_checkpoint(checkpoint_data, checkpoint_path)
                 print(f"Numero di serie temporali attualmente salvate in 'mean_magnitude_dict': {len(mean_magnitude_dict)}")
                 print(f"Numero di serie temporali attualmente salvate in 'sum_mean_mag_dict': {len(sum_mean_mag_dict)}")
-                print("Checkpoint salvato, codice interrotto per rinnovo token.")
-                return
+                print("Checkpoint salvato")
+                end_time = datetime.now() + timedelta(hours=delta_time)
             
         print(f'Errors in {class_sample}:', errors)
 
@@ -245,7 +283,7 @@ def main():
     print(f"Errori: {n_video_error_blasto} blasto e {n_video_error_no_blasto} no_blasto")
 
     # Ottengo il percorso della cartella "_02_temporalData"
-    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData', 'files')
+    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData', 'tmp_files')
 
     # Salvataggio della lista come file utilizzando pickle nella cartella corrente
     for dict_name, dict_data in zip(

@@ -93,6 +93,6 @@ cols = ['patient_id'] + [col for col in blasto_labels_df.columns if col != 'pati
 blasto_labels_df = blasto_labels_df[cols]
 
 # Save the result to a CSV file
-blasto_labels_df.to_csv(conf.path_singleWithID_csv, index=False)
+blasto_labels_df.to_csv(conf.path_addedID_csv, index=False)
 
 print(blasto_labels_df.head())
