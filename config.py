@@ -4,7 +4,6 @@ import os
 import torch
 import random
 import numpy as np
-import optuna
 
 # Rileva il percorso della cartella "cellPIV" in modo dinamico
 current_file_path = os.path.abspath(__file__)
@@ -121,8 +120,8 @@ class Config_02b_normalization:
     temporalDataType            = Config_02_temporalData.dict
 
     # Per gestire dati a 3, 5 o 7 giorni
-    Only3Days = 1
-    Only5Days = 0
+    Only3Days = 0
+    Only5Days = 1
 
     #Paths 3 Days
     csv_file_path               = Config_02_temporalData.final_csv_path

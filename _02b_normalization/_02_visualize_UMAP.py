@@ -27,10 +27,15 @@ except Exception as e:
     print(f"Impossibile impostare il backend interattivo: {e}")
 
 # %% Caricamento del dataset
-data = pd.read_csv(conf.normalized_train_path_7Days)
+# Specifica il numero di giorni desiderati
+selected_days = "5Days"
+
+# Ottieni i percorsi del dataset di train per cui visualizzerò l'UMAP
+train_path, _, _ = conf.get_paths(selected_days)
+data = pd.read_csv(train_path)
 
 # Seleziona le colonne delle feature
-features = data.iloc[:, 3:672+3]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
+features = data.iloc[:, 3:]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
 labels = data["BLASTO NY"]
 
 # Standardizzazione delle feature

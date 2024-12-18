@@ -31,12 +31,14 @@ except Exception as e:
 data = pd.read_csv(conf.final_csv_path)
 
 # Seleziona le colonne delle feature
-selected_days = "3Days"
+selected_days = "5Days"
 
 if selected_days == "3Days":
     features = data.iloc[:, 3:utils.num_frames_3Days]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
+elif selected_days == "5Days":
+    features = data.iloc[:, 3:utils.num_frames_5Days]
 else:
-    features = data.iloc[:, 3:utils.num_frames_7Days]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
+    features = data.iloc[:, 3:utils.num_frames_7Days]
 
 labels = data["BLASTO NY"]
 

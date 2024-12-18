@@ -17,7 +17,7 @@ from config import Config_03_train as conf
 
 def main():
     # Specifica il numero di giorni desiderati
-    selected_days = "7Days"
+    selected_days = "5Days"
 
     # Ottieni i percorsi dei dataset
     _, _, test_path = conf.get_paths(selected_days)

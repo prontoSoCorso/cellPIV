@@ -28,7 +28,7 @@ if __name__ == '__main__':
     device = Initialization()
 
     # Specifica il numero di giorni desiderati
-    selected_days = "7Days"
+    selected_days = "5Days"
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = config.get_paths(selected_days)
 

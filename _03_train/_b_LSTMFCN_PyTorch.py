@@ -113,7 +113,7 @@ class LSTMFCN(nn.Module):
 # Funzione principale
 def main():
     # Specifica il numero di giorni desiderati
-    selected_days = "3Days"
+    selected_days = "5Days"
 
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = conf.get_paths(selected_days)
