@@ -72,6 +72,5 @@ def main():
     # Mostro il grafico dopo averlo salvato, altrimenti se lo mostro prima si azzera la memoria e mi salva img bianca
     plt.show()
 
-
 if __name__ == "__main__":
     main()
