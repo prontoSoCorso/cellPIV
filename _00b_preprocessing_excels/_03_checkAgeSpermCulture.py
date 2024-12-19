@@ -9,6 +9,7 @@ import sys
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_file_path)
 while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
@@ -60,7 +61,8 @@ def plot_age_plots(df, columns, target):
                             color='black', weight='semibold')
 
     plt.tight_layout()
-    #plt.show()
+    save_path = os.path.join(current_dir, "plots_age.png")
+    plt.savefig(save_path)
 
 def plot_categorical_plots(df, columns, target):
     fig, axs = plt.subplots(2, 1, figsize=(12, 6))
@@ -100,7 +102,8 @@ def plot_categorical_plots(df, columns, target):
                                     textcoords='offset points')
 
     plt.tight_layout()
-    #plt.show()
+    save_path = os.path.join(current_dir, "plots_categorical_vars.png")
+    plt.savefig(save_path)
 
 def normality_tests(df, column, target):
     group1 = df[df[target] == 0][column].dropna()
@@ -135,7 +138,8 @@ def normality_tests(df, column, target):
     probplot(group2, dist="norm", plot=axs[1])
     axs[1].set_title(f'QQ Plot for {column} of group2')
     
-    #plt.show()
+    save_path = os.path.join(current_dir, "plots_normality_check.png")
+    plt.savefig(save_path)
 
 
 def mann_whitney_u_test_with_effect_size(df, column, target):
@@ -198,27 +202,28 @@ if __name__ == '__main__':
 
     # Test di normalità per "maternal age"
     for column in continuous_columns:
-        print(f"\nNormality tests for {column}:")
+        print(f"\n===== Normality tests for {column}: =====")
         normality_tests(df, column, target_column)
 
     # Test statistici
+    print("\n===== Statistical Tests =====")
     for column in continuous_columns:
         # Usare Mann-Whitney U Test invece del t-test con effect size
         u_stat, u_p, effect_size_r = mann_whitney_u_test_with_effect_size(df, column, target_column)
-        print(f'\nMann-Whitney U Test for {column}: U-statistic = {u_stat}, p-value = {u_p}, effect size r = {effect_size_r}')
+        print(f'Mann-Whitney U Test for {column}: U-statistic = {u_stat:.4f}, p-value = {u_p:.4f}, effect size r = {effect_size_r:.4f}')
         
         # Usare t-Test con effect size
         t_stat, t_p, cohens_d = student_t_test_with_effect_size(df, column, target_column)
-        print(f't-Test for {column}: t-statistic = {t_stat}, p-value = {t_p}, effect size d = {cohens_d}')
+        print(f't-Test for {column}: t-statistic = {t_stat:.4f}, p-value = {t_p:.4f}, effect size d = {cohens_d:.4f}')
         
 
         # Point-Biserial Correlation Coefficient
         correlation, p_value = point_biserial_correlation(df, column, target_column)
-        print(f'Point-Biserial Correlation for {column}: p-value = {p_value}, correlation = {correlation}')
+        print(f'Point-Biserial Correlation for {column}: p-value = {p_value:.4f}, correlation = {correlation:.4f}')
 
     for column in categorical_columns:
         chi2, p, cramers_v = chi_square_test_with_effect_size(df, column, target_column)
-        print(f'Chi-square test for {column}: chi2 = {chi2}, p = {p}, Cramér\'s V = {cramers_v}')
+        print(f'Chi-square test for {column}: chi2 = {chi2:.4f}, p = {p:.4f}, Cramér\'s V = {cramers_v:.4f}')
 
 
 
