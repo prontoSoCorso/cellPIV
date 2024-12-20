@@ -113,7 +113,7 @@ class LSTMFCN(nn.Module):
 # Funzione principale
 def main():
     # Specifica il numero di giorni desiderati
-    selected_days = "5Days"
+    selected_days = "7Days"
 
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = conf.get_paths(selected_days)
@@ -151,7 +151,7 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=conf.learning_rate_FCN)
 
     # Scheduler ReduceLROnPlateau
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=10, factor=0.8, verbose=True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=10, factor=0.8)
 
     # Addestramento e validazione
     best_val_accuracy = 0
@@ -192,6 +192,8 @@ def main():
 
             # Aggiorna lo scheduler in base alla loss di validazione
             scheduler.step(val_loss)
+            print(f"Learning rate attuale: {scheduler.optimizer.param_groups[0]['lr']}")
+
 
     # Ricarica il modello migliore
     model.load_state_dict(torch.load(best_model_path, weights_only=True))
