@@ -17,10 +17,10 @@ from config import Config_03_train as conf
 
 def main():
     # Specifica il numero di giorni desiderati
-    selected_days = "5Days"
+    days_to_consider = 1
 
-    # Ottieni i percorsi dei dataset
-    _, _, test_path = conf.get_paths(selected_days)
+    # Ottieni i percorsi dal config
+    _, _, test_path = conf.get_paths(days_to_consider)
 
     # Carica i dati di test
     df_test = pd.read_csv(test_path)
@@ -57,7 +57,7 @@ def main():
         subset = umap_df[umap_df["Label"] == label]
         plt.scatter(subset["Dim1"], subset["Dim2"], c=color, label=f"Classe {label}", alpha=0.7)
 
-    plt.title(f"Visualizzazione UMAP delle feature ROCKET, {selected_days}")
+    plt.title(f"Visualizzazione UMAP delle feature ROCKET, {days_to_consider}Days")
     plt.xlabel("Dimensione 1")
     plt.ylabel("Dimensione 2")
     plt.legend()
@@ -65,7 +65,7 @@ def main():
 
     # Salvo plot
     current_dir = os.path.dirname(current_file_path)
-    output_path = os.path.join(current_dir, "umap_ROCKET_"+selected_days)
+    output_path = os.path.join(current_dir, "umap_ROCKET_" + str(days_to_consider) + "Days")
     plt.savefig(output_path)
     print(f"Grafico salvato in: {output_path}")
 

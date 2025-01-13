@@ -22,10 +22,10 @@ from config import Config_03_train as conf
 # Funzione principale
 def main():
     # Specifica il numero di giorni desiderati
-    selected_days = "5Days"
-    
-    # Ottieni i percorsi del dataset
-    _, _, test_path = conf.get_paths(selected_days)
+    days_to_consider = 1
+
+    # Ottieni i percorsi dal config
+    _, _, test_path = conf.get_paths(days_to_consider)
     
     # Carica il dataset di test
     print("Caricamento dati di test...")
@@ -43,7 +43,7 @@ def main():
     # Carica il modello ConvTran pre-addestrato
     print("Caricamento modello ConvTran...")
     model = model_factory(conf)
-    model_path = os.path.join(parent_dir, conf.test_dir, f"best_convTran_model_{selected_days}.pkl")
+    model_path = os.path.join(parent_dir, conf.test_dir, f"best_convTran_model_{days_to_consider}Days.pkl")
     model = load_model(model, model_path)
     model.eval().to(conf.device)
     print(f"Modello ConvTran caricato da: {model_path}")
@@ -80,7 +80,7 @@ def main():
         subset = umap_df[umap_df["Label"] == label]
         plt.scatter(subset["Dim1"], subset["Dim2"], c=color, label=f"Classe {label}", alpha=0.7)
     
-    plt.title(f"Visualizzazione UMAP delle feature ConvTran, {selected_days}")
+    plt.title(f"Visualizzazione UMAP delle feature ConvTran, {days_to_consider}Days")
     plt.xlabel("Dimensione 1")
     plt.ylabel("Dimensione 2")
     plt.legend()
@@ -88,7 +88,7 @@ def main():
 
     # Salvo plot
     current_dir = os.path.dirname(current_file_path)
-    output_path = os.path.join(current_dir, "umap_ConvTran_"+selected_days)
+    output_path = os.path.join(current_dir, "umap_ConvTran_" + str(days_to_consider) + "Days")
     plt.savefig(output_path)
     print(f"Grafico salvato in: {output_path}")
 

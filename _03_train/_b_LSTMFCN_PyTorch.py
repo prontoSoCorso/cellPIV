@@ -112,11 +112,11 @@ class LSTMFCN(nn.Module):
 
 # Funzione principale
 def main():
-    # Specifica il numero di giorni desiderati
-    selected_days = "7Days"
+   # Specifica il numero di giorni da considerare
+    days_to_consider = 1
 
     # Ottieni i percorsi dal config
-    train_path, val_path, test_path = conf.get_paths(selected_days)
+    train_path, val_path, test_path = conf.get_paths(days_to_consider)
 
     # Carico i dati normalizzati
     df_train = load_data(train_path)
@@ -156,7 +156,7 @@ def main():
     # Addestramento e validazione
     best_val_accuracy = 0
     num_epochs_final_train = 10
-    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_lstm_fcn_model_{selected_days}.pth")
+    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_lstm_fcn_model_{days_to_consider}Days.pth")
 
     for epoch in range(conf.num_epochs_FCN):
         model.train()
@@ -226,7 +226,7 @@ def main():
     print(f"Test Brier Score Loss: {test_brier:.4f}")
     print(f"Test F1 Score: {test_f1:.4f}")
 
-    cm_path = os.path.join(parent_dir, "confusion_matrix_lstmfcn_" + selected_days + ".png")
+    cm_path = os.path.join(parent_dir, "confusion_matrix_lstmfcn_" + str(days_to_consider) + ".png")
     save_confusion_matrix(test_cm, cm_path)
     print(f"Confusion Matrix saved at: {cm_path}")
 

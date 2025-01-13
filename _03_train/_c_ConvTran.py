@@ -27,10 +27,11 @@ def Initialization():
 if __name__ == '__main__':
     device = Initialization()
 
-    # Specifica il numero di giorni desiderati
-    selected_days = "5Days"
+    # Specifica il numero di giorni da considerare
+    days_to_consider = 1
+
     # Ottieni i percorsi dal config
-    train_path, val_path, test_path = config.get_paths(selected_days)
+    train_path, val_path, test_path = config.get_paths(days_to_consider)
 
     # Load Data
     train_loader, val_loader, test_loader = load_my_data(train_path, val_path, test_path, config.val_ratio, config.batch_size)
@@ -51,7 +52,7 @@ if __name__ == '__main__':
     loss_module = get_loss_module()
 
     # Training
-    save_path = os.path.join(parent_dir, config.test_dir, "best_convTran_model_" + selected_days + ".pkl")
+    save_path = os.path.join(parent_dir, config.test_dir, "best_convTran_model_" + str(days_to_consider) + "Days.pkl")
 
     trainer = SupervisedTrainer(
         model, train_loader, device, loss_module, optimizer, 
@@ -82,6 +83,6 @@ if __name__ == '__main__':
     # Esegui la valutazione e salva la matrice di confusione
     test_metrics = best_test_evaluator.evaluate_test(
         save_conf_matrix=True,
-        conf_matrix_filename='confusion_matrix_ConvTran_' + selected_days + '.png'
+        conf_matrix_filename='confusion_matrix_ConvTran_' + str(days_to_consider) + 'Days.png'
     )
     print(f"Best Model Test Metrics: {test_metrics}")

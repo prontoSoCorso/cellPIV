@@ -54,11 +54,11 @@ def main():
     best_kernel = None
     best_model_path = None
 
-    # Specifica il numero di giorni desiderati
-    selected_days = "5Days"
+    # Specifica il numero di giorni da considerare
+    days_to_consider = 1
 
     # Ottieni i percorsi dal config
-    train_path, val_path, test_path = conf.get_paths(selected_days)
+    train_path, val_path, test_path = conf.get_paths(days_to_consider)
 
     # Carico i dati normalizzati
     df_train = load_data(train_path)
@@ -123,11 +123,11 @@ def main():
     X = df.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y = df['BLASTO NY'].values  # Colonna target
 
-    model = RocketClassifier(num_kernels=best_kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)
-    model = train_model(model, X, y)
+    final_model = RocketClassifier(num_kernels=best_kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)
+    final_model = train_model(model, X, y)
 
     # Valutazione finale sul test set
-    accuracy, balanced_accuracy, kappa, brier, f1, cm = evaluate_model(model, X_test, y_test)
+    accuracy, balanced_accuracy, kappa, brier, f1, cm = evaluate_model(final_model, X_test, y_test)
     print("\n=====FINAL TEST RESULTS=====")
     print(f"Test Accuracy: {accuracy:.4f}")
     print(f"Test Balanced Accuracy: {balanced_accuracy:.4f}")
@@ -135,11 +135,11 @@ def main():
     print(f"Test Brier Score Loss: {brier:.4f}")
     print(f"Test F1 Score: {f1:.4f}")
 
-    cm_path = os.path.join(parent_dir, "confusion_matrix_ROCKET_" + selected_days + ".png")
+    cm_path = os.path.join(parent_dir, "confusion_matrix_ROCKET_" + str(days_to_consider) + "Days.png")
     save_confusion_matrix(cm, cm_path)
 
-    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_rocket_model_{selected_days}.pth")
-    torch.save(model, best_model_path)
+    best_model_path = os.path.join(parent_dir, conf.test_dir, f"best_rocket_model_{days_to_consider}Days.pth")
+    torch.save(final_model, best_model_path)
     print(f'Modello salvato in: {best_model_path}')
     
 

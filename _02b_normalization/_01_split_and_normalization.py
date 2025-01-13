@@ -17,13 +17,9 @@ from config import utils
 def load_data():
     data = pd.read_csv(conf.csv_file_path)
 
-    # Cambiare i booleani in "Config_02b_normalization" per definire il numero di giorni da prendere in considerazione
-    if conf.Only5Days:
-        data = data.iloc[:,:utils.num_frames_5Days]
-
-    if conf.Only3Days:
-        data = data.iloc[:,:utils.num_frames_3Days]
-
+    # Filtra il numero di giorni da considerare
+    max_frames = utils.num_frames_by_days(conf.days_to_consider)
+    data = data.iloc[:, :max_frames]
     return data
 
 
@@ -95,35 +91,15 @@ def normalize_data(train_data, val_data, test_data):
 
 # Salvataggio dei file normalizzati
 def save_data(train_data, val_data, test_data):
-    if conf.Only3Days:
-        train_data.to_csv(conf.normalized_train_path_3Days, index=False)
-        val_data.to_csv(conf.normalized_val_path_3Days, index=False)
-        test_data.to_csv(conf.normalized_test_path_3Days, index=False)
-        print("Dati salvati con successo nei file CSV a 3 giorni normalizzati.")
-        print("=======================================================")
-        print(f"Train salvato in: {conf.normalized_train_path_3Days}")
-        print(f"Validation salvato in: {conf.normalized_val_path_3Days}")
-        print(f"Test salvato in: {conf.normalized_test_path_3Days}")
+    base_path = conf.normalized_base_path.format(days=conf.days_to_consider)
+    train_data.to_csv(f"{base_path}_train.csv", index=False)
+    val_data.to_csv(f"{base_path}_val.csv", index=False)
+    test_data.to_csv(f"{base_path}_test.csv", index=False)
 
-    elif conf.Only5Days:
-        train_data.to_csv(conf.normalized_train_path_5Days, index=False)
-        val_data.to_csv(conf.normalized_val_path_5Days, index=False)
-        test_data.to_csv(conf.normalized_test_path_5Days, index=False)
-        print("Dati salvati con successo nei file CSV a 5 giorni normalizzati.")
-        print("=======================================================")
-        print(f"Train salvato in: {conf.normalized_train_path_5Days}")
-        print(f"Validation salvato in: {conf.normalized_val_path_5Days}")
-        print(f"Test salvato in: {conf.normalized_test_path_5Days}")
-    
-    else:
-        train_data.to_csv(conf.normalized_train_path_7Days, index=False)
-        val_data.to_csv(conf.normalized_val_path_7Days, index=False)
-        test_data.to_csv(conf.normalized_test_path_7Days, index=False)
-        print("Dati salvati con successo nei file CSV a 7 giorni normalizzati.")
-        print("=======================================================")
-        print(f"Train salvato in: {conf.normalized_train_path_7Days}")
-        print(f"Validation salvato in: {conf.normalized_val_path_7Days}")
-        print(f"Test salvato in: {conf.normalized_test_path_7Days}")
+    print(f"Dati salvati con successo per {conf.days_to_consider} giorni.")
+    print(f"Train: {base_path}_train.csv")
+    print(f"Validation: {base_path}_val.csv")
+    print(f"Test: {base_path}_test.csv")
 
 
 def main():

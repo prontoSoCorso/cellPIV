@@ -31,14 +31,11 @@ except Exception as e:
 data = pd.read_csv(conf.final_csv_path)
 
 # Seleziona le colonne delle feature
-selected_days = "5Days"
+days_to_consider = conf.days_to_consider
 
-if selected_days == "3Days":
-    features = data.iloc[:, 3:utils.num_frames_3Days]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
-elif selected_days == "5Days":
-    features = data.iloc[:, 3:utils.num_frames_5Days]
-else:
-    features = data.iloc[:, 3:utils.num_frames_7Days]  # Ignora le prime 3 colonne (patient_id, dish_well, BLASTO NY)
+# Filtra il numero di giorni da considerare
+max_frames = utils.num_frames_by_days(days_to_consider)
+features = data.iloc[:, 3:max_frames]
 
 labels = data["BLASTO NY"]
 
@@ -59,14 +56,14 @@ for label, color in colors.items():
     subset = tsne_df[tsne_df["Label"] == label]
     plt.scatter(subset["Dim1"], subset["Dim2"], c=color, label=f"Classe {label}", alpha=0.7)
 
-plt.title(f"Visualizzazione t-SNE, {selected_days}")
+plt.title(f"Visualizzazione t-SNE, {days_to_consider} Days")
 plt.xlabel("Dimensione 1")
 plt.ylabel("Dimensione 2")
 plt.legend()
 plt.grid(True)
 
 # Salva immagine
-output_path = os.path.join(parent_dir, f"tSNE_{selected_days}.png")
+output_path = os.path.join(parent_dir, f"tSNE_{days_to_consider}Days.png")
 plt.savefig(output_path)
 print(f"Grafico salvato in: {output_path}")
 

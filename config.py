@@ -38,9 +38,11 @@ class utils:
     # Dim
     img_size                    = 500
     framePerDay                 = 96
-    num_frames_3Days            = framePerDay * 3
-    num_frames_5Days            = framePerDay * 5
-    num_frames_7Days            = framePerDay * 7
+
+    def num_frames_by_days(num_days):
+        tot_frames = utils.framePerDay*num_days
+        return tot_frames
+
     num_classes                 = 2
     project_name                = "BlastoClass_7days_672frames_optflow_LK"
 
@@ -114,32 +116,38 @@ class Config_02_temporalData:
     # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
     final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
 
+    days_to_consider = 1
 
 class Config_02b_normalization:
     # Data
-    temporalDataType            = Config_02_temporalData.dict
+    temporalDataType = Config_02_temporalData.dict
 
-    # Per gestire dati a 3, 5 o 7 giorni
-    Only3Days = 0
-    Only5Days = 1
+    # Per gestire dati a N giorni (usando un solo parametro invece di booleani multipli)
+    days_to_consider = 7  # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
 
-    #Paths 3 Days
-    csv_file_path               = Config_02_temporalData.final_csv_path
-    normalized_train_path_3Days = os.path.join(user_paths.path_excels, f"Normalized_train_3Days_{temporalDataType}.csv")
-    normalized_val_path_3Days   = os.path.join(user_paths.path_excels, f"Normalized_val_3Days_{temporalDataType}.csv")
-    normalized_test_path_3Days  = os.path.join(user_paths.path_excels, f"Normalized_test_3Days_{temporalDataType}.csv")
+    # Paths generici in base a `days_to_consider`
+    csv_file_path = Config_02_temporalData.final_csv_path
+    
+    # Base path generico per i file normalizzati
+    normalized_base_path = os.path.join(
+        user_paths.path_excels,
+        f"Normalized_{temporalDataType}_{days_to_consider}Days"
+    )
 
-    #Paths 5 Days
-    csv_file_path               = Config_02_temporalData.final_csv_path
-    normalized_train_path_5Days = os.path.join(user_paths.path_excels, f"Normalized_train_5Days_{temporalDataType}.csv")
-    normalized_val_path_5Days   = os.path.join(user_paths.path_excels, f"Normalized_val_5Days_{temporalDataType}.csv")
-    normalized_test_path_5Days  = os.path.join(user_paths.path_excels, f"Normalized_test_5Days_{temporalDataType}.csv")
+    # Metodo per ottenere i percorsi in base ai giorni selezionati
+    @staticmethod
+    def get_paths(days_to_consider=7):
+        """
+        Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
 
-    #Paths 7 Days
-    csv_file_path               = Config_02_temporalData.final_csv_path
-    normalized_train_path_7Days = os.path.join(user_paths.path_excels, f"Normalized_train_7Days_{temporalDataType}.csv")
-    normalized_val_path_7Days   = os.path.join(user_paths.path_excels, f"Normalized_val_7Days_{temporalDataType}.csv")
-    normalized_test_path_7Days  = os.path.join(user_paths.path_excels, f"Normalized_test_7Days_{temporalDataType}.csv")
+        :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
+        :return: Tuple con i percorsi di train, validation e test.
+        """
+        base_path = Config_02b_normalization.normalized_base_path.format(days=days_to_consider)
+        train_path = f"{base_path}_train.csv"
+        val_path = f"{base_path}_val.csv"
+        test_path = f"{base_path}_test.csv"
+        return train_path, val_path, test_path
 
     # Seed
     seed = utils.seed
@@ -154,13 +162,15 @@ class Config_02b_normalization:
 
 
 class Config_03_train:
-    project_name    = utils.project_name
+    project_name = utils.project_name
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
     num_classes = utils.num_classes
-    img_size    = utils.img_size
+    img_size = utils.img_size
     seed = utils.seed
-    test_dir    = "_04_test"
+    test_dir = "_04_test"
+
+    @staticmethod
     def seed_everything(seed):
         random.seed(seed)
         np.random.seed(seed)
@@ -169,38 +179,27 @@ class Config_03_train:
             torch.cuda.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
 
-    # Dizionari per gestire percorsi in modo dinamico
-    frame_options = {
-        "3Days": {
-            "train_path": Config_02b_normalization.normalized_train_path_3Days,
-            "val_path"  : Config_02b_normalization.normalized_val_path_3Days,
-            "test_path" : Config_02b_normalization.normalized_test_path_3Days,
-        },
-        "5Days": {
-            "train_path": Config_02b_normalization.normalized_train_path_5Days,
-            "val_path"  : Config_02b_normalization.normalized_val_path_5Days,
-            "test_path" : Config_02b_normalization.normalized_test_path_5Days,
-        },
-        "7Days": {
-            "train_path": Config_02b_normalization.normalized_train_path_7Days,
-            "val_path"  : Config_02b_normalization.normalized_val_path_7Days,
-            "test_path" : Config_02b_normalization.normalized_test_path_7Days,
-        }
-    }
-
     # Metodo per ottenere i percorsi in base ai giorni selezionati
-    @classmethod
-    def get_paths(cls, selected_days="7Days"):
-        if selected_days in cls.frame_options:
-            paths = cls.frame_options[selected_days]
-            return paths["train_path"], paths["val_path"], paths["test_path"]
-        else:
-            raise ValueError(f"Opzione non valida per il numero di giorni: {selected_days}")
+    @staticmethod
+    def get_paths(days_to_consider):
+        """
+        Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
+
+        :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
+        :return: Tuple con i percorsi di train, validation e test.
+        """
+        base_path = os.path.join(
+            user_paths.path_excels,
+            f"Normalized_{Config_02b_normalization.temporalDataType}_{days_to_consider}Days"
+        )
+        train_path = f"{base_path}_train.csv"
+        val_path = f"{base_path}_val.csv"
+        test_path = f"{base_path}_test.csv"
+        return train_path, val_path, test_path
     
 
-
     # ROCKET
-    kernels     = [100,300,500,1000,2500,5000,7500,10000,12500,15000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernels     = [50,100,200,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
 
 
     # LSTM-FCN
