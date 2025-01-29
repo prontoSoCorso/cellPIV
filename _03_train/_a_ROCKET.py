@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import torch
 
-# Configurazione dei percorsi e dei parametri
+# Configurazione dei percorsi
 current_file_path = os.path.abspath(__file__)
 parent_dir = os.path.dirname(current_file_path)
 while not os.path.basename(parent_dir) == "cellPIV":

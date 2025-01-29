@@ -226,7 +226,7 @@ def main():
     print(f"Test Brier Score Loss: {test_brier:.4f}")
     print(f"Test F1 Score: {test_f1:.4f}")
 
-    cm_path = os.path.join(parent_dir, "confusion_matrix_lstmfcn_" + str(days_to_consider) + ".png")
+    cm_path = os.path.join(parent_dir, "confusion_matrix_lstmfcn_" + str(days_to_consider) + "Days.png")
     save_confusion_matrix(test_cm, cm_path)
     print(f"Confusion Matrix saved at: {cm_path}")
 

@@ -169,6 +169,8 @@ class Config_03_train:
     img_size = utils.img_size
     seed = utils.seed
     test_dir = "_04_test"
+    num_labels = 2
+    Data_shape = (1,93) #variabile di base, verrà aggiornata in ConvTran
 
     @staticmethod
     def seed_everything(seed):
