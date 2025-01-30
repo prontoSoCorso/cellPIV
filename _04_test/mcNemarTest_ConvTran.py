@@ -2,10 +2,8 @@ import sys
 import os
 import pandas as pd
 import torch
-import torch.nn as nn
-from sklearn.metrics import confusion_matrix
 from statsmodels.stats.contingency_tables import mcnemar
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 import timeit
 import numpy as np
 
@@ -21,7 +19,7 @@ from config import Config_03_train as conf
 from _03_train.ConvTranUtils import CustomDataset
 from _99_ConvTranModel.model import model_factory
 from _99_ConvTranModel.utils import load_model
-import _04_test.myFunct as myFunct
+import _04_test.myFunctions as myFunctions
 
 device = conf.device
 
@@ -48,7 +46,7 @@ def apply_mcnemar(y_true, y_pred_model1, y_pred_model2, model_1_name, model_2_na
 
     # Salva la matrice come immagine con il risultato del test
     contingency_path = os.path.join(current_dir, f"contingency_matrix_{model_1_name}_{model_2_name}.png")
-    myFunct.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
+    myFunctions.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
     print(f"Matrice di contingenza salvata in: {contingency_path}")
 
     # Interpretazione

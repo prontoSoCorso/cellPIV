@@ -1,11 +1,8 @@
 import sys
 import os
-import pandas as pd
 import torch
-import torch.nn as nn
-from sklearn.metrics import confusion_matrix
 from statsmodels.stats.contingency_tables import mcnemar
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 import time
 import numpy as np
 
@@ -19,20 +16,9 @@ sys.path.append(parent_dir)
 
 from config import Config_03_train as conf
 from  _03_train._b_LSTMFCN_PyTorch import LSTMFCN
-import _04_test.myFunct as myFunct
+import _04_test.myFunctions as myFunctions
 
 device = conf.device
-
-# Funzione per caricare i dati
-def load_data(csv_file_path):
-    return pd.read_csv(csv_file_path)
-
-# Funzione per preparare i dati
-def prepare_data(df):
-    X = torch.tensor(df.iloc[:, 3:].values, dtype=torch.float32).unsqueeze(-1)  # Aggiungo dimensione per il canale
-    y = torch.tensor(df['BLASTO NY'].values, dtype=torch.long)
-    return TensorDataset(X, y)
-
 
 # Funzione per eseguire il test di McNemar
 def apply_mcnemar(y_true, y_pred_model1, y_pred_model2, model_1_name, model_2_name):
@@ -53,7 +39,7 @@ def apply_mcnemar(y_true, y_pred_model1, y_pred_model2, model_1_name, model_2_na
 
     # Salva la matrice come immagine con il risultato del test
     contingency_path = os.path.join(current_dir, f"contingency_matrix_{model_1_name}_{model_2_name}.png")
-    myFunct.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
+    myFunctions.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
     print(f"Matrice di contingenza salvata in: {contingency_path}")
 
     # Interpretazione
@@ -73,8 +59,8 @@ def main():
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = conf.get_paths(days_to_consider)
     # Carico i dati
-    df_test = load_data(test_path)
-    test_data = prepare_data(df_test)
+    df_test = myFunctions.load_data(test_path)
+    test_data = myFunctions.prepare_LSTMFCN_data(df_test)
     test_loader = DataLoader(test_data, batch_size=conf.batch_size_FCN, shuffle=False)
 
     # Carico i modelli da confrontare

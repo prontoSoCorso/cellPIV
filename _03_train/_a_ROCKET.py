@@ -55,7 +55,7 @@ def main():
     best_model_path = None
 
     # Specifica il numero di giorni da considerare
-    days_to_consider = 1
+    days_to_consider = 7
 
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = conf.get_paths(days_to_consider)

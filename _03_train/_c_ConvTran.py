@@ -28,7 +28,7 @@ if __name__ == '__main__':
     device = Initialization()
 
     # Specifica il numero di giorni da considerare
-    days_to_consider = 1
+    days_to_consider = 7
 
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = config.get_paths(days_to_consider)
