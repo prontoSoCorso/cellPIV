@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 from statsmodels.stats.contingency_tables import mcnemar
 from torch.utils.data import DataLoader
-import timeit
+import time
 import numpy as np
 
 # Aggiungo il percorso del progetto al sys.path
@@ -134,5 +134,6 @@ def main():
     apply_mcnemar(np.array(y_true1), np.array(y_pred_model1), np.array(y_pred_model2), model_name_without_extension_1, model_name_without_extension_2)
 
 if __name__ == "__main__":
-    execution_time = timeit.timeit(main, number=1)
-    print("Execution time:", execution_time, "seconds")
+    start_time = time.time()
+    main()
+    print("Execution time:", time - start_time, "seconds")

@@ -1,6 +1,6 @@
 import os
 import torch
-import timeit
+import time
 import pandas as pd
 from statsmodels.stats.contingency_tables import mcnemar
 import sys
@@ -99,6 +99,7 @@ def main():
     apply_mcnemar(y_test1, y_test2, y_pred_1, y_pred_2, model_name_without_extension_1, model_name_without_extension_2, output_dir)
 
 if __name__ == "__main__":
-    execution_time = timeit.timeit(main, number=1)
-    print("Execution time:", execution_time, "seconds")
+    start_time = time.time()
+    main()
+    print("Execution time:", time - start_time, "seconds")
 

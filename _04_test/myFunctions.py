@@ -56,42 +56,41 @@ def calculate_metrics(y_true, y_pred, y_prob):
     return np.array([accuracy, balanced_accuracy, kappa, brier, f1])
 
 
-# Funzione di bootstrap per media, deviazione standard e intervalli di confidenza
-def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=1000, alpha=0.95):
+# Funzione di bootstrap per ottenere tutte le metriche
+def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=100, alpha=0.95, show_normality=False):
     bootstrapped_metrics = []
 
     for _ in range(n_bootstraps):
-        indices = np.random.randint(0, len(y_true), len(y_true))
+        undersampling_proportion = 0.8
+        indices = np.random.randint(0, len(y_true), int(len(y_true)*undersampling_proportion))
         if len(np.unique(y_true[indices])) < 2 or len(np.unique(y_pred[indices])) < 2:
             continue
-
         metrics = calculate_metrics(y_true[indices], y_pred[indices], y_prob[indices])
         bootstrapped_metrics.append(metrics)
 
     bootstrapped_metrics = np.array(bootstrapped_metrics)
 
+    # Test di normalità per ogni metrica
     for i, metric in enumerate(["Accuracy", "Balanced Accuracy", "Kappa", "Brier", "F1"]):
         stat, p_value = shapiro(bootstrapped_metrics[:, i])
         print(f"Test di Shapiro-Wilk per {metric}: stat={stat:.4f}, p-value={p_value:.4f}")
 
-        if p_value < 0.05:
-            # Histogram
+        if show_normality and (p_value < 0.05):
             plt.figure(figsize=(8, 5))
             sns.histplot(bootstrapped_metrics[:, i], kde=True, bins=50)
             plt.title(f"Distribuzione bootstrap - {metric}")
             plt.show()
 
-            # QQ-plot per valutare la normalità
             plt.figure(figsize=(6, 5))
             probplot(bootstrapped_metrics[:, i], dist="norm", plot=plt)
             plt.title(f"QQ-plot - {metric}")
             plt.show()
 
-    # In generale, si vede che distribuzioni sono normali (Con bootstrap>1000 facilmente intuibile)
+    # Calcolo delle statistiche riassuntive
     mean = np.mean(bootstrapped_metrics, axis=0)
     std = np.std(bootstrapped_metrics, axis=0)
     lower = np.percentile(bootstrapped_metrics, (1 - alpha) / 2 * 100, axis=0)
     upper = np.percentile(bootstrapped_metrics, (1 + alpha) / 2 * 100, axis=0)
     
-    return mean, std, lower, upper
+    return mean, std, lower, upper, bootstrapped_metrics
 
