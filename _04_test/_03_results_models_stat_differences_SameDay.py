@@ -30,7 +30,7 @@ metrics = ["Accuracy", "F1 Score"]
 
 # Funzione per calcolare l'effect size r per Mann-Whitney
 def mann_whitney_u_test_with_effect_size(group1, group2):
-    u_stat, p_value = mannwhitneyu(group1, group2)
+    u_stat, p_value = mannwhitneyu(group1, group2, alternative="greater")
     
     # Calcolo della statistica Z
     n1, n2 = len(group1), len(group2)
