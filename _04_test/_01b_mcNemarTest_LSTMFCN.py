@@ -76,7 +76,7 @@ def main():
         dropout=conf.dropout_FCN,
         num_layers=conf.num_layers_FCN
     ).to(device)
-    state_dict1 = torch.load(model_1_path, map_location=device)
+    state_dict1 = torch.load(model_1_path, map_location=device, weights_only="True")
     model1.load_state_dict(state_dict1)
     model1.eval()
     
@@ -87,7 +87,7 @@ def main():
         dropout=conf.dropout_FCN,
         num_layers=conf.num_layers_FCN
     ).to(device)
-    state_dict2 = torch.load(model_2_path, map_location=device)
+    state_dict2 = torch.load(model_2_path, map_location=device, weights_only="True")
     model2.load_state_dict(state_dict2)
     model2.eval()
 

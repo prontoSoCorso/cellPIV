@@ -124,7 +124,7 @@ class SupervisedTrainer:
         balanced_accuracy = balanced_accuracy_score(targets_list, preds_list)
         kappa = cohen_kappa_score(targets_list, preds_list)
         brier = brier_score_loss(targets_list, probs_list, pos_label=1)
-        f1 = f1_score(targets_list, preds_list, average='binary')
+        f1 = f1_score(targets_list, preds_list, average='binary', zero_division="warn")
         cm = confusion_matrix(targets_list, preds_list)
 
         # Stampa metriche

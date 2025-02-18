@@ -45,6 +45,12 @@ def prepare_LSTMFCN_data(df):
     y = torch.tensor(df['BLASTO NY'].values, dtype=torch.long)
     return TensorDataset(X, y)
 
+# Funzione per testare il modello e ottenere predizioni e probabilità
+def test_model_ROCKET(model, X):
+    y_pred = model.predict(X)
+    y_prob = model.predict_proba(X)[:, 1]  # Probabilità della classe positiva
+    return y_pred, y_prob
+
 
 # Funzione per calcolare le metriche
 def calculate_metrics(y_true, y_pred, y_prob):
@@ -52,12 +58,12 @@ def calculate_metrics(y_true, y_pred, y_prob):
     balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
     kappa = cohen_kappa_score(y_true, y_pred)
     brier = brier_score_loss(y_true, y_prob, pos_label=1)
-    f1 = f1_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred, zero_division="warn")
     return np.array([accuracy, balanced_accuracy, kappa, brier, f1])
 
 
 # Funzione di bootstrap per ottenere tutte le metriche
-def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=100, alpha=0.95, show_normality=False):
+def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=50, alpha=0.95, show_normality=False):
     bootstrapped_metrics = []
 
     for _ in range(n_bootstraps):

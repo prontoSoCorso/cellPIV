@@ -15,12 +15,6 @@ sys.path.append(parent_dir)
 
 import _04_test.myFunctions as myFunctions
 
-# Funzione per testare il modello e ottenere predizioni e probabilità
-def test_model(model, X):
-    y_pred = model.predict(X)
-    y_prob = model.predict_proba(X)[:, 1]  # Probabilità della classe positiva
-    return y_pred, y_prob
-
 # Caricamento modello e dati per più giorni
 def main():
     days = [1, 3, 5, 7]
@@ -57,7 +51,7 @@ def main():
         X_test = np.nan_to_num(X_test, nan=0.0, posinf=1e6, neginf=-1e6)
 
         # Ottenere predizioni e probabilità
-        y_pred, y_prob = test_model(model, X_test)
+        y_pred, y_prob = myFunctions.test_model_ROCKET(model, X_test)
 
         # Calcolare metriche bootstrap
         print(f"Test di normalità per {days_val} giorni:")

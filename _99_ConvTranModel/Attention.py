@@ -54,7 +54,7 @@ class Attention_Rel_Scl(nn.Module):
         self.query = nn.Linear(emb_size, emb_size, bias=False)
 
         self.relative_bias_table = nn.Parameter(torch.zeros((2 * self.seq_len - 1), num_heads))
-        coords = torch.meshgrid((torch.arange(1), torch.arange(self.seq_len)))
+        coords = torch.meshgrid((torch.arange(1), torch.arange(self.seq_len)), indexing="xy")   # indexing xy for "column, row" or ij for "row, column" 
         coords = torch.flatten(torch.stack(coords), 1)
         relative_coords = coords[:, :, None] - coords[:, None, :]
         relative_coords[1] += self.seq_len - 1

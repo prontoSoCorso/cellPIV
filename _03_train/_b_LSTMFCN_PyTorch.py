@@ -59,7 +59,7 @@ def evaluate_model(model, dataloader, criterion):
     balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
     kappa = cohen_kappa_score(y_true, y_pred)
     brier = brier_score_loss(y_true, y_prob, pos_label=1)
-    f1 = f1_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred, zero_division="warn")
     cm = confusion_matrix(y_true, y_pred)
 
     return total_loss / len(dataloader), accuracy, balanced_accuracy, kappa, brier, f1, cm

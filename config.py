@@ -13,7 +13,18 @@ while os.path.basename(PROJECT_ROOT) != "cellPIV":
 
 # 0 newPC, 1 lorenzo, 2 AWS
 sourceForPath = 0
-print(sourceForPath)
+
+print_source = 0
+if print_source:
+    if sourceForPath==0: 
+        to_print = "Workstation Uni"
+    elif sourceForPath==1:
+        to_print = "PC Lorenzo"
+    elif sourceForPath==2:
+        to_print = "AWS"
+    print(f"Using path for this computer: {to_print}")
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class user_paths:
     if sourceForPath == 0:

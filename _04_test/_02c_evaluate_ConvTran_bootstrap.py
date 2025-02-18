@@ -33,12 +33,13 @@ def test_model(model, test_loader):
             X, y = X.to(device), y.to(device)
             output = model(X)
 
-            prob = torch.softmax(output, dim=1)[:, 1].cpu().numpy()
-            pred = torch.argmax(output, dim=1).cpu().numpy()
-
+            pred = torch.argmax(output, dim=1)
+            prob = torch.softmax(output, dim=1)[:, 1]
+            # si considera come probabilità finale quella associata alla classe 1 --> faccio [:, 1]
+            
             y_true.extend(y.cpu().numpy().flatten())
-            y_pred.extend(pred.flatten())
-            y_prob.extend(prob.flatten())
+            y_pred.extend(pred.cpu().numpy().flatten())
+            y_prob.extend(prob.cpu().numpy().flatten())
 
     return np.array(y_true), np.array(y_pred), np.array(y_prob)
 

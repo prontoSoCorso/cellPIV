@@ -121,19 +121,11 @@ def main():
         for X, y in test_loader_2:
             outputs2 = model2(X)
             preds2 = torch.argmax(outputs2, dim=1)
-
-            y_true2.extend(y.cpu().numpy())
-            y_pred_model2.extend(preds2.cpu().numpy())
-
-    if y_true1!=y_true2:
-        exit()
-
-    # Eseguo il test di McNemar
-    model_name_without_extension_1 = os.path.splitext(model_1_name)[0]
+or
     model_name_without_extension_2 = os.path.splitext(model_2_name)[0]
     apply_mcnemar(np.array(y_true1), np.array(y_pred_model1), np.array(y_pred_model2), model_name_without_extension_1, model_name_without_extension_2)
 
 if __name__ == "__main__":
     start_time = time.time()
     main()
-    print("Execution time:", time - start_time, "seconds")
+    print("Execution time:", time.time() - start_time, "seconds")

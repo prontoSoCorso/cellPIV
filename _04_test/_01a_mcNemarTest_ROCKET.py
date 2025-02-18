@@ -20,13 +20,6 @@ def load_data(csv_file_path):
     return pd.read_csv(csv_file_path)
 
 
-# Funzione per valutare il modello (ritorna predizioni e probabilità)
-def test_model(model, X):
-    y_pred = model.predict(X)
-    y_prob = model.predict_proba(X)[:, 1]  # Probabilità della classe positiva
-    return y_pred, y_prob
-
-
 # Funzione per applicare il test di McNemar
 def apply_mcnemar(y_true1, y_true2, y_pred_model_1, y_pred_model_2, model_1_name, model_2_name, output_dir):
     # Costruzione della matrice 2x2 per McNemar
@@ -90,8 +83,8 @@ def main():
     y_test2 = df_test2['BLASTO NY'].values  # Colonna target
 
     # Test sui due modelli
-    y_pred_1, _ = test_model(model_1, X_test1)
-    y_pred_2, _ = test_model(model_2, X_test2)
+    y_pred_1, _ = myFunctions.test_model_ROCKET(model_1, X_test1)
+    y_pred_2, _ = myFunctions.test_model_ROCKET(model_2, X_test2)
 
     # Applicazione del test di McNemar
     model_name_without_extension_1 = os.path.splitext(model_1_name)[0]
@@ -101,5 +94,5 @@ def main():
 if __name__ == "__main__":
     start_time = time.time()
     main()
-    print("Execution time:", time - start_time, "seconds")
+    print("Execution time:", time.time() - start_time, "seconds")
 
