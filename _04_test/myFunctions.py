@@ -3,7 +3,7 @@ import seaborn as sns
 import torch
 import pandas as pd
 from torch.utils.data import TensorDataset
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, f1_score
+from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, f1_score, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import shapiro, probplot
@@ -60,6 +60,26 @@ def calculate_metrics(y_true, y_pred, y_prob):
     brier = brier_score_loss(y_true, y_prob, pos_label=1)
     f1 = f1_score(y_true, y_pred, zero_division="warn")
     return np.array([accuracy, balanced_accuracy, kappa, brier, f1])
+
+
+def calculate_metrics_with_spec(y_true, y_pred, y_prob):
+    accuracy = accuracy_score(y_true, y_pred)
+    balanced_accuracy = balanced_accuracy_score(y_true, y_pred)
+    kappa = cohen_kappa_score(y_true, y_pred)
+    brier = brier_score_loss(y_true, y_prob, pos_label=1)
+
+    # Estraggo TN, FP, FN, TP
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    
+    # Calcolo Specificità (TNR), gestendo la divisione per zero
+    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0  
+    
+    # Calcolo F1-score manualmente per gestire la divisione per zero
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+    f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+
+    return np.array([accuracy, balanced_accuracy, kappa, brier, f1, specificity])
 
 
 # Funzione di bootstrap per ottenere tutte le metriche

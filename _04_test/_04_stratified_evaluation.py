@@ -26,7 +26,7 @@ from _03_train.ConvTranUtils import CustomDataset
 import _04_test.myFunctions as myFunctions
 
 
-def main():
+def main(merge_type, days_to_consider = 1):
     device = conf.device
     mp.set_start_method("spawn", force=True)  # Imposta multiprocessing con spawn
 
@@ -54,27 +54,30 @@ def main():
     - PN = >3 (Polipronucleato, anomalo, disfunzionale)
     - PN = deg (embrioni non vitali, con severi danni cellulari, no divisione cellulare o eccessiva frammentazione)
     '''
-    merge_type = True
-    if merge_type:
+    
+    if merge_type == "anomalous":
         # Fondo "2.1PN", "1.1PN", "1PN", "3PN", ">3PN" in una nuova categoria (Sono tutti i fecondati anomali)
         df_db["merged_PN"] = df_db["PN"].replace({"1PN":"anomalous", "1.1PN":"anomalous", "2.1PN":"anomalous", "3PN":"anomalous", ">3PN":"anomalous"})
         table2 = df_db.groupby("merged_PN")["blasto ny"].value_counts().unstack()
-        output_csv = "stratified_model_performance_1"
+        output_csv_first_part = "stratified_model_performance_anomalous"
         print(tabulate(table2, headers="keys", tablefmt="pretty"))
-    else:
+    elif merge_type == "not_vital":
         # Fondo "0PN" e "deg" in una nuova categoria (non vitali)
         df_db["merged_PN"] = df_db["PN"].replace({"0PN":"not_vital", "deg":"not_vital"})
         table2 = df_db.groupby("merged_PN")["blasto ny"].value_counts().unstack()
-        output_csv = "stratified_model_performance_2"
+        output_csv_first_part = "stratified_model_performance_notVital"
         print(tabulate(table2, headers="keys", tablefmt="pretty"))
+    else:
+        # No merging
+        print("=========== No selection of merge type ===========")
+        output_csv_first_part = "stratified_model_performance_noMerging"
 
-    
+
 
 
     # ---------------------------
     # 2. Caricamento del Test CSV
     # ---------------------------
-    days_to_consider = 3
     # Scelgo numero di giorni per il test
     test_csv_file = os.path.join(parent_dir, f"Normalized_sum_mean_mag_{days_to_consider}Days_test.csv")
     if not os.path.exists(test_csv_file):
@@ -182,21 +185,25 @@ def main():
     conv_model_path = os.path.join(current_dir, f"best_convTran_model_{days_to_consider}Days.pkl")
     if not os.path.exists(conv_model_path):
         raise FileNotFoundError(f"Modello ConvTran non trovato in {conv_model_path}")
-    conv_model = model_factory(conf).to(device)
-    conv_model = load_model(conv_model, conv_model_path)    
-
+    
     # Funzione di test per ConvTran (simile a quella usata precedentemente):
-    def test_model_ConvTran(model, X, y, batch_size=conf.batch_size):
+    def test_model_ConvTran(X, y, batch_size=conf.batch_size):
         dataset = CustomDataset(X.reshape(X.shape[0], 1, -1), y)
         num_workers = max(1, os.cpu_count() - 6)  # Lascio almeno 6 core per il sistema
         loader = DataLoader(dataset, batch_size=conf.batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
         
-        model.eval()
+        conf.num_labels = 2 # len(set(loader.dataset.labels)) --> lo forzo a 2 perché le classi sono due, anceh se alcune volte il test non ha esempi positivi (e.g per i deg o quelli con 0PN non ci sono mai blasto)
+        conf.Data_shape = (loader.dataset[0][0].shape[0], loader.dataset[0][0].shape[1])
+        
+        conv_model = model_factory(conf).to(device)
+        conv_model = load_model(conv_model, conv_model_path)    
+
+        conv_model.eval()
         all_pred, all_prob, all_true = [], [], []
         with torch.no_grad():
             for X_batch, y_batch in loader:
                 X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-                output = model(X_batch)
+                output = conv_model(X_batch)
 
                 prob = torch.softmax(output, dim=1)[:, 1]
                 pred = torch.argmax(output, dim=1)
@@ -271,7 +278,7 @@ def main():
 
     # --- Valutazione ConvTran ---
     print("\nValutazione modello ConvTran...")
-    _, y_pred_c, y_prob_c= test_model_ConvTran(conv_model, X, y)
+    _, y_pred_c, y_prob_c = test_model_ConvTran(X, y)
     acc_c, _, _, _, f1_c = myFunctions.calculate_metrics(y, y_pred_c, y_prob_c)
     performance_results.append({
         "Model": "ConvTran",
@@ -282,7 +289,7 @@ def main():
     for group, group_df in df_merged.groupby("merged_PN"):
         X_group = group_df.iloc[:, 3:df_test.shape[1]].values
         y_group = group_df["BLASTO NY"].values
-        _, y_pred_grp, y_prob_grp = test_model_ConvTran(conv_model, X_group, y_group)
+        _, y_pred_grp, y_prob_grp = test_model_ConvTran(X_group, y_group)
         acc_grp, _, _, _, f1_grp = myFunctions.calculate_metrics(y_group, y_pred_grp, y_prob_grp)
         performance_results.append({
             "Model": "ConvTran",
@@ -295,7 +302,8 @@ def main():
     # 8. Salvataggio dei Risultati
     # ---------------------------
     df_performance = pd.DataFrame(performance_results)
-    output_file = os.path.join(current_dir, output_csv, "_", str(days_to_consider), "Days.csv")
+    output_csv_complete = output_csv_first_part + "_" + str(days_to_consider) + "Days.csv"
+    output_file = os.path.join(current_dir, output_csv_complete)
     df_performance.to_csv(output_file, index=False)
     print(f"\n📁 Risultati della valutazione stratificata salvati in: {output_file}")
 
@@ -303,7 +311,9 @@ def main():
 
 
 if __name__ == "__main__":
+    merge_type = "not_vital"    # "anomalous" OR "not_vital" OR ""
+    days_to_consider = 3        # 1,3,5,7
     start_time = time.time()
-    main()
+    main(merge_type, days_to_consider)
     print("Execution time:", time.time() - start_time, "seconds")
 
