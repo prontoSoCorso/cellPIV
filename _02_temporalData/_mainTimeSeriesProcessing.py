@@ -1,7 +1,8 @@
 import os
 import sys
 import time
-
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
 # Rileva il percorso della cartella genitore, che sarà la stessa in cui ho il file da convertire
 current_dir = os.path.dirname(os.path.abspath(__file__))

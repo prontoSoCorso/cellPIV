@@ -120,8 +120,6 @@ def process_frames(folder_path, dish_well, img_size, num_minimum_frames, num_ini
     prev_frame = cv2.resize(prev_frame, target_size)
     
     mean_magnitude, vorticity, std_dev, hybrid = [], [], [], []
-    output_folder = os.path.join(output_base, dish_well)
-    os.makedirs(output_folder, exist_ok=True)
     
     for i, frame_file in enumerate(frame_files[1:]):
         current_frame_path = os.path.join(folder_path, frame_file)
