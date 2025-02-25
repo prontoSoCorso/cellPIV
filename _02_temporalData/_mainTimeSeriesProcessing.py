@@ -19,9 +19,8 @@ from _02_temporalData._01_fromPklToCsv import fromPickleToCsv, create_final_csv
 from _02_temporalData._02_dimReduction import compute_tSNE, compute_UMAP
 
 
-def main(embedding_type="UMAP", num_max_days=7, days_to_consider_dim_reduction=7):
+def main(embedding_type="UMAP", num_max_days=7, days_to_consider_dim_reduction=[7]):
     # importo e trasformo i file pkl salvati al passo precedente (o qualsiasi file pickle con stesso formato: key (dish_well) e valori della serie)
-    os.makedirs(conf.temporal_csv_path, exist_ok=True)
     path_pkl = conf.path_pkl
     output_temporal_csv_path = conf.temporal_csv_path
     num_frames_MaxDays = utils.num_frames_by_days(num_max_days)
@@ -35,10 +34,11 @@ def main(embedding_type="UMAP", num_max_days=7, days_to_consider_dim_reduction=7
 
     # Rappresentazione visuale dei dati: embedding tramite umap e/o tSNE
     final_csv_path = conf.final_csv_path
-    output_path_base = conf.csv_file_Danilo_path
+    output_path_base = os.path.join(current_dir, "dim_reduction_files")
+    os.makedirs(output_path_base, exist_ok=True)
 
     for day in days_to_consider_dim_reduction:
-        max_frames = utils.num_frames_by_days(days_to_consider_dim_reduction)
+        max_frames = utils.num_frames_by_days(day)
 
         if embedding_type.lower()=="umap":
             print("Computing UMAP...")

@@ -52,7 +52,7 @@ def create_final_csv(input_temporal_csv_path, original_csv_path, output_final_cs
     # Elimina duplicati
     temporal_data = temporal_data.drop_duplicates(subset=["dish_well"], keep="first")
     labels_data = labels_data.drop_duplicates(subset=["dish_well"], keep="first")
-    print(f"========== Duplicati Eliminati! ==========")
+    print(f"\n========== Duplicati Eliminati! ==========\n")
 
     '''
     Duplicati trovati in labels_data:
