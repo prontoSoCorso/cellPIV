@@ -3,29 +3,14 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import chi2_contingency, kstest, shapiro, mannwhitneyu, normaltest, probplot, ttest_ind, pointbiserialr
-
 import os
-import sys
-
-# Configurazione dei percorsi e dei parametri
-current_file_path = os.path.abspath(__file__)
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_file_path)
-while not os.path.basename(parent_dir) == "cellPIV":
-    parent_dir = os.path.dirname(parent_dir)
-sys.path.append(parent_dir)
-
-from config import Config_00_preprocessing as conf
-
-# Percorso del file CSV
-input_csv_path = conf.path_addedID_csv
 
 def load_data(file_path):
     df = pd.read_csv(file_path, sep=',')
     df['tSB'] = df['tSB'].replace('-', np.nan).astype(float)
     return df
 
-def plot_age_plots(df, columns, target):
+def plot_age_plots(df, columns, target, output_dir):
     fig, axs = plt.subplots(2, 1, figsize=(12, 6))
 
     for i, column in enumerate(columns):
@@ -61,10 +46,10 @@ def plot_age_plots(df, columns, target):
                             color='black', weight='semibold')
 
     plt.tight_layout()
-    save_path = os.path.join(current_dir, "plots_age.png")
+    save_path = os.path.join(output_dir, "plots_age.png")
     plt.savefig(save_path)
 
-def plot_categorical_plots(df, columns, target):
+def plot_categorical_plots(df, columns, target, output_dir):
     fig, axs = plt.subplots(2, 1, figsize=(12, 6))
 
     for i, column in enumerate(columns):
@@ -102,10 +87,10 @@ def plot_categorical_plots(df, columns, target):
                                     textcoords='offset points')
 
     plt.tight_layout()
-    save_path = os.path.join(current_dir, "plots_categorical_vars.png")
+    save_path = os.path.join(output_dir, "plots_categorical_vars.png")
     plt.savefig(save_path)
 
-def normality_tests(df, column, target):
+def normality_tests(df, column, target, output_dir):
     group1 = df[df[target] == 0][column].dropna()
     group2 = df[df[target] == 1][column].dropna()
 
@@ -138,7 +123,7 @@ def normality_tests(df, column, target):
     probplot(group2, dist="norm", plot=axs[1])
     axs[1].set_title(f'QQ Plot for {column} of group2')
     
-    save_path = os.path.join(current_dir, "plots_normality_check.png")
+    save_path = os.path.join(output_dir, "plots_normality_check.png")
     plt.savefig(save_path)
 
 
@@ -189,7 +174,11 @@ def point_biserial_correlation(df, column, target):
     correlation, p_value = pointbiserialr(df[target], df[column].dropna())
     return correlation, p_value
 
-if __name__ == '__main__':
+
+
+
+
+def check_variable_independence(input_csv_path, output_dir):
     df = load_data(input_csv_path)
 
     # Variabili da analizzare
@@ -197,13 +186,13 @@ if __name__ == '__main__':
     categorical_columns = ['sperm quality', 'mezzo di coltura']
     target_column = 'BLASTO NY'
 
-    plot_age_plots(df, continuous_columns, target_column)
-    plot_categorical_plots(df, categorical_columns, target_column)
+    plot_age_plots(df, continuous_columns, target_column, output_dir)
+    plot_categorical_plots(df, categorical_columns, target_column, output_dir)
 
     # Test di normalità per "maternal age"
     for column in continuous_columns:
         print(f"\n===== Normality tests for {column}: =====")
-        normality_tests(df, column, target_column)
+        normality_tests(df, column, target_column, output_dir)
 
     # Test statistici
     print("\n===== Statistical Tests =====")
@@ -224,7 +213,6 @@ if __name__ == '__main__':
     for column in categorical_columns:
         chi2, p, cramers_v = chi_square_test_with_effect_size(df, column, target_column)
         print(f'Chi-square test for {column}: chi2 = {chi2:.4f}, p = {p:.4f}, Cramér\'s V = {cramers_v:.4f}')
-
 
 
 

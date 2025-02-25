@@ -1,21 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
-import sys
 from tabulate import tabulate
 import matplotlib.pyplot as plt
-
-# Configurazione dei percorsi e dei parametri
-current_file_path = os.path.abspath(__file__)
-parent_dir = os.path.dirname(current_file_path)
-while not os.path.basename(parent_dir) == "cellPIV":
-    parent_dir = os.path.dirname(parent_dir)
-sys.path.append(parent_dir)
-
-from config import Config_00_preprocessing as conf
-
-# Percorso del file CSV
-input_csv_path = conf.path_addedID_csv
 
 # Funzioni di utilità
 def load_data(file_path):
@@ -52,7 +39,7 @@ def num_non_blastocysts_per_year(df):
     df = extract_year_from_dish(df)
     return df[df['BLASTO NY'] == 0].groupby('year').size().to_dict()
 
-def save_plot_images(samples_per_year, blastocysts_per_year, non_blastocysts_per_year, summary_text):
+def save_plot_images(samples_per_year, blastocysts_per_year, non_blastocysts_per_year, summary_text, output_dir):
     df_samples = pd.DataFrame(list(samples_per_year.items()), columns=['Year', 'Samples'])
     df_blastocysts = pd.DataFrame(list(blastocysts_per_year.items()), columns=['Year', 'Blastocysts'])
     df_non_blastocysts = pd.DataFrame(list(non_blastocysts_per_year.items()), columns=['Year', 'Non-Blastocysts'])
@@ -83,8 +70,7 @@ def save_plot_images(samples_per_year, blastocysts_per_year, non_blastocysts_per
         axs1[0].text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{percentage:.2f}%', ha='center', va='bottom')
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    current_dir = os.path.dirname(current_file_path)
-    plt.savefig(os.path.join(current_dir, "plots_statistics1.png"), dpi=300)
+    plt.savefig(os.path.join(output_dir, "plots_statistics1.png"), dpi=600)
 
     fig2, axs2 = plt.subplots(2, 1, figsize=(10, 10))
     fig2.suptitle('Summary of Non-Blastocysts and Text Data', fontsize=16)
@@ -101,9 +87,10 @@ def save_plot_images(samples_per_year, blastocysts_per_year, non_blastocysts_per
     axs2[1].text(0.5, 0.5, summary_text, transform=axs2[1].transAxes, fontsize=14, verticalalignment='center', horizontalalignment='center', weight='bold')
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    plt.savefig(os.path.join(current_dir, "plots_statistics2.png"), dpi=300)
+    plt.savefig(os.path.join(output_dir, "plots_statistics2.png"), dpi=600)
 
-if __name__ == '__main__':
+
+def calculate_and_plot_statistics(input_csv_path, output_dir):
     df = load_data(input_csv_path)
     df = calculate_n_images(df)
 
@@ -138,4 +125,4 @@ if __name__ == '__main__':
         f"Number of non-blastocysts: {num_non_blastocysts(df)}"
     ])
 
-    save_plot_images(yearly_data, blastocysts_data, non_blastocysts_data, summary_text)
+    save_plot_images(yearly_data, blastocysts_data, non_blastocysts_data, summary_text, output_dir)

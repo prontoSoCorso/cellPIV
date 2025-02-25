@@ -83,11 +83,10 @@ def calculate_metrics_with_spec(y_true, y_pred, y_prob):
 
 
 # Funzione di bootstrap per ottenere tutte le metriche
-def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=50, alpha=0.95, show_normality=False):
+def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=50, alpha=0.95, show_normality=False, undersampling_proportion=0.8):
     bootstrapped_metrics = []
 
     for _ in range(n_bootstraps):
-        undersampling_proportion = 0.8
         indices = np.random.randint(0, len(y_true), int(len(y_true)*undersampling_proportion))
         if len(np.unique(y_true[indices])) < 2 or len(np.unique(y_pred[indices])) < 2:
             continue

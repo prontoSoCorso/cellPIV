@@ -31,8 +31,6 @@ class user_paths:
         #Per computer fisso nuovo
         path_excels = PROJECT_ROOT 
         path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti/"
-        #path_BlastoData = "/home/phd2/Scrivania/Data/BlastoData/"      #Per usare solo 2013 e 2014
-        #path_BlastoData = "/home/phd2/Scrivania/Data/BlastoDataProva/"  #Solo 20 video
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
@@ -71,6 +69,7 @@ class Config_00_preprocessing:
 class Config_01_OpticalFlow:
     #method_optical_flow = "LucasKanade"
     method_optical_flow = "Farneback"
+    output_path_optical_flow_images = "/home/phd2/Scrivania/CorsoData/opticalFlowExamples"
 
     if method_optical_flow == "LucasKanade":
         # LUCAS KANADE

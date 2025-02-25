@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import timeit
 from scipy.signal import find_peaks
-from myFunctions import calculate_vorticity, sort_files_by_slice_number
+from _01_opticalFlows.opticalFlow_functions import calculate_vorticity, sort_files_by_slice_number
 
 import sys
 # Configurazione dei percorsi e dei parametri
@@ -66,16 +66,7 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
 
 
 
-def overlay_arrows(frame, magnitude, angle_degrees, prev_pts):
-    for i, (mag, angle) in enumerate(zip(magnitude, angle_degrees)):
-        # Estraggo le coordinate x e y del flusso ottico
-        x, y = prev_pts[i].ravel()
-        dx, dy = mag * np.cos(np.radians(angle)), mag * np.sin(np.radians(angle))
-        # Calcolo il punto finale della freccia
-        endpoint = (int(x + dx[0]), int(y + dy[0]))
-        # Disegno la freccia
-        cv2.arrowedLine(frame, (int(x), int(y)), endpoint, (255, 0, 0), 1)
-    return frame
+
 
 
 

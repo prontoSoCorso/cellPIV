@@ -3,7 +3,7 @@ import pickle
 import cv2
 import numpy as np
 import timeit
-from myFunctions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
+from _01_opticalFlows.opticalFlow_functions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
 
 import sys
 # Configurazione dei percorsi e dei parametri
@@ -36,7 +36,7 @@ def process_frames(folder_path, dish_well):
     frame_files = sort_files_by_slice_number(os.listdir(folder_path))
 
     # Controllo se il numero di frame è sufficiente
-    if len(frame_files) < 300:
+    if len(frame_files) < conf.num_minimum_frames:
         raise InsufficientFramesError(f"Il numero di frame nel file {dish_well} è minore di {conf.num_minimum_frames}: {len(frame_files)}")
 
     # Intorno al frame 290 ho sempre picco dovuto al cambio terreno (giorno 3 se frame ogni 15 min)
@@ -63,9 +63,9 @@ def process_frames(folder_path, dish_well):
     hybrid = []
 
     for frame_file in frame_files[1:]:
-
         # Read the current frame
-        current_frame = cv2.imread(os.path.join(folder_path, frame_file), cv2.IMREAD_GRAYSCALE)
+        current_frame_path = os.path.join(folder_path, frame_file)
+        current_frame = cv2.imread(current_frame_path, cv2.IMREAD_GRAYSCALE)
         if current_frame.shape[:2] != target_size:
             raise InvalidImageSizeError(f"L'immagine {frame_file} non è di dimensione 500x500")
         current_frame = cv2.resize(current_frame, target_size)
@@ -95,23 +95,18 @@ def process_frames(folder_path, dish_well):
         prev_frame = current_frame
 
     # Compute sum mean mag
-    sum_mean_mag = []
-
-    for frame in range(0, len(mean_magnitude)-conf.num_forward_frame+1):
-        sum_mean_mag.append(np.mean(mean_magnitude[frame:frame+conf.num_forward_frame]))
+    sum_mean_mag = [np.mean(mean_magnitude[i:i + conf.num_forward_frame]) for i in range(len(mean_magnitude) - conf.num_forward_frame + 1)]
     
     # Pad sum_mean_mag with zeros to match mean_magnitude length
     padding_length = len(mean_magnitude) - len(sum_mean_mag)
     sum_mean_mag = np.pad(sum_mean_mag, ((0, padding_length)), 'constant', constant_values=(0))
 
-    mean_magnitude = np.array(mean_magnitude).astype(float)     # Devo convertirlo perché è una lista in partenza
-    vorticity = np.array(vorticity).astype(float)
-    std_dev = np.array(std_dev).astype(float)    
-    hybrid = np.array(hybrid).astype(float)
-    sum_mean_mag = np.array(sum_mean_mag).astype(float)
     print(f"Processed frames {dish_well} saved successfully")
 
-    return mean_magnitude, vorticity, hybrid, sum_mean_mag
+    # Nel return devo convertire le quantità perché sono delle lsite 
+    return (np.array(mean_magnitude).astype(float), np.array(vorticity).astype(float),
+            np.array(hybrid).astype(float), np.array(sum_mean_mag).astype(float))
+
 
 
 def main():

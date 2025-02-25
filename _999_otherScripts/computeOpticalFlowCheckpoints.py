@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import timeit
 from datetime import datetime, timedelta
-from myFunctions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
+from _01_opticalFlows.opticalFlow_functions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
 from PIL import Image, ImageFile
 
 import sys

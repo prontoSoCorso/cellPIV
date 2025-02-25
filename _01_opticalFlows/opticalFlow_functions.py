@@ -11,7 +11,6 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_01_OpticalFlow as conf
-from config import user_paths as myPaths
 from config import utils as utils
 
 def sort_files_by_slice_number(file_list):
@@ -32,6 +31,17 @@ def sort_files_by_slice_number(file_list):
 
     return sorted_files
 
+
+def overlay_arrows(frame, magnitude, angle_degrees, prev_pts):
+    for i, (mag, angle) in enumerate(zip(magnitude, angle_degrees)):
+        # Estraggo le coordinate x e y del flusso ottico
+        x, y = prev_pts[i].ravel()
+        dx, dy = mag * np.cos(np.radians(angle)), mag * np.sin(np.radians(angle))
+        # Calcolo il punto finale della freccia
+        endpoint = (int(x + dx[0]), int(y + dy[0]))
+        # Disegno la freccia
+        cv2.arrowedLine(frame, (int(x), int(y)), endpoint, (255, 0, 0), 1)
+    return frame
 
 
 def calculate_vorticity(flow):
@@ -101,3 +111,6 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
     angle_degrees = np.rad2deg(angle) % 360
 
     return magnitude, angle_degrees, flow, prev_pts
+
+
+
