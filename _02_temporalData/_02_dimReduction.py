@@ -1,17 +1,10 @@
 import pandas as pd
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 from umap.umap_ import UMAP
 from sklearn.preprocessing import StandardScaler
 import os
-
-# Imposta il backend grafico interattivo
-try:
-    matplotlib.use("TkAgg")  # O "Qt5Agg" se preferisci
-except Exception as e:
-    print(f"Impossibile impostare il backend interattivo: {e}")
 
 
 def compute_UMAP(final_csv_path, days_to_consider, max_frames, output_path_base):
@@ -28,7 +21,7 @@ def compute_UMAP(final_csv_path, days_to_consider, max_frames, output_path_base)
     features_scaled = scaler.fit_transform(features)
 
     # Riduzione delle dimensioni con UMAP
-    umap = UMAP(n_components=2, random_state=42)
+    umap = UMAP(n_components=2, n_jobs=-1)  # Usa tutti i core disponibili
     features_2d = umap.fit_transform(features_scaled)
 
     # Creazione del DataFrame per la visualizzazione
@@ -57,9 +50,6 @@ def compute_UMAP(final_csv_path, days_to_consider, max_frames, output_path_base)
 
     # Mostra grafico
     plt.show()  # Mostra il grafico interattivo
-
-
-
 
 
 

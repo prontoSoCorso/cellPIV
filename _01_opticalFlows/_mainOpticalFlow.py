@@ -100,7 +100,8 @@ def main():
     print(f'Errors in "no_blasto":', errors_no_blasto)
 
     # Salvataggio dei risultati
-    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData')
+    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData', f"files_all_days_{conf.method_optical_flow}")
+    os.makedirs(temporal_data_directory, exist_ok=True)
     for dict_name, dict_data in zip(
         ['mean_magnitude_dict', 'vorticity_dict', 'hybrid_dict', 'sum_mean_mag_dict'],
         [mean_magnitude_dict, vorticity_dict, hybrid_dict, sum_mean_mag_dict]):

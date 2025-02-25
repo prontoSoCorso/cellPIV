@@ -50,8 +50,15 @@ def create_final_csv(input_temporal_csv_path, original_csv_path, output_final_cs
         print(f"Duplicati trovati in labels_data:\n{duplicates_labels}")
 
     # Elimina duplicati
-    temporal_data = temporal_data.drop_duplicates(subset=["dish_well"])
-    labels_data = labels_data.drop_duplicates(subset=["dish_well"])
+    temporal_data = temporal_data.drop_duplicates(subset=["dish_well"], keep="first")
+    labels_data = labels_data.drop_duplicates(subset=["dish_well"], keep="first")
+    print(f"========== Duplicati Eliminati! ==========")
+
+    '''
+    Duplicati trovati in labels_data:
+        4565    640     D2019.03.13_S02233_I0141_D     5  D2019.03.13_S02233_I0141_D_5      41         normo  ...         -  23.2415225016666  22.9910616672222    -         -  2
+        4568    640     D2019.03.13_S02233_I0141_D     5  D2019.03.13_S02233_I0141_D_5      41         normo  ...         -  23.2415225016666  22.9910616672222    -         -  2
+    '''
 
     # Mantieni solo le colonne necessarie
     columns_to_keep = ["dish_well"] + [col for col in temporal_data.columns if col.startswith("time_")]
@@ -75,6 +82,3 @@ def create_final_csv(input_temporal_csv_path, original_csv_path, output_final_cs
         print(f"File CSV unito salvato in: {output_final_csv_path}")
     except Exception as e:
         print(f"Errore durante il salvataggio del file: {e}")
-
-
-

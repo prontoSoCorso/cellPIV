@@ -121,7 +121,7 @@ class Config_02_temporalData:
     dictAndOptFlowType          = dict + "_" + OptFlow + ".csv"
 
     # Path in cui salvo il file csv che ottengo leggendo i pkl delle serie temporali e che sarà poi quello usato per creare il csv finale
-    temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series', dictAndOptFlowType)
+    temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series_csv', dictAndOptFlowType)
     csv_file_Danilo_path        = Config_00_preprocessing.path_addedID_csv  # File che ho ottenuto dal preprocessing degli excel (singolo csv con ID)
     # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
     final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
