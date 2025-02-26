@@ -10,12 +10,12 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from ConvTranUtils import load_my_data, CustomDataset
+from _03_train._c_ConvTranUtils import load_my_data, CustomDataset
 from _99_ConvTranModel.model import model_factory, count_parameters
 from _99_ConvTranModel.optimizers import get_optimizer
 from _99_ConvTranModel.loss import get_loss_module
 from _99_ConvTranModel.utils import load_model
-from ConvTranTraining import SupervisedTrainer, train_runner
+from _03_train._c_ConvTranTraining import SupervisedTrainer, train_runner
 from config import Config_03_train as config
 
 def Initialization():

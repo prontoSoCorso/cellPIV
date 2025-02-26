@@ -22,7 +22,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_train as conf
-from _03_train.ConvTranUtils import CustomDataset
+from _03_train._c_ConvTranUtils import CustomDataset
 import _04_test.myFunctions as myFunctions
 
 

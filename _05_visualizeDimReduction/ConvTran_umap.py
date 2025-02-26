@@ -14,7 +14,7 @@ while os.path.basename(parent_dir) != "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from _03_train.ConvTranUtils import CustomDataset, load_my_data
+from _03_train._c_ConvTranUtils import CustomDataset, load_my_data
 from _99_ConvTranModel.model import model_factory
 from _99_ConvTranModel.utils import load_model
 from config import Config_03_train as conf

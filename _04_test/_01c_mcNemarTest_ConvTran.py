@@ -16,7 +16,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_train as conf
-from _03_train.ConvTranUtils import CustomDataset
+from _03_train._c_ConvTranUtils import CustomDataset
 from _99_ConvTranModel.model import model_factory
 from _99_ConvTranModel.utils import load_model
 import _04_test.myFunctions as myFunctions
@@ -121,9 +121,18 @@ def main():
         for X, y in test_loader_2:
             outputs2 = model2(X)
             preds2 = torch.argmax(outputs2, dim=1)
-or
+
+            y_true2.extend(y.cpu().numpy())
+            y_pred_model2.extend(preds2.cpu().numpy())
+
+    if y_true1!=y_true2:
+        exit()
+
+    # Eseguo il test di McNemar
+    model_name_without_extension_1 = os.path.splitext(model_1_name)[0]
     model_name_without_extension_2 = os.path.splitext(model_2_name)[0]
     apply_mcnemar(np.array(y_true1), np.array(y_pred_model1), np.array(y_pred_model2), model_name_without_extension_1, model_name_without_extension_2)
+
 
 if __name__ == "__main__":
     start_time = time.time()

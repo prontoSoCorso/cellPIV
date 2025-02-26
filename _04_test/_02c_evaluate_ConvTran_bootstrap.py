@@ -18,7 +18,7 @@ sys.path.append(parent_dir)
 from config import Config_03_train as conf
 from _99_ConvTranModel.model import model_factory
 from _99_ConvTranModel.utils import load_model
-from _03_train.ConvTranUtils import CustomDataset
+from _03_train._c_ConvTranUtils import CustomDataset
 import _04_test.myFunctions as myFunctions
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
