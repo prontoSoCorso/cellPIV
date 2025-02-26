@@ -30,17 +30,17 @@ class user_paths:
     if sourceForPath == 0:
         #Per computer fisso nuovo
         path_excels = PROJECT_ROOT 
-        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti/"
+        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti"
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
         path_excels = PROJECT_ROOT
-        path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData/"
+        path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData"
 
     elif sourceForPath == 2:
         #Per AWS
         path_excels = "/home/ec2-user/cellPIV/"
-        path_BlastoData = "/mnt/s3bucket/blastocisti/"
+        path_BlastoData = "/mnt/s3bucket/blastocisti"
     
 
 class utils:
@@ -64,6 +64,11 @@ class Config_00_preprocessing:
     #path_original_excel     = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
     path_addedID_csv        = os.path.join(user_paths.path_excels, "_00b_preprocessing_excels", "DB_Morpheus_withID.csv")
     path_double_dish_excel  = os.path.join(user_paths.path_excels, "pz con doppia dish.xlsx")
+
+    # Percorso della directory sorgente (con i video equatoriali)
+    src_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
+    # Percorso della directory di destinazione
+    dest_dir = user_paths.path_BlastoData
 
 
 class Config_01_OpticalFlow:

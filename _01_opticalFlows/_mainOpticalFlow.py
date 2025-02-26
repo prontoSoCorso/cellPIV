@@ -15,7 +15,9 @@ from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
 from config import utils as utils
 
-def main():
+def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.path_BlastoData, 
+         img_size=conf.img_size, num_minimum_frames=conf.num_minimum_frames, 
+         num_initial_frames_to_cut=conf.num_initial_frames_to_cut, num_forward_frame=conf.num_forward_frame):
     # Success/Error counters
     n_video = 0
     n_video_blasto = 0
@@ -33,10 +35,10 @@ def main():
     hybrid_dict = {}
     sum_mean_mag_dict = {}
 
-    print(f"\n===== Metodo utilizzato per il calcolo del flusso ottico: {conf.method_optical_flow} =====\n")
+    print(f"\n===== Metodo utilizzato per il calcolo del flusso ottico: {method_optical_flow} =====\n")
 
     for class_sample in ['blasto', 'no_blasto']:
-        path_all_folders = os.path.join(myPaths.path_BlastoData, class_sample)
+        path_all_folders = os.path.join(path_BlastoData, class_sample)
         total_videos = len(os.listdir(path_all_folders))
 
         for idx, sample in enumerate(os.listdir(path_all_folders), start=1):
@@ -51,10 +53,10 @@ def main():
             try:
                 sample_path = os.path.join(path_all_folders, sample)
                 mean_magnitude, vorticity, hybrid, sum_mean_mag = process_frames(
-                    sample_path, sample, 
-                    utils.img_size, conf.num_minimum_frames, conf.num_initial_frames_to_cut, 
-                    conf.num_forward_frame, conf.method_optical_flow
-                )
+                    folder_path=sample_path, dish_well=sample, 
+                    img_size=img_size, num_minimum_frames=num_minimum_frames, num_initial_frames_to_cut=num_initial_frames_to_cut, 
+                    num_forward_frame=num_forward_frame, method_optical_flow=method_optical_flow
+                    )
                 
                 mean_magnitude_dict[sample] = mean_magnitude
                 vorticity_dict[sample] = vorticity
@@ -100,17 +102,19 @@ def main():
     print(f'Errors in "no_blasto":', errors_no_blasto)
 
     # Salvataggio dei risultati
-    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData', f"files_all_days_{conf.method_optical_flow}")
+    temporal_data_directory = os.path.join(parent_dir, '_02_temporalData', f"files_all_days_{method_optical_flow}")
     os.makedirs(temporal_data_directory, exist_ok=True)
     for dict_name, dict_data in zip(
         ['mean_magnitude_dict', 'vorticity_dict', 'hybrid_dict', 'sum_mean_mag_dict'],
         [mean_magnitude_dict, vorticity_dict, hybrid_dict, sum_mean_mag_dict]):
-        file_path = os.path.join(temporal_data_directory, f"{dict_name}_{conf.method_optical_flow}.pkl")
+        file_path = os.path.join(temporal_data_directory, f"{dict_name}_{method_optical_flow}.pkl")
         with open(file_path, 'wb') as f:
             pickle.dump(dict_data, f)
 
 if __name__ == "__main__":
     start_time = time.time()
     # execution_time = timeit.timeit(main, number=1)
-    main()
+    main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.path_BlastoData, 
+         img_size=conf.img_size, num_minimum_frames=conf.num_minimum_frames, 
+         num_initial_frames_to_cut=conf.num_initial_frames_to_cut, num_forward_frame=conf.num_forward_frame)
     print("Execution time:", str(time.time()-start_time), "seconds")

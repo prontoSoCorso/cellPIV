@@ -84,7 +84,8 @@ def save_plot_images(samples_per_year, blastocysts_per_year, non_blastocysts_per
         axs2[0].text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f'{percentage:.2f}%', ha='center', va='bottom')
 
     axs2[1].axis('off')
-    axs2[1].text(0.5, 0.5, summary_text, transform=axs2[1].transAxes, fontsize=14, verticalalignment='center', horizontalalignment='center', weight='bold')
+    axs2[1].text(0.5, 0.5, summary_text, transform=axs2[1].transAxes, fontsize=14, 
+                 verticalalignment='center', horizontalalignment='center', weight='bold')
 
     plt.tight_layout(rect=[0, 0, 1, 0.96])
     plt.savefig(os.path.join(output_dir, "plots_statistics2.png"), dpi=600)

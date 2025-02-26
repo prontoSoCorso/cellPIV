@@ -1,16 +1,8 @@
 import os
 import cv2
 import numpy as np
-import sys
-# Configurazione dei percorsi e dei parametri
-current_file_path = os.path.abspath(__file__)
-current_dir = os.path.dirname(current_file_path) 
-parent_dir = current_dir
-while not os.path.basename(parent_dir) == "cellPIV":
-    parent_dir = os.path.dirname(parent_dir)
-sys.path.append(parent_dir)
 
-from _01_opticalFlows.opticalFlow_functions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
+from opticalFlow_functions import calculate_vorticity, sort_files_by_slice_number, compute_optical_flowPyrLK, compute_optical_flowFarneback
 
 class InsufficientFramesError(Exception):
     """Eccezione sollevata quando il numero di frame è insufficiente."""

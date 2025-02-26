@@ -87,7 +87,8 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
     # Trovo i punti di interesse nel frame precedente
     # goodFeaturesToTrack() trova i punti di interesse nel prev_frame. 
     # Questi punti di interesse sono selezionati utilizzando l'algoritmo di Shi-Tomasi
-    prev_pts = cv2.goodFeaturesToTrack(prev_frame, maxCorners=conf.maxCorners, qualityLevel=conf.qualityLevel, minDistance=conf.minDistance, blockSize=conf.blockSize)
+    prev_pts = cv2.goodFeaturesToTrack(prev_frame, maxCorners=conf.maxCorners, qualityLevel=conf.qualityLevel, 
+                                       minDistance=conf.minDistance, blockSize=conf.blockSize)
     # maxCorners è il numero massimo di punti di interesse
     # qualityLevel è qualità richiesta (tengo bassa)
     # minDistance è minima distanza tra due punti di interesse (ne viene mantenuto solo uno se sono più vicini di minDistance)
@@ -111,6 +112,3 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
     angle_degrees = np.rad2deg(angle) % 360
 
     return magnitude, angle_degrees, flow, prev_pts
-
-
-

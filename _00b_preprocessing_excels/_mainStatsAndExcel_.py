@@ -19,7 +19,8 @@ from _00b_preprocessing_excels import _01_prepareExcelAndAddID, _02_calculateAnd
 from _utils_ import plot_and_save_stratified_distribution
 
 
-def main(path_original_excel, path_added_ID, path_double_dish_excel):
+def main(path_original_excel=conf.path_original_excel, path_added_ID=conf.path_addedID_csv, 
+         path_double_dish_excel=conf.path_double_dish_excel):
     # Rendo colonne conformi a come devo elaborare dopo
     blasto_labels_df = _01_prepareExcelAndAddID.merge_sheets_and_prepare_csv(path_original_excel)
     

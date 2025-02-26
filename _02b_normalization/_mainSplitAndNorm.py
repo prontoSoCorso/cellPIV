@@ -20,10 +20,10 @@ from _utils_.dimReduction import compute_UMAP, compute_tSNE
 
 
 
-def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, seed=conf.seed, embedding_type=conf.embedding_type, save_normalization_example=True):
+def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, seed=conf.seed, embedding_type=conf.embedding_type, 
+         save_normalization_example=True, temporalDataType = conf.temporalDataType, csv_file_path = conf.csv_file_path):
     # Carica i dati
     max_frames = utils.num_frames_by_days(days_to_consider)
-    csv_file_path = conf.csv_file_path
     data = load_data(csv_file_path=csv_file_path, max_frames=max_frames)
 
     # Split stratificato
@@ -59,7 +59,6 @@ def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, see
             output_base=current_dir
         )
 
-        temporalDataType = conf.temporalDataType
         create_and_save_plots(
         train_data=train_data,
         val_data=val_data,
@@ -73,5 +72,6 @@ def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, see
 
 if __name__ == "__main__":
     start_time = time.time()
-    main(days_to_consider=3, train_size=0.7, seed=42, embedding_type="", save_normalization_example=True)
+    main(days_to_consider=3, train_size=0.7, seed=42, embedding_type="", save_normalization_example=True, 
+         temporalDataType = conf.temporalDataType, csv_file_path = conf.csv_file_path)
     print("Execution time: ", str(time.time()-start_time), "seconds")
