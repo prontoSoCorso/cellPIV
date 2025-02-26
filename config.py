@@ -126,23 +126,27 @@ class Config_02_temporalData:
     # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
     final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
 
-    days_to_consider = 1
+    embedding_type = ""
+    num_max_days = 7
+    days_to_consider_for_dim_reduction = [3]    # array perché fa ciclo per poter svolgere umap su più giorni
 
 class Config_02b_normalization:
     # Data
     temporalDataType = Config_02_temporalData.dict
+    train_size = 0.7
+    embedding_type = ""
 
-    # Per gestire dati a N giorni (usando un solo parametro invece di booleani multipli)
+    # Per gestire dati a N giorni
     days_to_consider = 7  # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
 
-    # Paths generici in base a `days_to_consider`
+    # Paths file completo
     csv_file_path = Config_02_temporalData.final_csv_path
     
     # Base path generico per i file normalizzati
-    normalized_base_path = os.path.join(
-        user_paths.path_excels,
-        f"Normalized_{temporalDataType}_{days_to_consider}Days"
-    )
+    @staticmethod
+    def get_normalized_base_path(days_to_consider):
+        return os.path.join(user_paths.path_excels, f"Normalized_{Config_02b_normalization.temporalDataType}_{days_to_consider}Days")
+
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @staticmethod
@@ -153,7 +157,7 @@ class Config_02b_normalization:
         :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
         :return: Tuple con i percorsi di train, validation e test.
         """
-        base_path = Config_02b_normalization.normalized_base_path.format(days=days_to_consider)
+        base_path = Config_02b_normalization.get_normalized_base_path(days_to_consider)
         train_path = f"{base_path}_train.csv"
         val_path = f"{base_path}_val.csv"
         test_path = f"{base_path}_test.csv"

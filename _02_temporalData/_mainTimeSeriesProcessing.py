@@ -17,10 +17,10 @@ sys.path.append(parent_dir)
 from config import Config_02_temporalData as conf
 from config import utils
 from _02_temporalData._01_fromPklToCsv import fromPickleToCsv, create_final_csv
-from _02_temporalData._02_dimReduction import compute_tSNE, compute_UMAP
+from _utils_.dimReduction import compute_tSNE, compute_UMAP
 
 
-def main(embedding_type="UMAP", num_max_days=7, days_to_consider_dim_reduction=[7]):
+def main(embedding_type=conf.embedding_type, num_max_days=conf.num_max_days, days_to_consider_for_dim_reduction=conf.days_to_consider_for_dim_reduction):
     # importo e trasformo i file pkl salvati al passo precedente (o qualsiasi file pickle con stesso formato: key (dish_well) e valori della serie)
     path_pkl = conf.path_pkl
     output_temporal_csv_path = conf.temporal_csv_path
@@ -38,23 +38,21 @@ def main(embedding_type="UMAP", num_max_days=7, days_to_consider_dim_reduction=[
     output_path_base = os.path.join(current_dir, "dim_reduction_files")
     os.makedirs(output_path_base, exist_ok=True)
 
-    for day in days_to_consider_dim_reduction:
-        max_frames = utils.num_frames_by_days(day)
+    if embedding_type:
+        for day in days_to_consider_for_dim_reduction:
+            max_frames = utils.num_frames_by_days(day)
 
-        if embedding_type.lower()=="umap":
-            print("Computing UMAP...")
-            compute_UMAP(final_csv_path=final_csv_path, days_to_consider=day, max_frames=max_frames, output_path_base=output_path_base)
-        elif embedding_type.lower()=="tsne":
-            print("Computing tSNE...")
-            compute_tSNE(final_csv_path=final_csv_path, days_to_consider=day, max_frames=max_frames, output_path_base=output_path_base)
-        else:
-            print("Please select a valid dimensionality reduction method. You can choose from: umap, tsne")
+            if embedding_type.lower()=="umap":
+                print("Computing UMAP...")
+                compute_UMAP(csv_path=final_csv_path, days_to_consider=day, max_frames=max_frames, output_path_base=output_path_base)
+            elif embedding_type.lower()=="tsne":
+                print("Computing tSNE...")
+                compute_tSNE(csv_path=final_csv_path, days_to_consider=day, max_frames=max_frames, output_path_base=output_path_base)
+            else:
+                print("Please select a valid dimensionality reduction method. You can choose from: umap, tsne")
 
 
 if __name__ == '__main__':
     start_time = time.time()
-    main()
+    main(days_to_consider_for_dim_reduction=[5], num_max_days=7, embedding_type="UMAP")
     print("Execution time: ", str(time.time()-start_time), "seconds")
-
-
-
