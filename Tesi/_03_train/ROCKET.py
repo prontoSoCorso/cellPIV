@@ -68,8 +68,8 @@ def main():
     X_test = df_test.iloc[:, 3:].values  # Le colonne da 3 in poi contengono la serie temporale
     y_test = df_test['BLASTO NY'].values  # Colonna target
 
-    for kernel in conf.kernels:
-        conf.kernels = kernel
+    for kernel in conf.kernels_set:
+        conf.kernels_set = kernel
 
         # Definisce il modello RocketClassifier
         model = RocketClassifier(num_kernels=kernel, random_state=conf.seed_everything(conf.seed), n_jobs=-1)

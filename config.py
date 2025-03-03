@@ -190,6 +190,7 @@ class Config_03_train:
     test_dir = "_04_test"
     num_labels = 2
     Data_shape = (1,93) #variabile di base, verrà aggiornata in ConvTran
+    days_to_consider = 3
 
     @staticmethod
     def seed_everything(seed):
@@ -202,7 +203,7 @@ class Config_03_train:
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @staticmethod
-    def get_paths(days_to_consider):
+    def get_paths(days_to_consider=days_to_consider):
         """
         Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
 
@@ -220,9 +221,8 @@ class Config_03_train:
     
 
     # ROCKET
-    kernels     = [50,100,200,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
-
-
+    kernels_set     = [50,100,200,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    
     # LSTM-FCN
     num_epochs_FCN      = 1000
     batch_size_FCN      = 16                     # numero di sequenze prese (con 16 arrivo a 84%)
