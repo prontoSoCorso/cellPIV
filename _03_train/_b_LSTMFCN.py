@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
 import timeit
 import torch.optim.lr_scheduler
+import numpy as np
 
 # Configurazione dei percorsi
 current_file_path = os.path.abspath(__file__)
@@ -95,19 +96,46 @@ class LSTMFCN(nn.Module):
         return self.fc(combined)
 
 
-def evaluate_model_torch(model, dataloader):
+def find_best_threshold(model, val_loader, thresholds=np.linspace(0.0, 1.0, 101)):
+    """ Trova la migliore soglia basata sulla balanced accuracy sul validation set. """
+    model.eval()
+    y_true, y_prob = [], []
+
+    with torch.no_grad():
+        for X, y in val_loader:
+            X, y = X.to(device), y.to(device)
+            outputs = model(X)
+            probs = torch.softmax(outputs, dim=1)[:, 1].cpu().numpy()
+            y_prob.extend(probs)
+            y_true.extend(y.cpu().numpy())
+    
+    best_threshold = 0.5
+    best_balanced_accuracy = 0.0
+
+    for threshold in thresholds:
+        y_pred = (np.array(y_prob) >= threshold).astype(int)
+        acc = balanced_accuracy_score(y_true=y_true, y_pred=y_pred)
+        
+        if acc > best_balanced_accuracy:
+            best_balanced_accuracy = acc
+            best_threshold = threshold
+
+    return best_threshold
+
+
+def evaluate_model_torch(model, dataloader, threshold=0.5):
     model.eval()
     y_true, y_pred, y_prob = [], [], []
     with torch.no_grad():
         for X, y in dataloader:
             X, y = X.to(device), y.to(device)
             outputs = model(X)
-            probs = torch.softmax(outputs, dim=1)[:, 1]
-            preds = torch.argmax(outputs, dim=1)
+            probs = torch.softmax(outputs, dim=1)[:, 1].cpu().numpy()
+            preds = (probs >= threshold).astype(int)  # Usa la soglia, se no faccio argmax(outputs, dim=1)
             
             y_true.extend(y.cpu().numpy())
-            y_pred.extend(preds.cpu().numpy())
-            y_prob.extend(probs.cpu().numpy())
+            y_pred.extend(preds)
+            y_prob.extend(probs)
 
     fpr, tpr, _ = roc_curve(y_true, y_prob)
     roc_auc = auc(fpr, tpr)
@@ -219,8 +247,18 @@ def main(days_to_consider=1,
     # Caricamento miglior modello
     model.load_state_dict(torch.load(best_model_path))
     
+    # Trova la soglia migliore sul validation set con il migliore modello trovato
+    final_threshold = find_best_threshold(model=model, val_loader=val_loader)
+    print(f"\nBest Threshold: {final_threshold:.4f}")
+
+    # Model update with the best threshold
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'best_threshold': final_threshold
+    }, best_model_path)
+
     # Valutazione finale
-    test_metrics = evaluate_model_torch(model, test_loader)
+    test_metrics = evaluate_model_torch(model, test_loader, threshold=final_threshold)
     
     print("\n===== FINAL TEST RESULTS =====")
     for metric, value in test_metrics.items():

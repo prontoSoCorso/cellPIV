@@ -2,6 +2,7 @@ import os
 import sys
 from art import *
 import time
+import torch
 
 # Import Project Modules
 current_file_path = os.path.abspath(__file__)
@@ -10,13 +11,13 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from _03_train._c_ConvTranUtils import load_my_data, save_confusion_matrix, plot_roc_curve
+from config import Config_03_train as config
+from _c_ConvTranTraining import SupervisedTrainer, train_runner, find_best_threshold
+from _c_ConvTranUtils import load_my_data, save_confusion_matrix, plot_roc_curve
 from _99_ConvTranModel.model import model_factory, count_parameters
 from _99_ConvTranModel.optimizers import get_optimizer
 from _99_ConvTranModel.loss import get_loss_module
 from _99_ConvTranModel.utils import load_model
-from _03_train._c_ConvTranTraining import SupervisedTrainer, train_runner
-from config import Config_03_train as config
 
 def Initialization():
     config.seed_everything(config.seed)
@@ -52,14 +53,14 @@ def main(days_to_consider=config.days_to_consider,
     loss_module = get_loss_module()
 
     # Training
-    save_path = os.path.join(parent_dir, config.test_dir, "best_convTran_model_" + str(days_to_consider) + "Days.pkl")
+    save_path = os.path.join(parent_dir, config.test_dir, f"best_convTran_model_{days_to_consider}Days.pkl")
 
     trainer = SupervisedTrainer(
         model, train_loader, device, loss_module, optimizer, 
-        print_interval=config.print_interval
+        print_interval=config.print_interval, is_training=True
     )
     val_evaluator = SupervisedTrainer(
-        model, val_loader, device, loss_module, 
+        model, val_loader, device, loss_module,
         print_interval=config.print_interval, is_training=False
     )
 
@@ -71,17 +72,26 @@ def main(days_to_consider=config.days_to_consider,
         save_path=save_path
     )
     
-    # Carica il modello migliore e valuta sul test set
+    # Carico il modello migliore e rivaluto sul validation set per trovare soglia ottima
     best_model, optimizer, _ = load_model(model, save_path, optimizer)
     best_model.to(device)
+    best_threshold = find_best_threshold(best_model, val_loader, device)
+    print(f"\nBest Threshold Found: {best_threshold:.4f}")
 
+    # Valutazione sul test con soglia ottimale
     best_test_evaluator = SupervisedTrainer(
         best_model, test_loader, device, loss_module, 
         print_interval=config.print_interval, is_training=False
     )
 
     # Esegui la valutazione e salva la matrice di confusione
-    test_metrics = best_test_evaluator.evaluate_test()
+    test_metrics = best_test_evaluator.evaluate_test(threshold=best_threshold)
+
+    # Modifica del modello salvato per includere la soglia
+    torch.save({
+        'model_state_dict': best_model.state_dict(),
+        'best_threshold': best_threshold
+    }, save_path)
 
     print("\n===== FINAL TEST RESULTS - ConvTran =====")
     for metric, value in test_metrics.items():
@@ -98,7 +108,13 @@ def main(days_to_consider=config.days_to_consider,
         plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], test_metrics['roc_auc'], 
                        conf_matrix_filename.replace('confusion', 'roc'))
 
+
+    """
+    Caricamento del modello:
+    model, best_threshold = load_model_with_threshold(model, save_path, device)
+    """
+
 if __name__ == '__main__':
     start_time = time.time()
-    main(days_to_consider=5)
-    print(f"Tempo esecuzione LSTM-FCN: {(time.time()-start_time):.2f}s")
+    main(days_to_consider=7)
+    print(f"Tempo esecuzione ConvTran: {(time.time()-start_time):.2f}s")

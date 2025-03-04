@@ -1,10 +1,7 @@
 import torch
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.metrics import f1_score, accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
 from sklearn.metrics import roc_curve, auc, matthews_corrcoef, precision_score, recall_score
-
-from _c_ConvTranUtils import plot_roc_curve, save_confusion_matrix
+import numpy as np
 
 class SupervisedTrainer:
     def __init__(self, model, data_loader, device, criterion, optimizer=None, print_interval=100, writer=None, is_training=True):
@@ -101,7 +98,7 @@ class SupervisedTrainer:
 
 
     # Metodo per la valutazione finale sul test (include metriche avanzate e salvataggio della matrice di confusione)
-    def evaluate_test(self):
+    def evaluate_test(self, threshold=0.5):
         self.model.eval()
         targets_list = []
         preds_list = []
@@ -112,14 +109,14 @@ class SupervisedTrainer:
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
                 outputs = self.model(inputs)
 
-                # Calcolo probabilità per ROC
+                # Calcolo probabilità per ROC e predizione con threshold
                 probs = torch.softmax(outputs, dim=1)[:, 1]  # Probabilità per la classe positiva
+                preds = (probs >= threshold).int()
 
                 # Salva predizioni e target
-                _, predicted = outputs.max(1)
-                preds_list.extend(predicted.cpu().numpy())
-                targets_list.extend(targets.cpu().numpy())
                 probs_list.extend(probs.cpu().numpy())
+                preds_list.extend(preds.cpu().numpy())
+                targets_list.extend(targets.cpu().numpy())
 
         # Calcolo metriche complete
         fpr, tpr, _ = roc_curve(targets_list, probs_list)
@@ -139,6 +136,34 @@ class SupervisedTrainer:
             'fpr': fpr,
             'tpr': tpr
         }
+    
+
+
+def find_best_threshold(model, val_loader, device, thresholds=np.linspace(0.0, 1.0, 101)):
+    """ Trova la soglia ottimale sul validation set """
+    model.eval()
+    y_true, y_prob = [], []
+    
+    with torch.no_grad():
+        for X, y in val_loader:
+            X, y = X.to(device), y.to(device)
+            outputs = model(X)
+            probs = torch.softmax(outputs, dim=1)[:, 1]
+            y_prob.extend(probs.cpu().numpy())
+            y_true.extend(y.cpu().numpy())
+    
+    best_threshold = 0.5
+    best_metric = 0.0
+
+    for threshold in thresholds:
+        y_pred = (np.array(y_prob) >= threshold).astype(int)
+        current_metric = balanced_accuracy_score(y_true, y_pred)
+        
+        if current_metric > best_metric:
+            best_metric = current_metric
+            best_threshold = threshold
+
+    return best_threshold
 
 
 def train_runner(config, model, trainer, val_evaluator, save_path):
