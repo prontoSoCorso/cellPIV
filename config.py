@@ -224,12 +224,12 @@ class Config_03_train:
     kernels_set     = [50,100,200,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     
     # LSTM-FCN
-    num_epochs_FCN      = 1000
-    batch_size_FCN      = 16                     # numero di sequenze prese (con 16 arrivo a 84%)
+    num_epochs_FCN      = 300
+    batch_size_FCN      = 16
     dropout_FCN         = 0.3
     kernel_sizes_FCN    = (8,5,3) #def: 8,5,3
     filter_sizes_FCN    = (128,256,128)
-    lstm_size_FCN       = 4                      # Numero di layer LSTM (con 4 arrivo a 84%)
+    lstm_size_FCN       = 4
     attention_FCN       = False
     verbose_FCN         = 2
     learning_rate_FCN   = 1e-4

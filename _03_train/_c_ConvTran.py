@@ -1,7 +1,7 @@
 import os
 import sys
 from art import *
-import torch
+import time
 
 # Import Project Modules
 current_file_path = os.path.abspath(__file__)
@@ -10,7 +10,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from _03_train._c_ConvTranUtils import load_my_data, CustomDataset
+from _03_train._c_ConvTranUtils import load_my_data, save_confusion_matrix, plot_roc_curve
 from _99_ConvTranModel.model import model_factory, count_parameters
 from _99_ConvTranModel.optimizers import get_optimizer
 from _99_ConvTranModel.loss import get_loss_module
@@ -24,11 +24,11 @@ def Initialization():
     print(f"Using device: {config.device}")
     return device
 
-if __name__ == '__main__':
+def main(days_to_consider=config.days_to_consider, 
+         save_conf_matrix=True,
+         output_dir_plots = parent_dir):
+    
     device = Initialization()
-
-    # Specifica il numero di giorni da considerare
-    days_to_consider = 7
 
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = config.get_paths(days_to_consider)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     )
     
     # Carica il modello migliore e valuta sul test set
-    best_model, optimizer, start_epoch = load_model(model, save_path, optimizer)
+    best_model, optimizer, _ = load_model(model, save_path, optimizer)
     best_model.to(device)
 
     best_test_evaluator = SupervisedTrainer(
@@ -81,8 +81,24 @@ if __name__ == '__main__':
     )
 
     # Esegui la valutazione e salva la matrice di confusione
-    test_metrics = best_test_evaluator.evaluate_test(
-        save_conf_matrix=True,
-        conf_matrix_filename='confusion_matrix_ConvTran_' + str(days_to_consider) + 'Days.png'
-    )
-    print(f"Best Model Test Metrics: {test_metrics}")
+    test_metrics = best_test_evaluator.evaluate_test()
+
+    print("\n===== FINAL TEST RESULTS - ConvTran =====")
+    for metric, value in test_metrics.items():
+        if metric not in ['conf_matrix', 'fpr', 'tpr']:
+            print(f"{metric.capitalize()}: {value:.4f}")
+    plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
+                   test_metrics['roc_auc'], 
+                   os.path.join(output_dir_plots, f"roc_curve_LSTMFCN_{days_to_consider}Days.png"))
+
+    # Salvataggio output
+    conf_matrix_filename=os.path.join(output_dir_plots,f'confusion_matrix_ConvTran_{days_to_consider}Days.png')
+    if save_conf_matrix:
+        save_confusion_matrix(test_metrics['conf_matrix'], conf_matrix_filename)
+        plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], test_metrics['roc_auc'], 
+                       conf_matrix_filename.replace('confusion', 'roc'))
+
+if __name__ == '__main__':
+    start_time = time.time()
+    main(days_to_consider=5)
+    print(f"Tempo esecuzione LSTM-FCN: {(time.time()-start_time):.2f}s")

@@ -136,7 +136,7 @@ def main(merge_type, days_to_consider = 1):
 
 
     # --- LSTMFCN ---
-    from _03_train._b_LSTMFCN_PyTorch import LSTMFCN
+    from _03_train._b_LSTMFCN import LSTMFCN
     lstm_model_path = os.path.join(current_dir, f"best_lstm_fcn_model_{days_to_consider}Days.pth")
     if not os.path.exists(lstm_model_path):
         raise FileNotFoundError(f"Modello LSTMFCN non trovato in {lstm_model_path}")

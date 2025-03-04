@@ -17,7 +17,7 @@ sys.path.append(parent_dir)
 from config import Config_03_train as conf
 
 # Importa la definizione del modello LSTMFCN
-from _03_train._b_LSTMFCN_PyTorch import LSTMFCN  # Importa il modello
+from _03_train._b_LSTMFCN import LSTMFCN  # Importa il modello
 
 # Funzione principale
 def main():

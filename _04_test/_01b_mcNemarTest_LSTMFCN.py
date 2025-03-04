@@ -15,7 +15,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_train as conf
-from  _03_train._b_LSTMFCN_PyTorch import LSTMFCN
+from  _03_train._b_LSTMFCN import LSTMFCN
 import _04_test.myFunctions as myFunctions
 
 device = conf.device

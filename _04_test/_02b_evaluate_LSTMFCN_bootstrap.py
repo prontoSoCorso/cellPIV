@@ -16,7 +16,7 @@ sys.path.append(parent_dir)
 
 # Importa funzioni e modello LSTMFCN dal progetto
 from config import Config_03_train as conf
-from _03_train._b_LSTMFCN_PyTorch import LSTMFCN
+from _03_train._b_LSTMFCN import LSTMFCN
 import _04_test.myFunctions as myFunctions
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
