@@ -1,24 +1,30 @@
 CLINICAL INTERPRETATION GUIDE (ANOMALOUS MERGING, 3 DAYS)
 
-    1. Overall Performance:
-    - Best balanced accuracy: 0.76 (ConvTran)
-    - Best F1 score: 0.74 (ROCKET)
+1. Overall Performance:
+- Best balanced accuracy: 0.76 (ConvTran)
+- Best F1 score: 0.75 (ROCKET)
 
-    2. Model Comparison:
-    - ConvTran excels in detecting rare anomalies (3PN/>3PN: BA=1.00)
-    - ROCKET shows robust performance in common cases (2PN: F1=0.75)
-    - LSTMFCN provides balanced performance across categories
+2. Breakthrough Findings:
+- Perfect non-viable detection: All models (BA=1.0)
+- Anomalous group: ConvTran (BA=0.84, F1=0.75) leads
+- 3PN reliability: ROCKET (F1=0.84) > ConvTran (F1=0.71)
 
-    3. Key Clinical Insights:
-    - Non-viable embryos (0PN/deg) are perfectly identified (BA=1.00)
-    - 1.1PN cases show high variability (F1=0.00) - manual review recommended
-    - 3PN detection reliability: ConvTran (F1=0.84) > ROCKET (F1=0.67)
+3. Model Specialization:
+- ConvTran: Gold standard for anomalies
+- ROCKET: Best 3PN detection
+- LSTMFCN: Balanced 2PN performance (F1=0.75)
 
-    4. Actionable Recommendations:
-    - Use ConvTran for anomaly screening
-    - Use ROCKET for routine 2PN assessment
-    - Always verify 1.1PN/2.1PN cases manually
-    - Trust model predictions for non-viable embryos (100% accuracy)
+4. Critical Insights:
+- 0PN paradox: Perfect BA but F1=0.0 (no positive samples)
+- 2.1PN excellence: ConvTran (F1=0.86) vs ROCKET (F1=0.73)
 
-    Note: F1 Score <0.4 indicates high uncertainty, >0.7 indicates clinical reliability
-    
+5. Clinical Protocol:
+- Automated approval:
+  - ConvTran anomalous classifications
+  - Any model non-viable predictions
+- Required human oversight:
+  - 0PN/deg cases (despite perfect BA)
+  - LSTMFCN anomalous assessments
+  - Borderline 2.1PN predictions
+
+Note: F1 Score <0.4 indicates high uncertainty, >0.7 indicates clinical reliability
