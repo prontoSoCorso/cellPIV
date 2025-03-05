@@ -332,7 +332,7 @@ def main(merge_type, days_to_consider = 1):
 
 
 if __name__ == "__main__":
-    merge_type = "anomalous"    # "anomalous" OR "not_vital" OR "no_merging"
+    merge_type = "not_vital"    # "anomalous" OR "not_vital" OR "no_merging"
     days_to_consider = 5        # 1,3,5,7
     start_time = time.time()
     main(merge_type, days_to_consider)
