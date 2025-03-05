@@ -16,7 +16,7 @@ sys.path.append(parent_dir)
 
 from config import Config_03_train as conf
 from  _03_train._b_LSTMFCN import LSTMFCN
-import _04_test.myFunctions as myFunctions
+import _04_test._myFunctions as _myFunctions
 
 device = conf.device
 
@@ -39,7 +39,7 @@ def apply_mcnemar(y_true, y_pred_model1, y_pred_model2, model_1_name, model_2_na
 
     # Salva la matrice come immagine con il risultato del test
     contingency_path = os.path.join(current_dir, f"contingency_matrix_{model_1_name}_{model_2_name}.png")
-    myFunctions.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
+    _myFunctions.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
     print(f"Matrice di contingenza salvata in: {contingency_path}")
 
     # Interpretazione
@@ -59,8 +59,8 @@ def main():
     # Ottieni i percorsi dal config
     train_path, val_path, test_path = conf.get_paths(days_to_consider)
     # Carico i dati
-    df_test = myFunctions.load_data(test_path)
-    test_data = myFunctions.prepare_LSTMFCN_data(df_test)
+    df_test = _myFunctions.load_data(test_path)
+    test_data = _myFunctions.prepare_LSTMFCN_data(df_test)
     test_loader = DataLoader(test_data, batch_size=conf.batch_size_FCN, shuffle=False)
 
     # Carico i modelli da confrontare

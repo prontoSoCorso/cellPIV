@@ -3,6 +3,7 @@ import sys
 from art import *
 import time
 import torch
+import numpy as np
 
 # Import Project Modules
 current_file_path = os.path.abspath(__file__)
@@ -38,7 +39,7 @@ def main(days_to_consider=config.days_to_consider,
     train_loader, val_loader, test_loader = load_my_data(train_path, val_path, test_path, config.val_ratio, config.batch_size)
 
     # Aggiungi numero di etichette uniche
-    config.num_labels = len(set(train_loader.dataset.labels))
+    config.num_labels = len(np.unique(train_loader.dataset.labels))
     config.Data_shape = (train_loader.dataset[0][0].shape[0], train_loader.dataset[0][0].shape[1])
     
     # Build Model

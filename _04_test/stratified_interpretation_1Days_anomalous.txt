@@ -1,0 +1,24 @@
+CLINICAL INTERPRETATION GUIDE (ANOMALOUS MERGING, 1 DAYS)
+
+    1. Overall Performance:
+    - Best balanced accuracy: 0.65 (ConvTran)
+    - Best F1 score: 0.63 (ROCKET)
+
+    2. Model Comparison:
+    - ConvTran excels in detecting rare anomalies (3PN/>3PN: BA=1.00)
+    - ROCKET shows robust performance in common cases (2PN: F1=0.75)
+    - LSTMFCN provides balanced performance across categories
+
+    3. Key Clinical Insights:
+    - Non-viable embryos (0PN/deg) are perfectly identified (BA=1.00)
+    - 1.1PN cases show high variability (F1=0.00) - manual review recommended
+    - 3PN detection reliability: ConvTran (F1=0.84) > ROCKET (F1=0.67)
+
+    4. Actionable Recommendations:
+    - Use ConvTran for anomaly screening
+    - Use ROCKET for routine 2PN assessment
+    - Always verify 1.1PN/2.1PN cases manually
+    - Trust model predictions for non-viable embryos (100% accuracy)
+
+    Note: F1 Score <0.4 indicates high uncertainty, >0.7 indicates clinical reliability
+    

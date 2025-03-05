@@ -13,7 +13,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-import _04_test.myFunctions as myFunctions
+import _04_test._myFunctions as _myFunctions
 
 # Funzione per caricare i dati
 def load_data(csv_file_path):
@@ -42,7 +42,7 @@ def apply_mcnemar(y_true1, y_true2, y_pred_model_1, y_pred_model_2, model_1_name
 
     # Salva la matrice come immagine con il risultato del test
     contingency_path = os.path.join(output_dir, f"contingency_matrix_{model_1_name}_{model_2_name}.png")
-    myFunctions.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
+    _myFunctions.save_contingency_matrix_with_mcnemar(contingency_table, contingency_path, model_1_name, model_2_name, result.pvalue)
     print(f"Matrice di contingenza salvata in: {contingency_path}")
 
     # Interpretazione
@@ -83,8 +83,8 @@ def main():
     y_test2 = df_test2['BLASTO NY'].values  # Colonna target
 
     # Test sui due modelli
-    y_pred_1, _ = myFunctions.test_model_ROCKET(model_1, X_test1)
-    y_pred_2, _ = myFunctions.test_model_ROCKET(model_2, X_test2)
+    y_pred_1, _ = _myFunctions.test_model_ROCKET(model_1, X_test1)
+    y_pred_2, _ = _myFunctions.test_model_ROCKET(model_2, X_test2)
 
     # Applicazione del test di McNemar
     model_name_without_extension_1 = os.path.splitext(model_1_name)[0]

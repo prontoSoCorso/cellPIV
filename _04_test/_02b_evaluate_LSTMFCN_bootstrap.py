@@ -17,7 +17,7 @@ sys.path.append(parent_dir)
 # Importa funzioni e modello LSTMFCN dal progetto
 from config import Config_03_train as conf
 from _03_train._b_LSTMFCN import LSTMFCN
-import _04_test.myFunctions as myFunctions
+import _04_test._myFunctions as _myFunctions
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -61,8 +61,8 @@ def main():
             continue
 
         # Carica i dati di test
-        df_test = myFunctions.load_data(test_path)
-        test_data = myFunctions.prepare_LSTMFCN_data(df_test)
+        df_test = _myFunctions.load_data(test_path)
+        test_data = _myFunctions.prepare_LSTMFCN_data(df_test)
         test_loader = DataLoader(test_data, batch_size=conf.batch_size_FCN, shuffle=False)
 
         # Inizializza il modello LSTMFCN e carica i pesi
@@ -82,7 +82,7 @@ def main():
 
         # Calcolare metriche bootstrap
         print(f"Test di normalità per {days_val} giorni:")
-        mean, std, lower, upper, bootstrap_samples = myFunctions.bootstrap_metrics(y_true, y_pred, y_prob)
+        mean, std, lower, upper, bootstrap_samples = _myFunctions.bootstrap_metrics(y_true, y_pred, y_prob)
 
         # Definizione delle metriche
         metric_names = ["Accuracy", "Balanced Accuracy", "Cohen's Kappa", "Brier Score", "F1 Score"]

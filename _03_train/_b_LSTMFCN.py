@@ -206,7 +206,7 @@ def main(days_to_consider=1,
 
     best_val_acc = 0
     most_important_metric = "balanced_accuracy"
-    best_model_path = os.path.join(parent_dir, "_04_test", f"best_lstmfcn_{days_to_consider}Days.pth")
+    best_model_path = os.path.join(parent_dir, "_04_test", f"best_lstmfcn_model_{days_to_consider}Days.pth")
 
     # Addestramento
     for epoch in range(num_epochs):

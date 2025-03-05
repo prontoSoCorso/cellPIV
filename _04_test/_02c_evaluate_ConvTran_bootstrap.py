@@ -19,7 +19,7 @@ from config import Config_03_train as conf
 from _99_ConvTranModel.model import model_factory
 from _99_ConvTranModel.utils import load_model
 from _03_train._c_ConvTranUtils import CustomDataset
-import _04_test.myFunctions as myFunctions
+import _04_test._myFunctions as _myFunctions
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -80,7 +80,7 @@ def main():
 
         # Calcolare metriche bootstrap
         print(f"Test di normalità per {days_val} giorni:")
-        mean, std, lower, upper, bootstrap_samples = myFunctions.bootstrap_metrics(y_true, y_pred, y_prob)
+        mean, std, lower, upper, bootstrap_samples = _myFunctions.bootstrap_metrics(y_true, y_pred, y_prob)
 
         # Definizione delle metriche
         metric_names = ["Accuracy", "Balanced Accuracy", "Cohen's Kappa", "Brier Score", "F1 Score"]
