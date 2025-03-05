@@ -48,77 +48,66 @@ def main(merge_type, days_to_consider=1, output_dir=current_dir, file_dir=curren
 
     # 2. Create detailed scatter plot
     plt.figure(figsize=(14, 10))
+
+    # Use a more distinct color palette
+    model_palette = {
+        "ROCKET": "#1f77b4",  # Distinct blue
+        "LSTMFCN": "#ff7f0e",  # Bright orange
+        "ConvTran": "#2ca02c"  # Strong green
+    }
+
+    # Create scatter plot with enhanced visibility
     scatter = sns.scatterplot(
         data=df_perf[df_perf["Stratum"] != "Overall"],
         x="Balanced Accuracy", y="F1 Score",
         hue="Model", style="Stratum",
-        s=200, palette="viridis", 
-        edgecolor="black", linewidth=0.5
+        s=200, palette=model_palette,
+        edgecolor="black", linewidth=0.8,  # Thicker borders
+        alpha=0.9  # Slightly more opaque
     )
-    
-    # Add detailed annotations
+
+    # Add detailed annotations with better contrast
     for line in range(df_perf.shape[0]):
         if df_perf["Stratum"].iloc[line] != "Overall":
-            plt.text(df_perf["Balanced Accuracy"].iloc[line]+0.01, 
-                     df_perf["F1 Score"].iloc[line],
-                     f"{df_perf['Stratum'].iloc[line]}",
-                     fontsize=9, ha='left', va='center')
-    
-    # Clinical decision zones
-    plt.axhspan(0.7, 1.0, facecolor='#90EE90', alpha=0.3)  # Safe zone
-    plt.axhspan(0.4, 0.7, facecolor='#FFFF99', alpha=0.3)  # Caution zone
-    plt.axhspan(0.0, 0.4, facecolor='#FF9999', alpha=0.3)  # High-risk zone
-    
+            plt.text(df_perf["Balanced Accuracy"].iloc[line] + 0.015,  # Slightly more offset
+                    df_perf["F1 Score"].iloc[line],
+                    f"{df_perf['Stratum'].iloc[line]}",
+                    fontsize=10, ha='left', va='center',
+                    bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=2))
+
+    # Enhanced clinical decision zones
+    plt.axhspan(0.7, 1.0, facecolor='#90EE90', alpha=0.25)  # Safe zone
+    plt.axhspan(0.4, 0.7, facecolor='#FFFF99', alpha=0.25)  # Caution zone
+    plt.axhspan(0.0, 0.4, facecolor='#FF9999', alpha=0.25)  # High-risk zone
+
+    # Add zone labels
+    plt.text(0.45, 0.85, "Safe Zone", fontsize=12, color='darkgreen', alpha=0.8)
+    plt.text(0.45, 0.55, "Caution Zone", fontsize=12, color='darkgoldenrod', alpha=0.8)
+    plt.text(0.45, 0.25, "High-Risk Zone", fontsize=12, color='darkred', alpha=0.8)
+
+    # Plot formatting
     plt.title(f"Clinical Decision Matrix\n({merge_type.capitalize()} Merging, {days_to_consider} Days)", 
-             fontsize=14, pad=20)
-    plt.xlabel("Balanced Accuracy", fontsize=12)
-    plt.ylabel("F1 Score", fontsize=12)
+            fontsize=16, pad=20, weight='bold')
+    plt.xlabel("Balanced Accuracy", fontsize=14)
+    plt.ylabel("F1 Score", fontsize=14)
     plt.xlim(0.4, 1.05)
     plt.ylim(-0.05, 1.05)
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    
+
+    # Enhanced legend
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', 
+            frameon=True, framealpha=0.9,
+            title="Model/Stratum", title_fontsize=12,
+            fontsize=10, markerscale=1.5)
+
     # Save scatter plot
     filename = f"stratified_scatter_plot_{days_to_consider}Days_{merge_type}.png"
-    plt.savefig(os.path.join(output_dir, filename), bbox_inches='tight')
+    plt.savefig(os.path.join(output_dir, filename), bbox_inches='tight', dpi=300)
     plt.close()
-
-    # 3. Create clinical interpretation text file
-    interpretation = f"""CLINICAL INTERPRETATION GUIDE ({merge_type.upper()} MERGING, {days_to_consider} DAYS)
-
-    1. Overall Performance:
-    - Best balanced accuracy: {df_perf[df_perf['Stratum'] == 'Overall']['Balanced Accuracy'].max():.2f} (ConvTran)
-    - Best F1 score: {df_perf[df_perf['Stratum'] == 'Overall']['F1 Score'].max():.2f} (ROCKET)
-
-    2. Model Comparison:
-    - ConvTran excels in detecting rare anomalies (3PN/>3PN: BA=1.00)
-    - ROCKET shows robust performance in common cases (2PN: F1=0.75)
-    - LSTMFCN provides balanced performance across categories
-
-    3. Key Clinical Insights:
-    - Non-viable embryos (0PN/deg) are perfectly identified (BA=1.00)
-    - 1.1PN cases show high variability (F1=0.00) - manual review recommended
-    - 3PN detection reliability: ConvTran (F1=0.84) > ROCKET (F1=0.67)
-
-    4. Actionable Recommendations:
-    - Use ConvTran for anomaly screening
-    - Use ROCKET for routine 2PN assessment
-    - Always verify 1.1PN/2.1PN cases manually
-    - Trust model predictions for non-viable embryos (100% accuracy)
-
-    Note: F1 Score <0.4 indicates high uncertainty, >0.7 indicates clinical reliability
-    """
-
-    filename = f"stratified_interpretation_{days_to_consider}Days_{merge_type}.txt"
-    with open(os.path.join(output_dir, filename), 'w') as f:
-        f.write(interpretation)
-
-
-
 
 
 if __name__ == "__main__":
-    merge_type = "not_vital"    # "anomalous" OR "not_vital" OR "no_merging"
-    days_to_consider = 1        # 1,3,5,7
+    merge_type = "anomalous"    # "anomalous" OR "not_vital" OR "no_merging"
+    days_to_consider = 5        # 1,3,5,7
     start_time = time.time()
     main(merge_type, days_to_consider)
     print("Execution time:", time.time() - start_time, "seconds")
