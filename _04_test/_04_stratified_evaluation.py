@@ -31,35 +31,40 @@ def load_models(day, model_path, device):
     """Load all models for a specific day"""
     models = {}
     
-    # Load ROCKET
-    rocket_path = os.path.join(model_path, f"best_rocket_model_{day}Days.joblib")
-    rocket = joblib.load(rocket_path)
-    models['ROCKET'] = {
-        'model': rocket['classifier'],
-        'transformer': rocket['rocket'],
-        'threshold': rocket['final_threshold']
-        }
+    try:
+        # Load ROCKET
+        rocket_path = os.path.join(model_path, f"best_rocket_model_{day}Days.joblib")
+        rocket = joblib.load(rocket_path)
+        models['ROCKET'] = {
+            'model': rocket['classifier'],
+            'transformer': rocket['rocket'],
+            'threshold': rocket['final_threshold']
+            }
 
-    # Load LSTMFCN
-    lstm_path = os.path.join(model_path, f"best_lstmfcn_model_{day}Days.pth")
-    lstm_checkpoint = torch.load(lstm_path, map_location=device, weights_only=False)
-    models['LSTMFCN'] = {
-        'model': LSTMFCN(**{k: lstm_checkpoint[k] for k in ['lstm_size', 'filter_sizes',
-                                                            'kernel_sizes', 'dropout', 'num_layers']}
-                        ).to(device),
-        'threshold': lstm_checkpoint.get('best_threshold', 0.5),
-        'batch_size': lstm_checkpoint['batch_size']
-        }
-    models['LSTMFCN']['model'].load_state_dict(lstm_checkpoint['model_state_dict'])
+        # Load LSTMFCN
+        lstm_path = os.path.join(model_path, f"best_lstmfcn_model_{day}Days.pth")
+        lstm_checkpoint = torch.load(lstm_path, map_location=device, weights_only=False)
+        models['LSTMFCN'] = {
+            'model': LSTMFCN(**{k: lstm_checkpoint[k] for k in ['lstm_size', 'filter_sizes',
+                                                                'kernel_sizes', 'dropout', 'num_layers']}
+                            ).to(device),
+            'threshold': lstm_checkpoint.get('best_threshold', 0.5),
+            'batch_size': lstm_checkpoint['batch_size']
+            }
+        models['LSTMFCN']['model'].load_state_dict(lstm_checkpoint['model_state_dict'])
 
-    # Load ConvTran
-    conv_path = os.path.join(model_path, f"best_convTran_model_{day}Days.pkl")
-    conv_checkpoint = torch.load(conv_path, map_location=device, weights_only=False)
-    models['ConvTran'] = {
-        'model': model_factory(conf).to(device),
-        'threshold': conv_checkpoint.get('best_threshold', 0.5)
-        }
-    models['ConvTran']['model'].load_state_dict(conv_checkpoint['model_state_dict'])
+        # Load ConvTran
+        conv_path = os.path.join(model_path, f"best_convTran_model_{day}Days.pkl")
+        conv_checkpoint = torch.load(conv_path, map_location=device, weights_only=False)
+        models['ConvTran'] = {
+            'model': model_factory(conf).to(device),
+            'threshold': conv_checkpoint.get('best_threshold', 0.5)
+            }
+        models['ConvTran']['model'].load_state_dict(conv_checkpoint['model_state_dict'])
+
+    except Exception as e:
+        print(f"Error loading models: {str(e)}")
+        raise
 
     return models
 
@@ -100,7 +105,6 @@ def save_distribution_table(table, filename, title=""):
     table_str = f"{title}\n{tabulate(table, headers='keys', tablefmt='grid')}\n\n"
     with open(filename, 'w') as f:
         f.write(table_str)
-
 
 
 def visual_model_evaluation(csv_path, output_dir, merge_type, day):
@@ -267,7 +271,7 @@ def main(merge_types, days=1,
             df_db[["slide_well", "merged_PN"]], 
             left_on="dish_well", 
             right_on="slide_well"
-            ).dropna(subset=["merged_PN"])
+        ).dropna(subset=["merged_PN"])
         
         table2 = df_merged.groupby("merged_PN")[("BLASTO NY").upper()].value_counts().unstack()
         print("==================================================")
@@ -314,6 +318,9 @@ def main(merge_types, days=1,
                 })
 
             # Stratified evaluation
+            # For summarized ROC and CM plots, accumulate subgroup data
+            roc_data = []
+            cm_data = []
             for group, group_df in df_merged.groupby("merged_PN"):
                 X_grp = group_df[temporal_cols].values
                 y_grp = group_df["BLASTO NY"].values
@@ -324,6 +331,18 @@ def main(merge_types, days=1,
                     "Stratum": group,
                     **{k: v for k, v in metrics_grp.items() if k in ["balanced_accuracy", "f1"]}
                     })
+                
+                # Collect ROC and CM data for summary plots
+                roc_data.append((group, metrics_grp["fpr"], metrics_grp["tpr"], metrics_grp["roc_auc"]))
+                cm_data.append((group, metrics_grp["conf_matrix"]))
+                
+            # Create a single summary ROC plot for this model & day
+            if roc_data:
+                _myFunctions.plot_summary_roc_curves(model_name, roc_data, day, output_path_per_day_and_merge)
+            # Create a single summary confusion matrix plot for this model & day
+            if cm_data:
+                _myFunctions.plot_summary_confusion_matrices(model_name, cm_data, day, output_path_per_day_and_merge)
+
 
         # Save results
         result_file = os.path.join(output_path_per_day_and_merge, f"stratified_model_performance_{merge_type}_{day}Days.csv")

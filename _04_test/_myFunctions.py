@@ -9,6 +9,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.stats import shapiro, probplot
 import numpy as np
+import os
+import math
 
 # Funzione per salvare la matrice di contingenza con il risultato di McNemar
 def save_contingency_matrix_with_mcnemar(matrix, filename, model_1_name, model_2_name, p_value):
@@ -33,6 +35,52 @@ def save_contingency_matrix_with_mcnemar(matrix, filename, model_1_name, model_2
                 ha="center", fontsize=14, wrap=True, bbox={"facecolor": "lightgrey", "alpha": 0.5, "pad": 5})
     
     plt.savefig(filename, bbox_inches="tight")
+    plt.close()
+
+
+def plot_summary_confusion_matrices(model_name, cm_data, day, output_dir):
+    """
+    Plot a single PNG with all confusion matrices for the subgroups of a model.
+    cm_data: list of tuples (group, cm)
+    """
+    n = len(cm_data)
+    cols = 2
+    rows = math.ceil(n / cols)
+    fig, axes = plt.subplots(rows, cols, figsize=(cols * 4, rows * 4))
+    axes = axes.flatten() if n > 1 else [axes]
+    for i, (group, cm) in enumerate(cm_data):
+        ax = axes[i]
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False, ax=ax)
+        ax.set_title(f"{group}")
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Actual")
+    # Remove unused subplots if any
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
+    fig.suptitle(f"{model_name} Confusion Matrices ({day} Days)", fontsize=16)
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    output_file = os.path.join(output_dir, f"{model_name}_conf_matrix_{day}Days.png")
+    plt.savefig(output_file, bbox_inches="tight")
+    plt.close()
+
+
+def plot_summary_roc_curves(model_name, roc_data, day, output_dir):
+    """
+    Plot a single ROC plot per model per day.
+    roc_data: list of tuples (group, fpr, tpr, roc_auc)
+    """
+    plt.figure(figsize=(8, 6))
+    for group, fpr, tpr, roc_auc in roc_data:
+        plt.plot(fpr, tpr, lw=2, label=f"{group} (AUC = {roc_auc:.2f})")
+    plt.plot([0, 1], [0, 1], 'k--', lw=2)
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel("False Positive Rate", fontsize=12)
+    plt.ylabel("True Positive Rate", fontsize=12)
+    plt.title(f"{model_name} ROC Curve ({day} Days)", fontsize=14)
+    plt.legend(loc="lower right")
+    output_file = os.path.join(output_dir, f"{model_name}_ROC_{day}Days.png")
+    plt.savefig(output_file, bbox_inches="tight")
     plt.close()
 
 
