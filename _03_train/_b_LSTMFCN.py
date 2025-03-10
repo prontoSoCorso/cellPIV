@@ -15,6 +15,7 @@ import numpy as np
 
 # Configurazione dei percorsi
 current_file_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(current_file_path)
 parent_dir = os.path.dirname(current_file_path)
 while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
@@ -156,7 +157,7 @@ def evaluate_model_torch(model, dataloader, threshold=0.5):
     }
 
 def main(days_to_consider=1,
-         output_dir_plots = parent_dir, 
+         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training"), 
          batch_size=conf.batch_size_FCN, 
          lstm_size=conf.lstm_size_FCN,
          filter_sizes=conf.filter_sizes_FCN,
@@ -254,7 +255,13 @@ def main(days_to_consider=1,
     # Model update with the best threshold
     torch.save({
         'model_state_dict': model.state_dict(),
-        'best_threshold': final_threshold
+        'best_threshold': final_threshold,
+        'lstm_size': lstm_size,
+        'filter_sizes': filter_sizes,
+        'kernel_sizes': kernel_sizes,
+        'dropout': dropout,
+        'num_layers': num_layers,
+        'batch_size': batch_size
     }, best_model_path)
 
     # Valutazione finale

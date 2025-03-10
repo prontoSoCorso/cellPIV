@@ -260,6 +260,7 @@ class Config_03_train:
     val_interval    = 1    # Evaluate on validation every XX epochs
     key_metric      = 'accuracy' # choices={'loss', 'accuracy', 'precision'}, help='Metric used for defining best epoch'
     num_classes     = utils.num_classes
+    num_labels      = num_classes
     # ConvTran - Add Learning Rate Scheduler
     scheduler_patience  = 5    # Number of epochs with no improvement after which learning rate will be reduced
     scheduler_factor    = 0.5    # Factor by which the learning rate will be reduced

@@ -7,6 +7,7 @@ import numpy as np
 
 # Import Project Modules
 current_file_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(current_file_path)
 parent_dir = os.path.dirname(current_file_path)
 while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
@@ -28,7 +29,7 @@ def Initialization():
 
 def main(days_to_consider=config.days_to_consider, 
          save_conf_matrix=True,
-         output_dir_plots = parent_dir):
+         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training")):
     
     device = Initialization()
 
