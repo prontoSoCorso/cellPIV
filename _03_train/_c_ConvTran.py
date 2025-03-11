@@ -55,7 +55,7 @@ def main(days_to_consider=config.days_to_consider,
     loss_module = get_loss_module()
 
     # Training
-    save_path = os.path.join(parent_dir, config.test_dir, f"best_convTran_model_{days_to_consider}Days.pkl")
+    save_path = os.path.join(parent_dir, config.test_dir, f"best_convtran_model_{days_to_consider}Days.pkl")
 
     trainer = SupervisedTrainer(
         model, train_loader, device, loss_module, optimizer, 

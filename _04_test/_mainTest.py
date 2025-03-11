@@ -90,7 +90,7 @@ def main(base_path = os.path.join(current_dir, "final_test_images_and_metrics"),
                 y_pred, y_prob = np.array(all_pred), np.array(all_prob)
 
             elif model_name == 'ConvTran':
-                model_path = os.path.join(base_models_path, f"best_convTran_model_{day}Days.pkl")
+                model_path = os.path.join(base_models_path, f"best_convtran_model_{day}Days.pkl")
                 checkpoint = torch.load(model_path, map_location=device, weights_only=False)
                 conf.num_labels = 2
                 conf.Data_shape = (1, X.shape[1])

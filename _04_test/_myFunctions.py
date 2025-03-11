@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 import pandas as pd
@@ -7,10 +6,28 @@ from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa
 from sklearn.metrics import roc_curve, auc, precision_score, recall_score, matthews_corrcoef
 import seaborn as sns
 import matplotlib.pyplot as plt
-from scipy.stats import shapiro, probplot
 import numpy as np
 import os
 import math
+import sys
+import joblib
+from typing import Tuple
+
+
+# Path configuration
+current_file_path = os.path.abspath(__file__)
+current_dir = os.path.dirname(current_file_path)
+parent_dir = current_dir
+while not os.path.basename(parent_dir) == "cellPIV":
+    parent_dir = os.path.dirname(parent_dir)
+sys.path.append(parent_dir)
+
+# Import project modules
+from config import Config_03_train as conf
+from _03_train._c_ConvTranUtils import CustomDataset
+from _03_train._b_LSTMFCN import LSTMFCN
+from _99_ConvTranModel.model import model_factory
+
 
 # Funzione per salvare la matrice di contingenza con il risultato di McNemar
 def save_contingency_matrix_with_mcnemar(matrix, filename, model_1_name, model_2_name, p_value):
@@ -38,6 +55,7 @@ def save_contingency_matrix_with_mcnemar(matrix, filename, model_1_name, model_2
     plt.close()
 
 
+# To plot different confusion matrices in a single image
 def plot_summary_confusion_matrices(model_name, cm_data, day, output_dir):
     """
     Plot a single PNG with all confusion matrices for the subgroups of a model.
@@ -64,6 +82,7 @@ def plot_summary_confusion_matrices(model_name, cm_data, day, output_dir):
     plt.close()
 
 
+# To plot different roc curves in a single image
 def plot_summary_roc_curves(model_name, roc_data, day, output_dir):
     """
     Plot a single ROC plot per model per day.
@@ -84,31 +103,117 @@ def plot_summary_roc_curves(model_name, roc_data, day, output_dir):
     plt.close()
 
 
-# Funzione per caricare i dati
-def load_data(csv_file_path):
-    return pd.read_csv(csv_file_path)
+# Richiamo questa così da essere coerente nei vari script
+def instantiate_LSTMFCN(checkpoint, device):
+    model = LSTMFCN(**{k: checkpoint[k] 
+                       for k in ['lstm_size', 'filter_sizes',
+                                 'kernel_sizes', 'dropout', 'num_layers']}
+                                 ).to(device)
+    return model
+
+
+# Funzione per importare dati di test
+def load_test_data(days_val, base_test_csv_path):
+    test_path = os.path.join(base_test_csv_path, f"Normalized_sum_mean_mag_{days_val}Days_test.csv")
+    if not os.path.exists(test_path):
+        print(f"Test file not found: {test_path}")
+        return None, None
+    df_test = pd.read_csv(test_path)
+    return df_test
+
 
 # Funzione per preparare i dati
-def prepare_LSTMFCN_data(df):
-    X = torch.tensor(df.iloc[:, 3:].values, dtype=torch.float32).unsqueeze(-1)  # Aggiungo dimensione per il canale
-    y = torch.tensor(df['BLASTO NY'].values, dtype=torch.long)
-    return TensorDataset(X, y)
+def prepare_data(model_type: str, df) -> Tuple[np.ndarray, np.ndarray]:
+    """Load and prepare test data with model-specific preprocessing"""
+    temporal_cols = [c for c in df.columns if c.startswith('value_')]
+    X = df[temporal_cols].values
+    y = df['BLASTO NY'].values
+
+    if model_type == "LSTMFCN":
+        X = X.unsqueeze(-1) if torch.is_tensor(X) else np.expand_dims(X, -1)
+    return X, y
+
+
+# Per definire valori di convTran per fare il model_factory(config)
+def value_for_config_convTran(X):
+    num_labels = 2
+
+    if X.ndim == 2:
+        data_shape = (1, X.shape[1])
+    elif X.ndim == 3:
+        data_shape = (X.shape[0], X.shape[2])
+    else:
+        raise ValueError("X deve avere 2 o 3 dimensioni.")
+
+    return {
+        "num_labels": num_labels, 
+        "data_shape": data_shape
+        }
+
 
 # Funzione per testare il modello e ottenere predizioni e probabilità
-def test_model_ROCKET(transformer, model, X, threshold):
+def test_model_ROCKET(model_info, X):
     # Trasformazione features
     X_3d = X[:, np.newaxis, :]  # Aggiunge dimensione canale
-    X_features = transformer.transform(X_3d)
+    X_features = model_info['transformer'].transform(X_3d)
 
     # Predizioni con soglia ottimale
-    y_prob = model.predict_proba(X_features)[:, 1]
-    y_pred = (y_prob >= threshold).astype(int)
+    y_prob = model_info['model'].predict_proba(X_features)[:, 1]
+    y_pred = (y_prob >= model_info['threshold']).astype(int)
 
     return y_pred, y_prob
 
 
+# Different type of loading specific for each model
+def load_model_by_type(model_type: str, days: int, base_models_path: str, device: torch.device, data=None):
+    """
+    Loads the specified model type for the given day.
+      - ROCKET: uses joblib.load
+      - LSTMFCN: uses torch.load and instantiates the LSTMFCN model
+      - ConvTran: creates model via model_factory(conf) and then loads weights
+    """
+    model_file = f"best_{model_type.lower()}_model_{days}Days.{'pth' if model_type == 'LSTMFCN' else 'pkl' if model_type == 'ConvTran' else 'joblib'}"
+    model_path = os.path.join(base_models_path, model_file)
+    
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model {model_type.lower()} not found: {model_path}")
 
-# Funzione per calcolare le metriche (new)
+    if model_type == "ROCKET":
+        rocket = joblib.load(model_path)
+        # For ROCKET, we return a dict with classifier, transformer and threshold
+        return {
+            "model": rocket['classifier'],
+            "transformer": rocket['rocket'],
+            "threshold": rocket['final_threshold']
+            }
+    
+    elif model_type == "LSTMFCN":
+        lstm_checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+        model = instantiate_LSTMFCN(checkpoint=lstm_checkpoint, device=device)
+        model.load_state_dict(lstm_checkpoint['model_state_dict'])
+        return {
+            "model": model,
+            "threshold": lstm_checkpoint.get('best_threshold', 0.5),
+            "batch_size": lstm_checkpoint.get('batch_size', conf.batch_size)
+            }
+    
+    elif model_type == "ConvTran":
+        conv_checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+        # Create confi instance with proper settings
+        conf.num_labels, conf.Data_shape = value_for_config_convTran(data[0])["num_labels"], value_for_config_convTran(data[0])["data_shape"] 
+        model = model_factory(conf).to(device)
+        model.load_state_dict(conv_checkpoint['model_state_dict'])
+        return {
+            "model": model,
+            "threshold": conv_checkpoint.get('best_threshold', 0.5)
+            }
+    
+    else:
+        print(f"Unknown model type: {model_type}")
+        return None
+
+
+# Funzione per calcolare le metriche
 def calculate_metrics(y_true, y_pred, y_prob):
     fpr, tpr, _ = roc_curve(y_true, y_prob)
     roc_auc = auc(fpr, tpr)
@@ -136,43 +241,4 @@ def calculate_metrics(y_true, y_pred, y_prob):
             metrics[key] = np.round(value, decimals) # Arrotonda gli elementi dell'array
 
     return metrics
-
-
-
-# Funzione di bootstrap per ottenere tutte le metriche
-def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=50, alpha=0.95, show_normality=False, undersampling_proportion=0.8):
-    bootstrapped_metrics = []
-
-    for _ in range(n_bootstraps):
-        indices = np.random.randint(0, len(y_true), int(len(y_true)*undersampling_proportion))
-        if len(np.unique(y_true[indices])) < 2 or len(np.unique(y_pred[indices])) < 2:
-            continue
-        metrics = calculate_metrics(y_true[indices], y_pred[indices], y_prob[indices])
-        bootstrapped_metrics.append(metrics)
-
-    bootstrapped_metrics = np.array(bootstrapped_metrics)
-
-    # Test di normalità per ogni metrica
-    for i, metric in enumerate(["Accuracy", "Balanced Accuracy", "Kappa", "Brier", "F1"]):
-        stat, p_value = shapiro(bootstrapped_metrics[:, i])
-        print(f"Test di Shapiro-Wilk per {metric}: stat={stat:.4f}, p-value={p_value:.4f}")
-
-        if show_normality and (p_value < 0.05):
-            plt.figure(figsize=(8, 5))
-            sns.histplot(bootstrapped_metrics[:, i], kde=True, bins=50)
-            plt.title(f"Distribuzione bootstrap - {metric}")
-            plt.show()
-
-            plt.figure(figsize=(6, 5))
-            probplot(bootstrapped_metrics[:, i], dist="norm", plot=plt)
-            plt.title(f"QQ-plot - {metric}")
-            plt.show()
-
-    # Calcolo delle statistiche riassuntive
-    mean = np.mean(bootstrapped_metrics, axis=0)
-    std = np.std(bootstrapped_metrics, axis=0)
-    lower = np.percentile(bootstrapped_metrics, (1 - alpha) / 2 * 100, axis=0)
-    upper = np.percentile(bootstrapped_metrics, (1 + alpha) / 2 * 100, axis=0)
-    
-    return mean, std, lower, upper, bootstrapped_metrics
 

@@ -43,7 +43,7 @@ def main():
     # Carica il modello ConvTran pre-addestrato
     print("Caricamento modello ConvTran...")
     model = model_factory(conf)
-    model_path = os.path.join(parent_dir, conf.test_dir, f"best_convTran_model_{days_to_consider}Days.pkl")
+    model_path = os.path.join(parent_dir, conf.test_dir, f"best_convtran_model_{days_to_consider}Days.pkl")
     model = load_model(model, model_path)
     model.eval().to(conf.device)
     print(f"Modello ConvTran caricato da: {model_path}")

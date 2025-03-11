@@ -50,7 +50,7 @@ def main():
     risultati_bootstrap = {}
 
     for days_val in days:
-        model_name = f"best_convTran_model_{days_val}Days.pkl"
+        model_name = f"best_convtran_model_{days_val}Days.pkl"
         _, _, test_path = conf.get_paths(days_val)
         model_path = os.path.join(current_dir, model_name)
 

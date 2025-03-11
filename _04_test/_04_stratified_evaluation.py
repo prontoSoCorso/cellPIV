@@ -54,7 +54,7 @@ def load_models(day, model_path, device):
         models['LSTMFCN']['model'].load_state_dict(lstm_checkpoint['model_state_dict'])
 
         # Load ConvTran
-        conv_path = os.path.join(model_path, f"best_convTran_model_{day}Days.pkl")
+        conv_path = os.path.join(model_path, f"best_convtran_model_{day}Days.pkl")
         conv_checkpoint = torch.load(conv_path, map_location=device, weights_only=False)
         models['ConvTran'] = {
             'model': model_factory(conf).to(device),
@@ -73,10 +73,7 @@ def load_models(day, model_path, device):
 def evaluate_model(model_type, model_info, X, y, temporal_cols, device):
     """Generic model evaluation function"""
     if model_type == 'ROCKET':
-        X_3d = X[:, np.newaxis, :]
-        X_features = model_info['transformer'].transform(X_3d)
-        y_prob = model_info['model'].predict_proba(X_features)[:, 1]
-        y_pred = (y_prob >= model_info['threshold']).astype(int)
+        y_pred, y_prob = _myFunctions.test_model_ROCKET(model_info=model_info, X=X)
         return y_pred, y_prob
     
     # PyTorch model evaluation
@@ -292,15 +289,9 @@ def main(merge_types, days=1,
         X = df_merged[temporal_cols].values
         y = df_merged["BLASTO NY"].values
 
-        # Aggiorno conf.Data_shape in base alla shape di X
-        if X.ndim == 2:
-            conf.Data_shape = (1, X.shape[1])
-        elif X.ndim == 3:
-            conf.Data_shape = (X.shape[0], X.shape[2])
-        else:
-            raise ValueError("X deve avere 2 o 3 dimensioni.")
-        # Forzo il numero di etichette a 2 (o lo imposto in base alle esigenze)
-        conf.num_labels = 2
+        # Aggiorno conf.Data_shape ed il num_labels in base ad X
+        conf.num_labels = _myFunctions.value_for_config_convTran(X)["num_labels"]
+        conf.Data_shape = _myFunctions.value_for_config_convTran(X)["data_shape"]
 
         # Load models
         models = load_models(day=day, model_path=base_model_path, device=device)

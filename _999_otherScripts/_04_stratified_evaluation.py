@@ -182,7 +182,7 @@ def main(merge_type, days_to_consider = 1):
     # --- ConvTran ---
     from _99_ConvTranModel.model import model_factory
     from _99_ConvTranModel.utils import load_model
-    conv_model_path = os.path.join(current_dir, f"best_convTran_model_{days_to_consider}Days.pkl")
+    conv_model_path = os.path.join(current_dir, f"best_convtran_model_{days_to_consider}Days.pkl")
     if not os.path.exists(conv_model_path):
         raise FileNotFoundError(f"Modello ConvTran non trovato in {conv_model_path}")
     
