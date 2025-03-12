@@ -10,6 +10,7 @@ from scipy import stats
 from scipy.stats import shapiro, probplot
 import matplotlib.pyplot as plt
 import seaborn as sns
+from statsmodels.stats.multitest import fdrcorrection
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -44,11 +45,10 @@ def load_and_prepare_test_data(model_type, days_val, base_test_csv_path):
     else:
         return (X, y)
 
-
-
 # Funzione di bootstrap per ottenere tutte le metriche
 def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=30, alpha=0.95, 
-                      show_normality=False, undersampling_proportion=0.8):
+                      show_normality=False, undersampling_proportion=0.5, seed=2024):
+    np.random.seed(seed=seed)
     bootstrapped_metrics = []
     metric_order = ["accuracy", "balanced_accuracy", "kappa", "brier", "f1"]
 
@@ -85,7 +85,6 @@ def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=30, alpha=0.95,
     upper = np.percentile(bootstrapped_metrics, (1 + alpha) / 2 * 100, axis=0)
     
     return mean, std, lower, upper, bootstrapped_metrics
-
 
 def test_model_wrapper(model_type, model_info, test_data, device):
     """
@@ -148,14 +147,36 @@ def compute_effect_size(bootstrap1, bootstrap2):
     pooled_std = np.sqrt((std1**2 + std2**2) / 2)
     d = (mean1 - mean2) / pooled_std if pooled_std > 0 else 0.0
     # t-test
-    t_stat, p_val = stats.ttest_ind(bootstrap1, bootstrap2, equal_var=False)
+    t_stat, p_val = stats.ttest_rel(bootstrap1, bootstrap2, alternative="two-sided")
     return d, p_val
 
+def interpret_cohen_d(d: float) -> str:
+    """Interpret Cohen's d effect size"""
+    abs_d = abs(d)
+    if abs_d < 0.2:
+        return "Negligible"
+    elif 0.2 <= abs_d < 0.5:
+        return "Small"
+    elif 0.5 <= abs_d < 0.8:
+        return "Medium"
+    else:
+        return "Large"
+
+def interpret_p_value(p: float) -> str:
+    """Interpret statistical significance"""
+    if p < 0.001:
+        return "***"
+    elif p < 0.01:
+        return "**"
+    elif p < 0.05:
+        return "*"
+    else:
+        return "NS"
 
 ##########################################
 # Main bootstrap evaluation code
 ##########################################
-def main(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
+def boostrap_evaluation(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
          days=[1, 3, 5, 7],
          models_list=['ROCKET', 'LSTMFCN', 'ConvTran'],
          base_models_path=current_dir,
@@ -191,22 +212,22 @@ def main(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
                     "Days": day_val,
                     "Model": m_type,
                     "Metric": metric,
-                    "Mean": mean[i],
-                    "Std Deviation": std[i],
-                    "Lower CI": lower[i],
-                    "Upper CI": upper[i]
+                    "Mean": round(mean[i], 4),
+                    "Std Deviation": round(std[i], 4),
+                    "Lower CI": round(lower[i], 4),
+                    "Upper CI": round(upper[i], 4)
                 })
-                bootstrap_results[(day_val, m_type, metric)] = bootstrap_samples[:, i]
+                bootstrap_results[(day_val, m_type, metric)] = np.round(bootstrap_samples[:, i], 4)
             print("\n---------------------------\n")
     
     # Save summary results
-    df_summary = pd.DataFrame(summary_results)
+    df_summary = pd.DataFrame(summary_results).round(4)
     summary_file = os.path.join(base_path, "results_summary_bootstrap_metrics.csv")
     df_summary.to_csv(summary_file, index=False)
     print(f"📁 Summary bootstrap metrics saved to: {summary_file}")
-    
+
     # Save bootstrap results in wide format
-    df_bootstrap = pd.DataFrame.from_dict(bootstrap_results, orient="index")
+    df_bootstrap = pd.DataFrame.from_dict(bootstrap_results, orient="index").round(4)
     df_bootstrap.index = pd.MultiIndex.from_tuples(df_bootstrap.index, names=["Days", "Model", "Metric"])
     df_bootstrap.columns = [f"Bootstrap_{i+1}" for i in range(df_bootstrap.shape[1])]
     bootstrap_file = os.path.join(base_path, "results_bootstrap_metrics.csv")
@@ -232,9 +253,11 @@ def main(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
                             "Comparison": f"{models_list[i]} vs {models_list[j]}",
                             "Days": day_val,
                             "Metric": metric,
-                            "Cohen_d": d,
-                            "p_value": p_val
-                        })
+                            "Cohen_d": round(d, 4),
+                            "Effect Size": interpret_cohen_d(d),
+                            "p_value": round(p_val, 4),
+                            "Significance": interpret_p_value(p_val)
+                            })
     # Compare same model across days (e.g., LSTMFCN day1 vs day3)
     for m_type in models_list:
         for metric in metric_names:
@@ -250,17 +273,36 @@ def main(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
                             "Comparison": f"{m_type} {days[i]}Days vs {days[j]}Days",
                             "Days": f"{days[i]} vs {days[j]}",
                             "Metric": metric,
-                            "Cohen_d": d,
-                            "p_value": p_val
-                        })
+                            "Cohen_d": round(d, 4),
+                            "Effect Size": interpret_cohen_d(d),
+                            "p_value": round(p_val, 4),
+                            "Significance": interpret_p_value(p_val)
+                            })
     df_comp = pd.DataFrame(comparisons)
+
+    # Extract all p-values for correction
+    p_values = df_comp['p_value'].values
+    # Perform FDR correction
+    _, pvals_corrected = fdrcorrection(p_values, alpha=0.05)
+
+    # Add corrected values to DataFrame
+    df_comp['p_value_fdr'] = pvals_corrected.round(4)
+    df_comp['Significance_fdr'] = df_comp['p_value_fdr'].apply(interpret_p_value)
+
+    # Reorder columns for clarity
+    df_comp = df_comp[[
+        'Comparison', 'Days', 'Metric', 'Cohen_d', 'Effect Size',
+        'p_value', 'Significance', 'p_value_fdr', 'Significance_fdr'
+    ]]
+
     comp_file = os.path.join(base_path, "pairwise_comparisons_bootstrap_metrics.csv")
     df_comp.to_csv(comp_file, index=False)
     print(f"📁 Pairwise comparisons saved to: {comp_file}")
 
+
 if __name__ == "__main__":
     start_time = time.time()
-    main(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
+    boostrap_evaluation(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
          days=[1,3],
          models_list=['ROCKET', 'LSTMFCN', 'ConvTran'],
          base_models_path=current_dir,

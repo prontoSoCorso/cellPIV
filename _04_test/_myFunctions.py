@@ -123,8 +123,13 @@ def load_test_data(days_val, base_test_csv_path):
 
 
 # Funzione per preparare i dati
-def prepare_data(model_type: str, df) -> Tuple[np.ndarray, np.ndarray]:
+def prepare_data(model_type: str, df=None, path_csv=None) -> Tuple[np.ndarray, np.ndarray]:
     """Load and prepare test data with model-specific preprocessing"""
+    if path_csv:
+        df = pd.read_csv(path_csv)
+    if df is None:
+        raise ValueError("Either 'df' or 'path_csv' must be provided.")
+        
     temporal_cols = [c for c in df.columns if c.startswith('value_')]
     X = df[temporal_cols].values
     y = df['BLASTO NY'].values

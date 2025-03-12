@@ -9,7 +9,6 @@ from sklearn.metrics import roc_curve, auc, precision_score, recall_score, matth
 import seaborn as sns
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, TensorDataset
-import timeit
 import torch.optim.lr_scheduler
 import numpy as np
 
@@ -234,7 +233,6 @@ def main(days_to_consider=1,
             best_val_acc = val_metrics[most_important_metric]
             best_val_loss = val_loss
             epochs_no_improve = 0
-            epochs_no_improve = 0
             torch.save(model.state_dict(), best_model_path)
             print(f"Epoch: {epoch}, Model saved with validation {most_important_metric.capitalize()}: {best_val_acc:.4f}")
         else:
@@ -282,5 +280,16 @@ def main(days_to_consider=1,
     return test_metrics
 
 if __name__ == "__main__":
-    execution_time = timeit.timeit(lambda: main(days_to_consider=7), number=1)
-    print(f"Tempo esecuzione LSTM-FCN: {execution_time:.2f}s")
+    import time
+    start_time = time.time()
+    main(days_to_consider=7,
+         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training"), 
+         batch_size=conf.batch_size_FCN, 
+         lstm_size=conf.lstm_size_FCN,
+         filter_sizes=conf.filter_sizes_FCN,
+         kernel_sizes=conf.kernel_sizes_FCN,
+         dropout=conf.dropout_FCN,
+         num_layers=conf.num_layers_FCN,
+         learning_rate=conf.learning_rate_FCN,
+         num_epochs=conf.num_epochs_FCN)
+    print(f"Tempo esecuzione LSTM-FCN: {(time.time() - start_time):.2f}s")

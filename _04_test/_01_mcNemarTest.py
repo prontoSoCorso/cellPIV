@@ -15,6 +15,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 # Model-specific imports
+from config import Config_03_train as conf
 from _03_train._c_ConvTranUtils import CustomDataset
 import _04_test._myFunctions as _myFunctions
 
@@ -29,10 +30,11 @@ def predict(model_type: str, model: Any, X: np.ndarray, params: Dict, device: to
     # PyTorch model prediction
     if model_type == "LSTMFCN":
         dataset = TensorDataset(torch.tensor(X, dtype=torch.float32))
+        loader = DataLoader(dataset, batch_size=params['batch_size'], shuffle=False)
     else:
         dataset = CustomDataset(X.reshape(X.shape[0], 1, -1), np.zeros(len(X)))  # Dummy labels
+        loader = DataLoader(dataset, batch_size=conf.batch_size, shuffle=False)
 
-    loader = DataLoader(dataset, batch_size=params['batch_size'], shuffle=False)
     model.eval()
     preds = []
     
@@ -74,7 +76,7 @@ def mcnemar_test(y_true: np.ndarray, pred1: np.ndarray, pred2: np.ndarray,
     
     return result.pvalue
 
-def main(model_type: str, days: Tuple[int, int], data_dir: str, model_dir: str, output_dir: str):
+def compare_with_McNemar(model_type: str, days: Tuple[int, int], data_dir: str, model_dir: str, output_dir: str):
     """Main comparison workflow"""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     os.makedirs(output_dir, exist_ok=True)
@@ -83,8 +85,8 @@ def main(model_type: str, days: Tuple[int, int], data_dir: str, model_dir: str, 
     models = []
     for day in days:
         test_path = os.path.join(data_dir, f"Normalized_sum_mean_mag_{day}Days_test.csv")
-        X, y = _myFunctions.prepare_data(model_type=model_type, test_path=test_path)
-        model_info = _myFunctions.load_model_by_type(model_type=model_type, days=day, base_models_path=model_dir, device=device, data=X)
+        X, y = _myFunctions.prepare_data(model_type=model_type, path_csv=test_path)
+        model_info = _myFunctions.load_model_by_type(model_type=model_type, days=day, base_models_path=model_dir, device=device, data=(X,y))
         model = model_info["model"]
         params = {key: value for key, value in model_info.items() if key != "model"}
         models.append((model, params, X, y))
@@ -123,7 +125,7 @@ if __name__ == "__main__":
         model_dir = current_dir
         output_dir = os.path.join(current_dir, "mcnemar_results")
     
-    main(
+    compare_with_McNemar(
         model_type= args.model_type if check else model_type,
         days=args.days if check else days,
         data_dir=args.data_dir if check else data_dir,

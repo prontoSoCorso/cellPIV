@@ -198,7 +198,7 @@ def visual_model_evaluation(csv_path, output_dir, merge_type, day):
     plt.close()
 
 
-def main(merge_types, days=1, 
+def stratified_evaluation(merge_types, days=1, 
          base_path=os.path.join(current_dir, "final_stratified_test_results"), 
          base_model_path=current_dir,
          base_test_csv_path=parent_dir,
@@ -354,5 +354,5 @@ if __name__ == "__main__":
     merge_types = ["anomalous", "not_vital"]    # "anomalous" OR "not_vital" OR "no_merging"
     days_to_consider = [1,3,5,7]        # 1,3,5,7
     
-    main(merge_types=merge_types, days=days_to_consider)
+    stratified_evaluation(merge_types=merge_types, days=days_to_consider)
     print(f"Execution time: {time.time() - start_time:.2f} seconds\n")

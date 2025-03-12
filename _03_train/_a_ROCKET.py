@@ -133,7 +133,7 @@ def evaluate_model(model, X, y_true, threshold=0.5):
 def main(train_path="", val_path="", test_path="", default_path=True, 
          kernels=conf.kernels_set, seed=conf.seed, output_dir_plots=os.path.join(current_dir, "tmp_test_results_after_training"), 
          output_model_dir=os.path.join(parent_dir, "_04_test"), 
-         days_to_consider=conf.days_to_consider, type_model_classification="randomforest",
+         days_to_consider=conf.days_to_consider, type_model_classification="RF",
          most_important_metric="balanced_accuracy"):
     
     os.makedirs(output_dir_plots, exist_ok=True)

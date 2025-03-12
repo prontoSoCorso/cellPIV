@@ -1,12 +1,13 @@
 import sqlite3
 import os
+import shutil
 
 def write_to_file(data, filename):
     """Scrive i dati binari su disco."""
     with open(filename, 'wb') as file:
         file.write(data)
 
-def extract_frames(input_dir, output_dir, log_file):
+def extract_frames(input_dir, output_dir, log_file, first_year:int=1900, last_year:int=3000):
     """Estrae i frame dai file .pdb mantenendo la struttura iniziale."""
     metrics = {}  # Dizionario per tracciare i video estratti e gli errori per anno
     sep = "_"
@@ -15,7 +16,7 @@ def extract_frames(input_dir, output_dir, log_file):
         for year in os.listdir(input_dir):
             year_path = os.path.join(input_dir, year)
             print(year)
-            if (int(year)==2020 and os.path.isdir(year_path)):
+            if (first_year<=int(year)<=last_year and os.path.isdir(year_path)):
                 print(f"========== Estraendo anno {year} ==========")
                 metrics[year] = {"videos_extracted": 0, "errors": 0}  # Inizializza le metriche per l'anno
                 output_year_dir = os.path.join(output_dir, year)
@@ -32,6 +33,20 @@ def extract_frames(input_dir, output_dir, log_file):
                                 pdb_name = os.path.splitext(file)[0]
 
                                 try:
+                                    # Calculate total space needed for this PDB
+                                    with sqlite3.connect(pdb_file) as con:
+                                        cur = con.cursor()
+                                        res = cur.execute("SELECT SUM(LENGTH(image_data)) FROM IMAGES")
+                                        total_size = res.fetchone()[0] or 0
+                                    
+                                    # Check disk space
+                                    disk_stat = shutil.disk_usage(output_dir)
+                                    if disk_stat.free < total_size:
+                                        print(f"Space insufficient for {pdb_file}. Skipping.")
+                                        metrics[year]["errors"] += 1
+                                        break
+                                    
+                                    # If there is enough space, continue extracting
                                     con = sqlite3.connect(pdb_file)
                                     cur = con.cursor()
                                     res = cur.execute("SELECT * FROM IMAGES")
@@ -75,7 +90,7 @@ def extract_frames(input_dir, output_dir, log_file):
         print(f"Errore durante il salvataggio del log: {e}")
 
 if __name__ == '__main__':
-    # Percorsi specificati direttamente nel codice
+    # Important paths
     input_dir = "/home/phd2/Scrivania/CorsoData/ScopeData"
     output_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
     log_file = "/home/phd2/Scrivania/CorsoData/estrazione_log.txt"
