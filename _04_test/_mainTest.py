@@ -17,28 +17,28 @@ from _04_test._03_stratified_evaluation import stratified_evaluation
 
 def main():
     test_all(
-        base_path = os.path.join(current_dir, "final_test_images_and_metrics"), 
-        days=[1, 3, 5, 7], 
+        base_path = os.path.join(current_dir, "plots_and_metrics_test"), 
+        days=[1,3,5,7], 
         models = ['ROCKET', 'LSTMFCN', 'ConvTran'], 
         base_models_path=current_dir, 
         base_test_csv_path=parent_dir
         )
     
-    model_type = "ConvTran"
+    model_type = ["ROCKET","LSTMFCN","ConvTran"]
     days = [1,3]
     data_dir = parent_dir
     model_dir = current_dir
-    output_dir = os.path.join(current_dir, "mcnemar_results")
+    base_output_dir = os.path.join(current_dir, "mcnemar_results")
     compare_with_McNemar(
-        model_type=model_type,
+        models_type=model_type,
         days=days,
         data_dir=data_dir,
         model_dir=model_dir,
-        output_dir=os.path.join(output_dir, model_type)
+        base_output_dir=base_output_dir
         )
 
     boostrap_evaluation(
-        base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
+        base_path=os.path.join(current_dir, "bootstrap_test_metrics"),
         days=[1,3,5,7],
         models_list=['ROCKET', 'LSTMFCN', 'ConvTran'],
         base_models_path=current_dir,
@@ -50,7 +50,7 @@ def main():
     stratified_evaluation(
         merge_types=merge_types,
         days=days_to_consider, 
-        base_path=os.path.join(current_dir, "final_stratified_test_results"), 
+        base_path=os.path.join(current_dir, "stratified_test_results"), 
         base_model_path=current_dir,
         base_test_csv_path=parent_dir,
         db_file=os.path.join(parent_dir, "DB morpheus UniPV.xlsx")

@@ -47,10 +47,10 @@ def load_and_prepare_test_data(model_type, days_val, base_test_csv_path):
 
 # Funzione di bootstrap per ottenere tutte le metriche
 def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=30, alpha=0.95, 
-                      show_normality=False, undersampling_proportion=0.5, seed=2024):
+                      show_normality=False, undersampling_proportion=0.5, seed=2024,
+                      metric_order=["accuracy", "balanced_accuracy", "precision", "recall", "f1"]):
     np.random.seed(seed=seed)
     bootstrapped_metrics = []
-    metric_order = ["accuracy", "balanced_accuracy", "kappa", "brier", "f1"]
 
     for _ in range(n_bootstraps):
         indices = np.random.randint(0, len(y_true), int(len(y_true)*undersampling_proportion))
@@ -63,7 +63,7 @@ def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=30, alpha=0.95,
     bootstrapped_metrics = np.array(bootstrapped_metrics)
 
     # Test di normalità per ogni metrica
-    for i, metric in enumerate(["Accuracy", "Balanced Accuracy", "Kappa", "Brier", "F1"]):
+    for i, metric in enumerate(["Accuracy", "Balanced Accuracy", "Precision", "Recall", "F1"]):
         stat, p_value = shapiro(bootstrapped_metrics[:, i])
         print(f"Test di Shapiro-Wilk per {metric}: stat={stat:.4f}, p-value={p_value:.4f}")
 
@@ -176,7 +176,7 @@ def interpret_p_value(p: float) -> str:
 ##########################################
 # Main bootstrap evaluation code
 ##########################################
-def boostrap_evaluation(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
+def boostrap_evaluation(base_path=os.path.join(current_dir, "bootstrap_test_metrics"),
          days=[1, 3, 5, 7],
          models_list=['ROCKET', 'LSTMFCN', 'ConvTran'],
          base_models_path=current_dir,
@@ -186,6 +186,15 @@ def boostrap_evaluation(base_path=os.path.join(current_dir, "final_test_bootstra
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     summary_results = []
     bootstrap_results = {}  # key: (day, model, metric) -> bootstrap samples
+    metric_order = ["accuracy", "balanced_accuracy", "precision", "recall", "f1"]
+    metric_names = ["Accuracy", "Balanced Accuracy", "Precision", "Recall", "F1 Score"]
+    metric_short = {
+        "Accuracy": "Acc",
+        "Balanced Accuracy": "BalAcc",
+        "Precision": "Prec",
+        "Recall": "Recall",
+        "F1 Score": "F1"
+        }
     
     # Loop over days and models
     for day_val in days:
@@ -204,9 +213,8 @@ def boostrap_evaluation(base_path=os.path.join(current_dir, "final_test_bootstra
             y_true, y_pred, y_prob = test_model_wrapper(model_type=m_type, model_info=model_info, test_data=test_data, device=device)
             # Compute bootstrap metrics (using _myFunctions.bootstrap_metrics)
             print(f"Bootstrap for {m_type} {day_val} Days:")
-            mean, std, lower, upper, bootstrap_samples = bootstrap_metrics(y_true, y_pred, y_prob)
+            mean, std, lower, upper, bootstrap_samples = bootstrap_metrics(y_true, y_pred, y_prob, metric_order=metric_order)
             
-            metric_names = ["Accuracy", "Balanced Accuracy", "Cohen's Kappa", "Brier Score", "F1 Score"]
             for i, metric in enumerate(metric_names):
                 summary_results.append({
                     "Days": day_val,
@@ -300,10 +308,106 @@ def boostrap_evaluation(base_path=os.path.join(current_dir, "final_test_bootstra
     print(f"📁 Pairwise comparisons saved to: {comp_file}")
 
 
+    ##########################################
+    # Generate summary bar plots visualization
+    ##########################################
+    print("Generating summary visualization...")
+    
+    # Create figure with subplots
+    n_days = len(days)
+    ncols = 2
+    nrows = (n_days + 1) // ncols
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, 
+                           figsize=(18, 6*nrows),
+                           squeeze=False)
+    plt.subplots_adjust(hspace=0.4, wspace=0.3)  # Adjusted right margin
+    
+    # Define consistent colors for models
+    model_colors = {
+        'ROCKET': '#1f77b4',
+        'LSTMFCN': '#ff7f0e',
+        'ConvTran': '#2ca02c'
+    }
+
+    # Create a single legend for all subplots
+    handles, labels = [], []
+    
+    for idx, day in enumerate(days):
+        row = idx // ncols
+        col = idx % ncols
+        ax = axs[row][col]
+        
+        # Filter data for current day
+        day_df = df_summary[df_summary['Days'] == day]
+        
+        # Create x-axis positions
+        n_metrics = len(metric_order)
+        bar_width = 0.25
+        model_pos = {
+            model: np.arange(n_metrics) + i*bar_width 
+            for i, model in enumerate(models_list)
+        }
+        
+        # Plot bars for each model
+        for model in models_list:
+            model_data = day_df[day_df['Model'] == model].set_index('Metric')
+            means = [model_data.loc[metric, 'Mean'] for metric in metric_names]
+            stds = [model_data.loc[metric, 'Std Deviation'] for metric in metric_names]
+            
+            bars = ax.bar(model_pos[model], means, bar_width,
+                  yerr=stds, capsize=4,
+                  label=model, color=model_colors[model])
+            
+            # Store handles and labels for legend
+            if idx == 0:
+                handles.append(bars[0])
+                labels.append(model)
+
+            # Add value annotations
+            for xpos, mean, std in zip(model_pos[model], means, stds):
+                ax.text(xpos, mean + std + 0.02, 
+                       f'{mean:.2f}\n±{std:.2f}',
+                       ha='center', va='bottom', 
+                       fontsize=8, rotation=90)
+
+        # Configure subplot
+        ax.set_title(f'{day} Days', fontweight='bold')
+        ax.set_xticks(np.arange(n_metrics) + bar_width)
+        ax.set_xticklabels([metric_short[m] for m in metric_names])
+        ax.set_ylim(0, 1.1)
+        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
+    # Add legend outside the plots
+    fig.legend(handles, labels, 
+               loc='center right', 
+               bbox_to_anchor=(1.0, 0.5),
+               title="Models",
+               fontsize=10,
+               title_fontsize=12)
+
+    # Hide empty subplots if any
+    for idx in range(n_days, nrows*ncols):
+        axs.flatten()[idx].axis('off')
+
+    # Save final figure
+    fig_path = os.path.join(base_path, 'summary_metrics_all_days.png')
+    plt.savefig(fig_path, bbox_inches='tight', dpi=300)
+    plt.close()
+    print(f"📊 Saved summary visualization to: {fig_path}")
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     start_time = time.time()
-    boostrap_evaluation(base_path=os.path.join(current_dir, "final_test_bootstrap_metrics"),
-         days=[1,3],
+    boostrap_evaluation(base_path=os.path.join(current_dir, "bootstrap_test_metrics"),
+         days=[1,3,5,7],
          models_list=['ROCKET', 'LSTMFCN', 'ConvTran'],
          base_models_path=current_dir,
          base_test_csv_path=parent_dir)

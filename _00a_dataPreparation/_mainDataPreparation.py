@@ -22,27 +22,30 @@ def count_folders(path_main_folder):
 
 
 
-def main():
+def main(extract_pdb=True, extract_equator=True, count_final_folders=True):
     ##############################
     # Extraction from pdb files
     ##############################
-    input_dir = "/home/phd2/Scrivania/CorsoData/ScopeData"
-    output_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
-    log_file = "/home/phd2/Scrivania/CorsoData/estrazione_log.txt"
-    extract_frames(input_dir=input_dir, output_dir=output_dir, log_file=log_file)
+    if extract_pdb:
+        input_dir = "/home/phd2/Scrivania/CorsoData/ScopeData"
+        output_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
+        log_file = "/home/phd2/Scrivania/CorsoData/estrazione_log.txt"
+        extract_frames(input_dir=input_dir, output_dir=output_dir, log_file=log_file)
 
     ##############################
     # Selecting equatorial images
     ##############################
-    src_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
-    dest_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
-    copy_equatorial_frames(src_dir=src_dir, dest_dir=dest_dir)
+    if extract_equator:
+        src_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
+        dest_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
+        copy_equatorial_frames(src_dir=src_dir, dest_dir=dest_dir)
 
     ##############################
     # Count final folders
     ##############################
-    path_main_folder = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
-    count_folders(path_main_folder=path_main_folder)
+    if count_final_folders:
+        path_main_folder = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
+        count_folders(path_main_folder=path_main_folder)
 
 
 if __name__ == "__main__":

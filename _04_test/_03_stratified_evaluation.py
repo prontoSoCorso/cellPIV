@@ -9,6 +9,7 @@ from tabulate import tabulate
 from torch.utils.data import DataLoader
 from torch.utils.data import TensorDataset
 import torch.multiprocessing as mp
+import umap.umap_ as umap
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -104,13 +105,105 @@ def save_distribution_table(table, filename, title=""):
         f.write(table_str)
 
 
-def visual_model_evaluation(csv_path, output_dir, merge_type, day):
+def visual_model_evaluation(csv_path, output_dir, merge_type, day, df_merged):
     import seaborn as sns
     import matplotlib.pyplot as plt
-
     df_perf = pd.read_csv(csv_path)
+
     """Create clinical-grade visualizations with detailed annotations"""
+    ##############################
+    # Create Umap(s)
+    ##############################
+    # N.B.: The UMAP is computed on the raw temporal features (value_* columns), 
+    # not model embeddings. It shows how the input data is naturally clustered.
+    print("Computing UMAP...")
+
+    # Get unique models and stratums
+    models = df_perf['Model'].unique()
+    stratums = df_perf['Stratum'].unique()
     
+    # Create subplot grid
+    n_cols = 3
+    n_rows = int(np.ceil( (len(stratums)+1) /n_cols) )
+    
+    for model in models:
+        plt.figure(figsize=(6*n_cols, 6*n_rows))
+        plt.suptitle(f"UMAP - {model} ({day} Days, {merge_type} Merging)", 
+                    y=1.02, fontsize=14)
+        
+        # Compute UMAP once per model
+        model_data = df_perf[(df_perf['Model'] == model) & 
+                            (df_perf['Stratum'] == 'Overall')]
+        if not model_data.empty:
+            # Compute UMAP
+            reducer = umap.UMAP(random_state=42)
+            temporal_cols = [c for c in df_merged.columns if c.startswith('value_')]
+            embedding = reducer.fit_transform(df_merged[temporal_cols].values)
+
+            # Plot Grounf Truth first
+            plt.subplot(n_rows, n_cols, 1)
+            plt.scatter(embedding[:, 0], embedding[:, 1], 
+                    c=df_merged["BLASTO NY"], cmap="coolwarm",
+                    alpha=0.7, s=15, vmin=0, vmax=1)
+            plt.title(f"Ground Truth\n(n={len(df_merged)})", fontsize=10)
+            plt.xticks([])
+            plt.yticks([])
+
+            # Plot Overall second
+            plt.subplot(n_rows, n_cols, 2)
+            plt.scatter(embedding[:, 0], embedding[:, 1], 
+                    c=df_merged[f"{model}_prob"], cmap="coolwarm",
+                    alpha=0.7, s=15, vmin=0, vmax=1)
+            plt.title(f"Overall\n(n={len(df_merged)})", fontsize=10)
+            plt.xticks([])
+            plt.yticks([])
+            
+            # Add ground truth contours for overall
+            n_ground = 5
+            for label in [0, 1]:
+                label_mask = df_merged['BLASTO NY'] == label
+                if label_mask.sum() > n_ground:
+                    sns.kdeplot(x=embedding[label_mask, 0], 
+                            y=embedding[label_mask, 1],
+                            levels=3, color='green' if label == 0 else 'black',
+                            alpha=0.5)
+            
+            # Plot each stratum
+            for idx, stratum in enumerate(stratums, start=2): # index 2 because "Overall" and "Ground Truth" already done
+                plt.subplot(n_rows, n_cols, idx)
+                
+                # Get stratum data
+                mask = df_merged['merged_PN'] == stratum
+                y_prob = df_merged[f"{model}_prob"]  # Store probabilities during evaluation
+                
+                # Plot UMAP
+                plt.scatter(embedding[mask, 0], embedding[mask, 1], 
+                           c=y_prob[mask], cmap="coolwarm",
+                           alpha=0.7, s=15, vmin=0, vmax=1)
+                
+                plt.title(f"{stratum}\n(n={mask.sum()})", fontsize=10)
+                plt.xticks([])
+                plt.yticks([])
+                
+                # Add ground truth contours
+                for label in [0, 1]:
+                    label_mask = mask & (df_merged['BLASTO NY'] == label)
+                    if label_mask.sum() > n_ground:
+                        sns.kdeplot(x=embedding[label_mask, 0], 
+                                   y=embedding[label_mask, 1],
+                                   levels=3, color='blue' if label == 0 else 'red',
+                                   alpha=0.5)
+
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, f"umap_{model}_{day}Days_{merge_type}.png"), 
+                   bbox_inches='tight', dpi=300)
+        plt.close()
+
+
+    ##############################
+    # Create bar plots for each metric
+    ##############################
+    print("Computing bar plots...")
     # Helper function for annotation
     def annotate_bars(ax):
         for p in ax.patches:
@@ -120,8 +213,7 @@ def visual_model_evaluation(csv_path, output_dir, merge_type, day):
                        xytext=(0, 5), 
                        textcoords='offset points',
                        fontsize=8)
-
-    # 1. Create bar plots for each metric
+            
     metrics = ['balanced_accuracy', 'f1']
     for metric in metrics:
         plt.figure(figsize=(14, 8))
@@ -139,7 +231,10 @@ def visual_model_evaluation(csv_path, output_dir, merge_type, day):
         plt.savefig(os.path.join(output_dir, filename), bbox_inches='tight')
         plt.close()
 
-    # 2. Create detailed scatter plot
+    ##############################
+    # Create detailed scatter plot
+    ##############################
+    print("Computing scatter plot...")
     plt.figure(figsize=(14, 10))
 
     # Use a more distinct color palette
@@ -199,7 +294,7 @@ def visual_model_evaluation(csv_path, output_dir, merge_type, day):
 
 
 def stratified_evaluation(merge_types, days=1, 
-         base_path=os.path.join(current_dir, "final_stratified_test_results"), 
+         base_path=os.path.join(current_dir, "stratified_test_results"), 
          base_model_path=current_dir,
          base_test_csv_path=parent_dir,
          db_file=os.path.join(parent_dir, "DB morpheus UniPV.xlsx")
@@ -302,6 +397,7 @@ def stratified_evaluation(merge_types, days=1,
             # Overall evaluation
             y_pred, y_prob = evaluate_model(model_name, model_info, X, y, temporal_cols, device)
             metrics = _myFunctions.calculate_metrics(y, y_pred, y_prob)
+            df_merged[f"{model_name}_prob"] = y_prob
             results.append({
                 "Model": model_name,
                 "Stratum": "Overall",
@@ -344,7 +440,7 @@ def stratified_evaluation(merge_types, days=1,
         # Visual Results
         # ---------------------------
         print("\nComputing visual results...\n")
-        visual_model_evaluation(csv_path=result_file, output_dir=output_path_per_day_and_merge, merge_type=merge_type, day=day)
+        visual_model_evaluation(csv_path=result_file, output_dir=output_path_per_day_and_merge, merge_type=merge_type, day=day, df_merged=df_merged)
 
 
 if __name__ == "__main__":
