@@ -1,7 +1,0 @@
-Model,Metric,Comparison,Test,Statistic,p-value,Effect Size r,Effect Label
-ConvTran,Accuracy,Day 1 vs Day 3,Mann-Whitney U,120.0,0.9999994930007626,0.629858167745255,Grande
-ConvTran,F1 Score,Day 1 vs Day 3,Mann-Whitney U,62.5,0.9999999951655435,0.7396061818220798,Grande
-ROCKET,Accuracy,Day 1 vs Day 3,Mann-Whitney U,0.0,0.9999999999867514,0.8588975014708022,Grande
-ROCKET,F1 Score,Day 1 vs Day 3,Mann-Whitney U,0.0,0.9999999999863529,0.8588975014708022,Grande
-LSTMFCN,Accuracy,Day 1 vs Day 3,Mann-Whitney U,18.5,0.9999999999165627,0.8235872708547805,Grande
-LSTMFCN,F1 Score,Day 1 vs Day 3,Mann-Whitney U,0.0,0.9999999999863444,0.8588975014708022,Grande

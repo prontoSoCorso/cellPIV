@@ -128,7 +128,11 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
             # Store confusion matrix
             conf_matrices[model_name] = metrics['conf_matrix']
             # Store predictions for UMAP
-            day_umap_data['models'][model_name] = y_prob
+            day_umap_data['models'][model_name] = {
+                'prob': y_prob,
+                'pred': y_pred,  # Store threshold-based predictions
+                'threshold': threshold  # Store the actual threshold used
+                }
             
             """
             # ---------------------------
@@ -241,6 +245,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         plt.title(f'Metrics Comparison for {day} Days')
         plt.xlabel('Metrics')
         plt.ylabel('Score')
+        plt.ylim((0,1))
         plt.xticks(index + bar_width, metrics)
         plt.legend()
         output_path_per_day = os.path.join(base_path,f"day {day}")
@@ -289,21 +294,23 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         # Plot model predictions in subsequent columns
         for model_idx, model_name in enumerate(models, start=1):
             ax = fig.add_subplot(gs[day_idx, model_idx])
-            y_prob = data['models'][model_name]
+            model_data = data['models'][model_name]
             
             # Plot UMAP colored by predictions
             sc = ax.scatter(embedding[:, 0], embedding[:, 1], 
-                           c=y_prob, cmap="coolwarm", 
+                           c=model_data['prob'], cmap="coolwarm", 
                            alpha=0.7, s=15, edgecolors='none',
                            vmin=0, vmax=1)
             
-            ax.set_title(f"{model_name} - {day} Days", fontsize=12)
+            ax.set_title(f"{model_name} - {day} Days\n(Threshold: {model_data['threshold']:.2f})", 
+                         fontsize=12)
             ax.set_xticks([])
             ax.set_yticks([])
             
             # Add ground truth contours
             for label in [0, 1]:
-                mask = (df_test['BLASTO NY'] == label).values
+                mask = (model_data['pred'] == label)
+                mask = (y_pred == label)
                 if mask.sum() > 10:  # Only plot contours if enough points
                     sns.kdeplot(x=embedding[mask, 0], y=embedding[mask, 1],
                                levels=3, color='blue' if label == 0 else 'red',

@@ -1,6 +1,6 @@
 import os
 import sys
-import argparse
+import matplotlib.pyplot as plt
 import torch
 import numpy as np
 from statsmodels.stats.contingency_tables import mcnemar
@@ -48,7 +48,7 @@ def predict(model_type: str, model: Any, X: np.ndarray, params: Dict, device: to
     return np.array(preds)
 
 def mcnemar_test(y_true: np.ndarray, pred1: np.ndarray, pred2: np.ndarray, 
-                 model_names: Tuple[str, str], output_dir: str) -> float:
+                 model_names: Tuple[str, str]) -> float:
     """Perform McNemar's test and save results"""
     # Create contingency table
     correct_1 = (pred1 == y_true)
@@ -62,29 +62,53 @@ def mcnemar_test(y_true: np.ndarray, pred1: np.ndarray, pred2: np.ndarray,
     # Perform statistical test
     result = mcnemar(contingency_table, exact=True)
     
-    # Save visualization
-    img_path = os.path.join(output_dir, f"mcnemar_{model_names[0]}_vs_{model_names[1]}.png")
-    _myFunctions.save_contingency_matrix_with_mcnemar(
-        contingency_table, img_path, model_names[0], model_names[1], result.pvalue
-    )
-
     # Print results
     print(f"\nMcNemar's Test Results ({' vs '.join(model_names)}):")
     print(f"Contingency Table:\n{np.array(contingency_table)}")
     print(f"p-value: {result.pvalue:.4f}")
     print("Statistically significant" if result.pvalue < 0.05 else "No significant difference")
     
-    return result.pvalue
+    return result.pvalue, np.array(contingency_table), model_names
 
-def compare_with_McNemar(models_type: str, days: Tuple[int, int], data_dir: str, model_dir: str, base_output_dir: str):
+def create_combined_contingency_plot(contingency_data: list, output_dir: str):
+    """Create a combined plot with multiple contingency matrices"""
+    n = len(contingency_data)
+    fig, axes = plt.subplots(1, n, figsize=(6*n, 6), constrained_layout=True)
 
+    for idx, (contingency_table, model_names, p_value) in enumerate(contingency_data):
+        ax = axes[idx] if n > 1 else axes
+        im = ax.imshow(contingency_table, cmap='Blues')
+        
+        # Add text annotations
+        for i in range(2):
+            for j in range(2):
+                ax.text(j, i, str(contingency_table[i, j]), 
+                        ha='center', va='center',
+                        fontsize=14, color='white' if contingency_table[i, j] > np.max(contingency_table) / 2 else 'black')
+                        
+        # Configure axes
+        ax.set_title(f"{model_names[0]} vs {model_names[1]}\np-value: {p_value:.2e}")
+        ax.set_xlabel(f'{model_names[1]} Predictions', fontsize=12)
+        ax.set_ylabel(f'{model_names[0]} Predictions')
+        ax.set_xticks([0, 1])
+        ax.set_yticks([0, 1])
+        ax.set_xticklabels(["Model 2 Wrong", "Model 2 Correct"], fontsize=12)
+        ax.set_yticklabels(["Model 1 Wrong", "Model 1 Correct"], fontsize=12)
+
+        # Add colorbar
+        cbar = fig.colorbar(im, ax=ax, fraction=0.04, pad=0.04)
+        cbar.ax.tick_params(labelsize=12)
+
+    plt.savefig(os.path.join(output_dir, "combined_contingency_matrices.png"), dpi=300)
+    plt.close()
+
+def compare_with_McNemar(models_type: str, days: Tuple[int, int], data_dir: str, model_dir: str, output_dir: str):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    os.makedirs(output_dir, exist_ok=True)
+    contingency_data = []
+    
     for model_type in models_type:
-        output_dir=os.path.join(base_output_dir, model_type)
-
         """Main comparison workflow"""
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        os.makedirs(output_dir, exist_ok=True)
-
         # Load both models
         models = []
         for day in days:
@@ -107,9 +131,11 @@ def compare_with_McNemar(models_type: str, days: Tuple[int, int], data_dir: str,
 
         # Perform statistical test
         model_names = [f"{model_type}_{day}Days" for day in days]
-        mcnemar_test(models[0][3], *predictions, model_names, output_dir)
+        p_value, contingency_table, model_names = mcnemar_test(models[0][3], *predictions, model_names)
+        contingency_data.append((contingency_table, model_names, p_value))
 
-
+    # Create combined plot
+    create_combined_contingency_plot(contingency_data, output_dir)
 
 if __name__ == "__main__":
     models_type = ["ROCKET","LSTMFCN","ConvTran"]
@@ -123,5 +149,5 @@ if __name__ == "__main__":
         days=days,
         data_dir=data_dir,
         model_dir=model_dir,
-        base_output_dir=base_output_dir
+        output_dir=base_output_dir
         )

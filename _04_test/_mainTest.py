@@ -34,7 +34,7 @@ def main():
         days=days,
         data_dir=data_dir,
         model_dir=model_dir,
-        base_output_dir=base_output_dir
+        output_dir=base_output_dir
         )
 
     boostrap_evaluation(
