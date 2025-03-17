@@ -1,14 +1,30 @@
 import pandas as pd
+import numpy as np
 
+# Caricare il file Excel
 xls = pd.ExcelFile("DB morpheus UniPV.xlsx", engine='openpyxl')
-
-df = pd.read_excel("DB morpheus UniPV.xlsx")
-
 sheet = pd.read_excel(xls, sheet_name="lista")
 
-different_zygote = sheet.value_counts("PN")
+# Estrarre la colonna tPNa e forzare il tipo numerico
+tPNA = pd.to_numeric(sheet["tPNa"], errors='coerce')
+blasto_ny = sheet["blasto ny"]  # Colonna blasto ny
 
-print(different_zygote)
+# Numero di dati con tPNa < 4
+count_tPNA_lt4 = (tPNA < 4).sum()
+
+# Numero di dati con tPNa > 10 tra quelli con blasto ny == 0
+count_tPNA_gt10_blasto0 = ((tPNA > 10) & (blasto_ny == 1)).sum()
+
+# Stampa risultati
+print(f"Numero di dati con tPNa < 4: {count_tPNA_lt4}")
+print(f"Numero di dati con tPNa > 10 tra quelli con 'blasto ny' == 0: {count_tPNA_gt10_blasto0}")
+
+
+n = sheet.value_counts("blasto ny")
+print(f"\n{n}")
+
+
+
 
 
 

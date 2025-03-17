@@ -28,40 +28,21 @@ from _99_ConvTranModel.model import model_factory
 import _04_test._myFunctions as _myFunctions
 
 
-def load_models(day, model_path, device):
+def load_models(day, model_path, device, model_types, data):
     """Load all models for a specific day"""
     models = {}
     
     try:
-        # Load ROCKET
-        rocket_path = os.path.join(model_path, f"best_rocket_model_{day}Days.joblib")
-        rocket = joblib.load(rocket_path)
-        models['ROCKET'] = {
-            'model': rocket['classifier'],
-            'transformer': rocket['rocket'],
-            'threshold': rocket['final_threshold']
-            }
-
-        # Load LSTMFCN
-        lstm_path = os.path.join(model_path, f"best_lstmfcn_model_{day}Days.pth")
-        lstm_checkpoint = torch.load(lstm_path, map_location=device, weights_only=False)
-        models['LSTMFCN'] = {
-            'model': LSTMFCN(**{k: lstm_checkpoint[k] for k in ['lstm_size', 'filter_sizes',
-                                                                'kernel_sizes', 'dropout', 'num_layers']}
-                            ).to(device),
-            'threshold': lstm_checkpoint.get('best_threshold', 0.5),
-            'batch_size': lstm_checkpoint['batch_size']
-            }
-        models['LSTMFCN']['model'].load_state_dict(lstm_checkpoint['model_state_dict'])
-
-        # Load ConvTran
-        conv_path = os.path.join(model_path, f"best_convtran_model_{day}Days.pkl")
-        conv_checkpoint = torch.load(conv_path, map_location=device, weights_only=False)
-        models['ConvTran'] = {
-            'model': model_factory(conf).to(device),
-            'threshold': conv_checkpoint.get('best_threshold', 0.5)
-            }
-        models['ConvTran']['model'].load_state_dict(conv_checkpoint['model_state_dict'])
+        for model_type in model_types:
+            model_info = _myFunctions.load_model_by_type(
+                model_type=model_type,
+                days=day,
+                base_models_path=model_path,
+                device=device,
+                data=data  # Pass the prepared data for ConvTran config
+                )
+            if model_info:
+                models[model_type] = model_info
 
     except Exception as e:
         print(f"Error loading models: {str(e)}")
@@ -70,8 +51,7 @@ def load_models(day, model_path, device):
     return models
 
 
-
-def evaluate_model(model_type, model_info, X, y, temporal_cols, device):
+def evaluate_model(model_type, model_info, X, y, device):
     """Generic model evaluation function"""
     if model_type == 'ROCKET':
         y_pred, y_prob = _myFunctions.test_model_ROCKET(model_info=model_info, X=X)
@@ -92,7 +72,12 @@ def evaluate_model(model_type, model_info, X, y, temporal_cols, device):
             X_batch = X_batch.to(device)
             output = model_info['model'](X_batch)
             prob = torch.softmax(output, dim=1)[:, 1].cpu().numpy()
-            all_pred.extend((prob >= model_info['threshold']).astype(int))
+            threshold = model_info.get('threshold', 0.5)
+            if threshold==0.5:
+                print("\n==============================\n")
+                print(f"Usata threshold di default per {model_type}")
+                print("\n==============================\n")
+            all_pred.extend((prob >= threshold).astype(int))
             all_prob.extend(prob)
     
     return np.array(all_pred), np.array(all_prob)
@@ -297,7 +282,8 @@ def stratified_evaluation(merge_types, days=1,
          base_path=os.path.join(current_dir, "stratified_test_results"), 
          base_model_path=current_dir,
          base_test_csv_path=parent_dir,
-         db_file=os.path.join(parent_dir, "DB morpheus UniPV.xlsx")
+         db_file=os.path.join(parent_dir, "DB morpheus UniPV.xlsx"),
+         model_types=["ROCKET", "LSTMFCN", "ConvTran"]
          ):
     os.makedirs(base_path, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -385,17 +371,18 @@ def stratified_evaluation(merge_types, days=1,
         y = df_merged["BLASTO NY"].values
 
         # Aggiorno conf.Data_shape ed il num_labels in base ad X
-        conf.num_labels = _myFunctions.value_for_config_convTran(X)["num_labels"]
-        conf.Data_shape = _myFunctions.value_for_config_convTran(X)["data_shape"]
+        conv_config = _myFunctions.value_for_config_convTran(X)
+        conf.num_labels = conv_config["num_labels"]
+        conf.Data_shape = conv_config["data_shape"]
 
         # Load models
-        models = load_models(day=day, model_path=base_model_path, device=device)
+        models = load_models(day=day, model_path=base_model_path, device=device, model_types=model_types, data=(X,y))
 
         # Evaluate models
         results = []
         for model_name, model_info in models.items():
             # Overall evaluation
-            y_pred, y_prob = evaluate_model(model_name, model_info, X, y, temporal_cols, device)
+            y_pred, y_prob = evaluate_model(model_name, model_info, X, y, device)
             metrics = _myFunctions.calculate_metrics(y, y_pred, y_prob)
             df_merged[f"{model_name}_prob"] = y_prob
             results.append({
@@ -411,7 +398,7 @@ def stratified_evaluation(merge_types, days=1,
             for group, group_df in df_merged.groupby("merged_PN"):
                 X_grp = group_df[temporal_cols].values
                 y_grp = group_df["BLASTO NY"].values
-                y_pred_grp, y_prob_grp = evaluate_model(model_name, model_info, X_grp, y_grp, temporal_cols, device)
+                y_pred_grp, y_prob_grp = evaluate_model(model_name, model_info, X_grp, y_grp, device)
                 metrics_grp = _myFunctions.calculate_metrics(y_grp, y_pred_grp, y_prob_grp)
                 results.append({
                     "Model": model_name,
@@ -449,6 +436,7 @@ if __name__ == "__main__":
 
     merge_types = ["anomalous", "not_vital"]    # "anomalous" OR "not_vital" OR "no_merging"
     days_to_consider = [1,3,5,7]        # 1,3,5,7
+    model_types = ["ROCKET", "LSTMFCN", "ConvTran"]
     
-    stratified_evaluation(merge_types=merge_types, days=days_to_consider)
+    stratified_evaluation(merge_types=merge_types, days=days_to_consider, model_types=model_types)
     print(f"Execution time: {time.time() - start_time:.2f} seconds\n")

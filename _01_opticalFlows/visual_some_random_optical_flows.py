@@ -169,8 +169,6 @@ def process_frames(folder_path, dish_well, img_size, num_minimum_frames, num_ini
 
 
 
-
-
 def main():
     n_video_target = 3  # Numero di video per ciascuna classe
     selected_videos = {"blasto": set(), "no_blasto": set()}  # Set per evitare duplicati

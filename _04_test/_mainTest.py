@@ -53,7 +53,8 @@ def main():
         base_path=os.path.join(current_dir, "stratified_test_results"), 
         base_model_path=current_dir,
         base_test_csv_path=parent_dir,
-        db_file=os.path.join(parent_dir, "DB morpheus UniPV.xlsx")
+        db_file=os.path.join(parent_dir, "DB morpheus UniPV.xlsx"),
+        model_types=["ROCKET", "LSTMFCN", "ConvTran"]
         )
 
 
