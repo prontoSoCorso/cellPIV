@@ -41,7 +41,7 @@ def stratified_split(data, train_size, seed):
 
 
 # Normalizzazione del train con quantile normalization
-def normalize_data(train_data, val_data, test_data):
+def normalize_data(train_data, val_data, test_data, inf_quantile=0.10, sup_quantile=0.90):
     # Seleziona solo le colonne temporali da normalizzare
     temporal_columns = [col for col in train_data.columns if col.startswith("value_")]
 
@@ -51,8 +51,8 @@ def normalize_data(train_data, val_data, test_data):
     test_temporal = test_data[temporal_columns]
 
     # Calcolo il 10° e il 90° percentile per il train
-    min_val = train_temporal[train_temporal > 0].quantile(0.10).min()
-    max_val = train_temporal[train_temporal > 0].quantile(0.90).max()
+    min_val = train_temporal[train_temporal > 0].quantile(inf_quantile).min()
+    max_val = train_temporal[train_temporal > 0].quantile(sup_quantile).max()
 
     print("=====VALORI DI MIN E MAX PER NORMALIZZAZIONE=====")
     print(f"min_val = {min_val}, max_val = {max_val}")

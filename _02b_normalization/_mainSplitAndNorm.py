@@ -43,7 +43,8 @@ def import_original_db_and_merge_data(data, original_db_path=os.path.join(parent
 
 def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, seed=conf.seed, embedding_type=conf.embedding_type, original_db_path=os.path.join(parent_dir, "DB morpheus UniPV.xlsx"),
          save_normalization_example_single_pt=True, mean_data_visualization=True, specific_patient_to_analyse=None, mean_data_visualization_stratified = True,
-         temporalDataType = conf.temporalDataType, csv_file_path = conf.csv_file_path):
+         temporalDataType = conf.temporalDataType, csv_file_path = conf.csv_file_path,
+         inf_quantile=0.10, sup_quantile=0.90):
     
     # Carica i dati
     max_frames = utils.num_frames_by_days(days_to_consider)
@@ -53,7 +54,7 @@ def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, see
     train_data, val_data, test_data = stratified_split(data, train_size=train_size, seed=seed)
 
     # Normalizza i dati
-    train_data_norm, val_data_norm, test_data_norm = normalize_data(train_data, val_data, test_data)
+    train_data_norm, val_data_norm, test_data_norm = normalize_data(train_data, val_data, test_data, inf_quantile=inf_quantile, sup_quantile=sup_quantile)
 
     # Salva i dataset normalizzati
     base_path = conf.get_normalized_base_path(days_to_consider)
@@ -116,6 +117,7 @@ def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, see
 if __name__ == "__main__":
     start_time = time.time()
     main(days_to_consider=3, train_size=0.7, seed=42, temporalDataType = conf.temporalDataType, csv_file_path = conf.csv_file_path, 
-         embedding_type="", save_normalization_example_single_pt=False, mean_data_visualization=True,
-         specific_patient_to_analyse=61, mean_data_visualization_stratified=True)
+         embedding_type="umap", save_normalization_example_single_pt=True, mean_data_visualization=True,
+         specific_patient_to_analyse=61, mean_data_visualization_stratified=True,
+         inf_quantile=0.10, sup_quantile=0.90)
     print("Execution time: ", str(time.time()-start_time), "seconds")
