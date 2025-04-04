@@ -8,7 +8,16 @@ def write_to_file(data, filename):
         file.write(data)
 
 def extract_frames(input_dir, output_dir, log_file, first_year:int=1900, last_year:int=3000):
-    """Estrae i frame dai file .pdb mantenendo la struttura iniziale."""
+    """
+    Extracts frames from SQLite database files.
+    
+    Args:
+        input_dir: Path to directory containing year-organized PDB files
+        output_dir: Path where extracted images should be stored
+        log_file: Path for operation log file
+        first_year: Minimum year to process (inclusive)
+        last_year: Maximum year to process (inclusive)
+    """
     metrics = {}  # Dizionario per tracciare i video estratti e gli errori per anno
     sep = "_"
     
@@ -88,11 +97,3 @@ def extract_frames(input_dir, output_dir, log_file, first_year:int=1900, last_ye
         print(f"Risultati salvati in {log_file}")
     except Exception as e:
         print(f"Errore durante il salvataggio del log: {e}")
-
-if __name__ == '__main__':
-    # Important paths
-    input_dir = "/home/phd2/Scrivania/CorsoData/ScopeData"
-    output_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
-    log_file = "/home/phd2/Scrivania/CorsoData/estrazione_log.txt"
-
-    extract_frames(input_dir, output_dir, log_file)

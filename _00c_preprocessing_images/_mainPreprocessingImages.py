@@ -1,4 +1,3 @@
-import time
 import os
 import sys
 # Configurazione dei percorsi e dei parametri
@@ -12,7 +11,7 @@ from config import Config_00_preprocessing as conf
 from _00c_preprocessing_images import _01_check_and_prepare_images
 
 
-def main(src_dir=conf.src_dir, dest_dir=conf.dest_dir, input_excel_path=conf.path_original_excel):
+def main(src_dir=conf.path_main_folder, dest_dir=conf.dest_dir_blastoData, input_excel_path=conf.path_original_excel):
     
     # Dividing videos in two folder (blasto and no_blasto)
     _01_check_and_prepare_images.organize_videos_by_classification(src_dir, dest_dir, input_excel_path)
@@ -27,6 +26,7 @@ def main(src_dir=conf.src_dir, dest_dir=conf.dest_dir, input_excel_path=conf.pat
 
 
 if __name__ == '__main__':
+    import time
     start_time = time.time()
-    main(src_dir=conf.src_dir, dest_dir=conf.dest_dir, input_excel_path=conf.path_original_excel)
+    main(src_dir=conf.path_main_folder, dest_dir=conf.dest_dir_blastoData, input_excel_path=conf.path_original_excel)
     print("Excecution time: " + str(time.time() - start_time) + "seconds")

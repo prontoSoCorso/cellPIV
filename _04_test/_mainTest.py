@@ -9,7 +9,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from _04_test._00_test_roc_bar_metrics import test_all
+from _04_test._00_test_metrics_roc_umap_barPlots_cm import test_all
 from _04_test._01_mcNemarTest import compare_with_McNemar
 from _04_test._02_bootstrap_evaluation import boostrap_evaluation
 from _04_test._03_stratified_evaluation import stratified_evaluation

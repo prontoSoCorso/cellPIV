@@ -32,11 +32,3 @@ def copy_equatorial_frames(src_dir, dest_dir):
         print(f"Selezione completata. I frame equatoriali sono stati copiati in {dest_dir}")
     except Exception as e:
         print(f"Errore durante l'esecuzione: {e}")
-
-if __name__ == "__main__":
-    # Percorsi sorgente e destinazione
-    src_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
-    dest_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
-
-    # Copia dei frame equatoriali
-    copy_equatorial_frames(src_dir, dest_dir)

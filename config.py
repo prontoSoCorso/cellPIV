@@ -4,6 +4,7 @@ import os
 import torch
 import random
 import numpy as np
+import cv2
 
 # Rileva il percorso della cartella "cellPIV" in modo dinamico
 current_file_path = os.path.abspath(__file__)
@@ -22,7 +23,7 @@ if print_source:
         to_print = "PC Lorenzo"
     elif sourceForPath==2:
         to_print = "AWS"
-    print(f"Using path for this computer: {to_print}")
+    #print(f"Using path for this computer: {to_print}")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -30,7 +31,7 @@ class user_paths:
     if sourceForPath == 0:
         #Per computer fisso nuovo
         path_excels = PROJECT_ROOT 
-        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti"
+        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti_small_batch"
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
@@ -46,70 +47,81 @@ class user_paths:
 class utils:
     # Dim
     img_size                    = 500
-    framePerDay                 = 96
+    framePerHour                = 4
+    framePerDay                 = framePerHour*24
 
     def num_frames_by_days(num_days):
         tot_frames = utils.framePerDay*num_days
         return tot_frames
 
     num_classes                 = 2
-    project_name                = "BlastoClass_7days_672frames_optflow_LK"
+    project_name                = "BlastoClass_3days_optflow_Farneback"
+    hours2cut                   = 4
+    start_frame                 = framePerHour*hours2cut
+    logging_files_dir           = "_z_logging_files"
 
     # Seed everything
     seed = 2024
 
 
 class Config_00_preprocessing:
+    # dataPreparation
+    input_dir_pdb_files = "/home/phd2/Scrivania/CorsoData/ScopeData"
+    output_dir_extracted_pdb_files = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
+    log_file_pdb_extraction = "/home/phd2/Scrivania/CorsoData/estrazione_log.txt"
+
+    src_dir_extracted_pdb = output_dir_extracted_pdb_files
+    dest_dir_extracted_equator = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
+    
+    # Percorso della directory con i video equatoriali
+    path_main_folder = dest_dir_extracted_equator
+
+    # Preprocessing
     path_original_excel     = os.path.join(user_paths.path_excels, "DB morpheus UniPV.xlsx")
     #path_original_excel     = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
     path_addedID_csv        = os.path.join(user_paths.path_excels, "_00b_preprocessing_excels", "DB_Morpheus_withID.csv")
     path_double_dish_excel  = os.path.join(user_paths.path_excels, "pz con doppia dish.xlsx")
 
-    # Percorso della directory sorgente (con i video equatoriali)
-    src_dir = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
     # Percorso della directory di destinazione
-    dest_dir = user_paths.path_BlastoData
+    dest_dir_blastoData = user_paths.path_BlastoData
 
 
 class Config_01_OpticalFlow:
     #method_optical_flow = "LucasKanade"
-    method_optical_flow = "Farneback"
+    method_optical_flow = "LucasKanade"
     output_path_optical_flow_images = "/home/phd2/Scrivania/CorsoData/opticalFlowExamples"
+
+    # Settings
+    save_metrics = True
+    save_overlay_optical_flow = True
+    save_final_data = True
+
+    # Var
+    img_size                    = utils.img_size
+    num_minimum_frames          = 300
+    num_initial_frames_to_cut   = utils.start_frame   # Taglio le prime ore perché biologicamente non significative
+                                                        # (prima delle 4 ore no pronuclei e pochi movimenti cellulari)
+    num_forward_frame           = 4     # Numero di frame per sum_mean_mag
 
     if method_optical_flow == "LucasKanade":
         # LUCAS KANADE
         # LK parameters
-        winSize         = 10
-        maxLevelPyramid = 3
-        maxCorners      = 300
-        qualityLevel    = 0.3
-        minDistance     = 10
-        blockSize       = 7
+        winSize         = 15
+        maxLevelPyramid = 4
+        maxCorners      = 500
+        qualityLevel    = 0.1
+        minDistance     = 5
+        blockSize       = 5
 
-        # Var
-        img_size                    = utils.img_size
-        save_images                 = 0
-        num_minimum_frames          = 300
-        num_initial_frames_to_cut   = 5
-        num_forward_frame           = 4   # Numero di frame per sum_mean_mag
-        
     elif method_optical_flow == "Farneback":
         # FARNEBACK
         # Farneback parameters
-        pyr_scale = 0.5
-        levels = 3
-        winSize = 10
-        iterations = 4
-        poly_n = 5
-        poly_sigma = 1.2
-        flags = 0
-
-        # Var
-        img_size = utils.img_size
-        save_images = 0
-        num_minimum_frames = 300
-        num_initial_frames_to_cut = 5
-        num_forward_frame = 4   # Numero di frame per sum_mean_mag
+        pyr_scale = 0.3
+        levels = 5
+        winSize = 15
+        iterations = 5
+        poly_n = 7
+        poly_sigma = 1.5
 
     else:
         raise SystemExit("\n===== Scegliere un metodo di flusso ottico valido nel config =====\n")
