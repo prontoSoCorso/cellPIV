@@ -64,37 +64,37 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
 
             logging.info(f"Processing video n: {idx}/{total_videos}, {class_sample}/{sample}")
 
-            #try:
-            sample_path = os.path.join(path_all_folders, sample)
-            output_metrics_base_path=os.path.join(output_metrics_base_dir, method_optical_flow, class_sample)
-            os.makedirs(output_metrics_base_path, exist_ok=True)
-            output_path_images = os.path.join(output_path_optical_flow_images, method_optical_flow, class_sample, sample)
-            os.makedirs(output_path_images, exist_ok=True)
+            try:
+                sample_path = os.path.join(path_all_folders, sample)
+                output_metrics_base_path=os.path.join(output_metrics_base_dir, method_optical_flow, class_sample)
+                os.makedirs(output_metrics_base_path, exist_ok=True)
+                output_path_images = os.path.join(output_path_optical_flow_images, method_optical_flow, class_sample, sample)
+                os.makedirs(output_path_images, exist_ok=True)
 
-            metrics = process_frames(
-                folder_path=sample_path, 
-                dish_well=sample, 
-                img_size=img_size, 
-                num_minimum_frames=num_minimum_frames, 
-                num_initial_frames_to_cut=num_initial_frames_to_cut, 
-                num_forward_frame=num_forward_frame, 
-                method_optical_flow=method_optical_flow,
-                output_metrics_base_path=output_metrics_base_path,
-                save_metrics=save_metrics,
-                save_overlay_optical_flow=save_overlay_optical_flow,
-                output_path_images_with_optical_flow=output_path_images
-                )
-            
-            mean_magnitude_dict[sample] = np.array(metrics["mean_magnitude"]).astype(float)
-            vorticity_dict[sample] = np.array(metrics["vorticity"]).astype(float)
-            hybrid_dict[sample] = np.array(metrics["hybrid"]).astype(float)
-            sum_mean_mag_dict[sample] = np.array(metrics["sum_mean_mag"]).astype(float)
+                metrics = process_frames(
+                    folder_path=sample_path, 
+                    dish_well=sample, 
+                    img_size=img_size, 
+                    num_minimum_frames=num_minimum_frames, 
+                    num_initial_frames_to_cut=num_initial_frames_to_cut, 
+                    num_forward_frame=num_forward_frame, 
+                    method_optical_flow=method_optical_flow,
+                    output_metrics_base_path=output_metrics_base_path,
+                    save_metrics=save_metrics,
+                    save_overlay_optical_flow=save_overlay_optical_flow,
+                    output_path_images_with_optical_flow=output_path_images
+                    )
+                
+                mean_magnitude_dict[sample] = np.array(metrics["mean_magnitude"]).astype(float)
+                vorticity_dict[sample] = np.array(metrics["vorticity"]).astype(float)
+                hybrid_dict[sample] = np.array(metrics["hybrid"]).astype(float)
+                sum_mean_mag_dict[sample] = np.array(metrics["sum_mean_mag"]).astype(float)
 
-            if class_sample == "blasto":
-                n_video_success_blasto += 1
-            else:
-                n_video_success_no_blasto += 1
-        """
+                if class_sample == "blasto":
+                    n_video_success_blasto += 1
+                else:
+                    n_video_success_no_blasto += 1
+        
             except Exception as e:
                 if class_sample == "blasto":
                     n_video_error_blasto += 1
@@ -108,7 +108,7 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
                 print(e)
                 print('-------------------')
                 continue
-        """
+        
 
     print('===================')
     print("Terminata Elaborazione...")
