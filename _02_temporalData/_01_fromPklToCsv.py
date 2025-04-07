@@ -7,8 +7,8 @@ import pandas as pd
 import os
 import numpy as np
 
-def fromPickleToCsv(current_dir, path_pkl, output_temporal_csv_path, num_frames_MaxDays):
-    with open(os.path.join(current_dir, path_pkl), 'rb') as f:
+def fromPickleToCsv(path_pkl, output_temporal_csv_path, num_frames_MaxDays):
+    with open(path_pkl, 'rb') as f:
         data = pickle.load(f)
 
     # Processa i dati

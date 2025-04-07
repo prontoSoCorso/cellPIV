@@ -130,8 +130,8 @@ class Config_01_OpticalFlow:
 
 class Config_02_temporalData:
     dict                        = "sum_mean_mag"
-    OptFlow                     = Config_01_OpticalFlow.method_optical_flow
-    type_files                  = "files_7Days_Farneback"
+    OptFlow                     = "Farneback"
+    type_files                  = f"files_all_days_{OptFlow}"
     dict_in                     = dict + "_dict_" + OptFlow + ".pkl"
     
     path_pkl                    = os.path.join(type_files, dict_in)
@@ -143,9 +143,9 @@ class Config_02_temporalData:
     # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
     final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
 
-    embedding_type = ""
+    embedding_type = "UMAP"
     num_max_days = 7
-    days_to_consider_for_dim_reduction = [3]    # array perché fa ciclo per poter svolgere umap su più giorni
+    days_to_consider_for_dim_reduction = [1,3,5,7]    # array perché fa ciclo per poter svolgere umap su più giorni
 
 class Config_02b_normalization:
     # Data
