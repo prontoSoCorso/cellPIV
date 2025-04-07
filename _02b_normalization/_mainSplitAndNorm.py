@@ -116,8 +116,15 @@ def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, see
 
 if __name__ == "__main__":
     start_time = time.time()
-    main(days_to_consider=3, train_size=0.7, seed=42, temporalDataType = conf.temporalDataType, csv_file_path = conf.csv_file_path, 
-         embedding_type="umap", save_normalization_example_single_pt=True, mean_data_visualization=True,
-         specific_patient_to_analyse=61, mean_data_visualization_stratified=True,
-         inf_quantile=0.10, sup_quantile=0.90)
+    main(days_to_consider=conf.days_to_consider, 
+         train_size=conf.train_size, 
+         seed=conf.seed, 
+         temporalDataType = conf.temporalDataType, 
+         csv_file_path = conf.csv_file_path, 
+         embedding_type=conf.embedding_type, 
+         save_normalization_example_single_pt=conf.save_normalization_example_single_pt, 
+         mean_data_visualization=conf.mean_data_visualization,
+         specific_patient_to_analyse=conf.specific_patient_to_analyse, 
+         mean_data_visualization_stratified=conf.mean_data_visualization_stratified,
+         inf_quantile=conf.inf_quantile, sup_quantile=conf.sup_quantile)
     print("Execution time: ", str(time.time()-start_time), "seconds")

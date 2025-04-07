@@ -4,6 +4,7 @@ from art import *
 import time
 import torch
 import numpy as np
+import logging 
 
 # Import Project Modules
 current_file_path = os.path.abspath(__file__)
@@ -14,8 +15,9 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_train as config
+import _utils_._utils as utils
 from _c_ConvTranTraining import SupervisedTrainer, train_runner, find_best_threshold
-from _c_ConvTranUtils import load_my_data, save_confusion_matrix, plot_roc_curve
+from _c_ConvTranUtils import load_my_data
 from _99_ConvTranModel.model import model_factory, count_parameters
 from _99_ConvTranModel.optimizers import get_optimizer
 from _99_ConvTranModel.loss import get_loss_module
@@ -29,8 +31,14 @@ def Initialization():
 
 def main(days_to_consider=config.days_to_consider, 
          save_conf_matrix=True,
-         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training")):
+         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training"),
+         log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                              "logging_files"),
+         log_filename=f'train_ConvTran_based_on_{config.method_optical_flow}'):
     
+    # File di Log & initialization
+    utils.config_logging(log_dir=log_dir, log_filename=log_filename)
+    logging.info(f"\n{'='*30} Starting ConvTran Training {'='*30}")
     device = Initialization()
 
     # Ottieni i percorsi dal config
@@ -47,8 +55,8 @@ def main(days_to_consider=config.days_to_consider,
     model = model_factory(config)
     model.to(device)
 
-    print(f"Model:\n{model}")
-    print(f"Total number of parameters: {count_parameters(model)}")
+    logging.info(f"Model architecture:\n{model}")
+    logging.info(f"Total parameters: {count_parameters(model):,}")
 
     # Optimizer and Loss
     optimizer = get_optimizer("RAdam")(model.parameters(), lr=config.lr)
@@ -66,6 +74,8 @@ def main(days_to_consider=config.days_to_consider,
         print_interval=config.print_interval, is_training=False
     )
 
+    # Start training
+    logging.info("\nStarting training process...")
     train_runner(
         config=config,
         model=model,
@@ -78,7 +88,7 @@ def main(days_to_consider=config.days_to_consider,
     best_model, optimizer, _ = load_model(model, save_path, optimizer)
     best_model.to(device)
     best_threshold = find_best_threshold(best_model, val_loader, device)
-    print(f"\nBest Threshold Found: {best_threshold:.4f}")
+    logging.info(f"\nOptimal threshold determined: {best_threshold:.4f}")
 
     # Valutazione sul test con soglia ottimale
     best_test_evaluator = SupervisedTrainer(
@@ -94,20 +104,21 @@ def main(days_to_consider=config.days_to_consider,
         'model_state_dict': best_model.state_dict(),
         'best_threshold': best_threshold
     }, save_path)
+    logging.info(f"\nFinal model saved to: {save_path}")
 
-    print("\n===== FINAL TEST RESULTS - ConvTran =====")
+    logging.info("\n===== FINAL TEST RESULTS =====")
     for metric, value in test_metrics.items():
         if metric not in ['conf_matrix', 'fpr', 'tpr']:
-            print(f"{metric.capitalize()}: {value:.4f}")
-    plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
-                   test_metrics['roc_auc'], 
-                   os.path.join(output_dir_plots, f"roc_curve_LSTMFCN_{days_to_consider}Days.png"))
+            logging.info(f"{metric.capitalize()}: {value:.4f}")
 
-    # Salvataggio output
+    # Save plots
+    utils.plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
+                   test_metrics['roc_auc'], 
+                   os.path.join(output_dir_plots, f"roc_curve_ConvTran_{days_to_consider}Days.png"))
     conf_matrix_filename=os.path.join(output_dir_plots,f'confusion_matrix_ConvTran_{days_to_consider}Days.png')
     if save_conf_matrix:
-        save_confusion_matrix(test_metrics['conf_matrix'], conf_matrix_filename)
-        plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], test_metrics['roc_auc'], 
+        utils.save_confusion_matrix(conf_matrix=test_metrics['conf_matrix'], filename=conf_matrix_filename, model_name="ConvTran")
+        utils.plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], test_metrics['roc_auc'], 
                        conf_matrix_filename.replace('confusion', 'roc'))
 
 

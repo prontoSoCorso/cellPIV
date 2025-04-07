@@ -22,7 +22,8 @@ from config import Config_03_train as conf
 from _03_train._b_LSTMFCN import LSTMFCN
 from _03_train._c_ConvTranUtils import CustomDataset
 from _99_ConvTranModel.model import model_factory
-import _04_test._myFunctions as _myFunctions
+import _04_test._testFunctions as _testFunctions
+import _utils_._utils as utils
 
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -124,7 +125,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
                 y_pred, y_prob = np.array(all_pred), np.array(all_prob)
 
             # Compute metrics
-            metrics = _myFunctions.calculate_metrics(y_true, y_pred, y_prob)
+            metrics = utils.calculate_metrics(y_true, y_pred, y_prob)
             # Store confusion matrix
             conf_matrices[model_name] = metrics['conf_matrix']
             # Store predictions for UMAP
@@ -133,20 +134,6 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
                 'pred': y_pred,  # Store threshold-based predictions
                 'threshold': threshold  # Store the actual threshold used
                 }
-            
-            """
-            # ---------------------------
-            # Save confusion matrix
-            # ---------------------------
-            plt.figure(figsize=(6,6))
-            sns.heatmap(metrics['conf_matrix'], annot=True, fmt='d', cmap='Blues',  
-                        xticklabels=["no_blasto", "blasto"], yticklabels=["no_blasto", "blasto"])
-            plt.title(f'Confusion Matrix - {model_name} ({day} Days)')
-            plt.xlabel('Predicted')
-            plt.ylabel('Actual')
-            plt.savefig(os.path.join(output_path_per_day, f'confusion_matrix_{model_name}_{day}Days.png'))
-            plt.close()"
-            """
 
             # Collect ROC data
             roc_data.append({

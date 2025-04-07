@@ -17,7 +17,7 @@ sys.path.append(parent_dir)
 # Model-specific imports
 from config import Config_03_train as conf
 from _03_train._c_ConvTranUtils import CustomDataset
-import _04_test._myFunctions as _myFunctions
+import _04_test._testFunctions as _testFunctions
 
 def predict(model_type: str, model: Any, X: np.ndarray, params: Dict, device: torch.device) -> np.ndarray:
     """Generate predictions for different model types"""
@@ -113,8 +113,8 @@ def compare_with_McNemar(models_type: str, days: Tuple[int, int], data_dir: str,
         models = []
         for day in days:
             test_path = os.path.join(data_dir, f"Normalized_sum_mean_mag_{day}Days_test.csv")
-            X, y = _myFunctions.prepare_data(model_type=model_type, path_csv=test_path)
-            model_info = _myFunctions.load_model_by_type(model_type=model_type, days=day, base_models_path=model_dir, device=device, data=(X,y))
+            X, y = _testFunctions.prepare_data(model_type=model_type, path_csv=test_path)
+            model_info = _testFunctions.load_model_by_type(model_type=model_type, days=day, base_models_path=model_dir, device=device, data=(X,y))
             model = model_info["model"]
             params = {key: value for key, value in model_info.items() if key != "model"}
             models.append((model, params, X, y))

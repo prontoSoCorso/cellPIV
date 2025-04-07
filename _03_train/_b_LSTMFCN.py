@@ -1,13 +1,11 @@
 import sys
 import os
-import pandas as pd
+import logging
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix, f1_score
-from sklearn.metrics import roc_curve, auc, precision_score, recall_score, matthews_corrcoef
-import seaborn as sns
-import matplotlib.pyplot as plt
+from sklearn.metrics import balanced_accuracy_score
+
 from torch.utils.data import DataLoader, TensorDataset
 import torch.optim.lr_scheduler
 import numpy as np
@@ -20,43 +18,16 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
+from _utils_._utils import save_confusion_matrix, config_logging, plot_roc_curve, load_data, calculate_metrics
 from config import Config_03_train as conf
 if conf.device:
     device = conf.device
-
-# Funzione per caricare i dati normalizzati da CSV
-def load_data(csv_file_path):
-    return pd.read_csv(csv_file_path)
 
 def prepare_data(df):
     temporal_columns = [col for col in df.columns if col.startswith("value_")]
     X = torch.tensor(df[temporal_columns].values, dtype=torch.float32).unsqueeze(-1)
     y = torch.tensor(df['BLASTO NY'].values, dtype=torch.long)
     return TensorDataset(X, y)
-
-# Funzione per salvare la matrice di confusione come immagine
-def save_confusion_matrix(conf_matrix, filename):
-    plt.figure(figsize=(6, 6))
-    sns.heatmap(conf_matrix, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-    plt.title(f"Confusion Matrix - LSTMFCN")
-    plt.savefig(filename)
-    plt.close()
-
-def plot_roc_curve(fpr, tpr, roc_auc, filename):
-    plt.figure()
-    plt.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic')
-    plt.legend(loc="lower right")
-    plt.savefig(filename)
-    plt.close()
-
 
 class LSTMFCN(nn.Module):
     def __init__(self, lstm_size, filter_sizes, kernel_sizes, dropout, num_layers):
@@ -137,23 +108,9 @@ def evaluate_model_torch(model, dataloader, threshold=0.5):
             y_pred.extend(preds)
             y_prob.extend(probs)
 
-    fpr, tpr, _ = roc_curve(y_true, y_prob)
-    roc_auc = auc(fpr, tpr)
+    metrics = calculate_metrics(y_true=y_true, y_pred=y_pred, y_prob=y_prob)
+    return metrics
 
-    return {
-        "accuracy": accuracy_score(y_true, y_pred),
-        "balanced_accuracy": balanced_accuracy_score(y_true, y_pred),
-        "roc_auc": roc_auc,
-        "precision": precision_score(y_true, y_pred),
-        "recall": recall_score(y_true, y_pred),
-        "MCC": matthews_corrcoef(y_true, y_pred),
-        "kappa": cohen_kappa_score(y_true, y_pred),
-        "brier": brier_score_loss(y_true, y_prob),
-        "f1": f1_score(y_true, y_pred),
-        "conf_matrix": confusion_matrix(y_true, y_pred),
-        "fpr": fpr,
-        "tpr": tpr
-    }
 
 def main(days_to_consider=1,
          output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training"), 
@@ -164,8 +121,13 @@ def main(days_to_consider=1,
          dropout=conf.dropout_FCN,
          num_layers=conf.num_layers_FCN,
          learning_rate=conf.learning_rate_FCN,
-         num_epochs=conf.num_epochs_FCN):
+         num_epochs=conf.num_epochs_FCN,
+         log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                   "logging_files"),
+         log_filename=f'train_LSTMFCN_based_on_{conf.method_optical_flow}'):
     
+    config_logging(log_dir=log_dir, log_filename=log_filename)
+
     os.makedirs(output_dir_plots, exist_ok=True)
     train_path, val_path, test_path = conf.get_paths(days_to_consider)
     
@@ -227,20 +189,25 @@ def main(days_to_consider=1,
         val_metrics = evaluate_model_torch(model, val_loader)
         val_loss = val_metrics['brier']  # uso Brier score per l'early stopping
         scheduler.step(val_loss)
-        
+
+        # Log epoch metrics
+        logging.info(f"\nEpoch {epoch+1}/{num_epochs}")
+        logging.info(f"Train Loss: {train_loss/len(train_loader.dataset):.4f}")
+        logging.info(f"Val Brier Score: {val_loss:.4f}")
+        logging.info(f"Val Balanced Accuracy: {val_metrics['balanced_accuracy']:.4f}")
+        logging.info(f"Learning Rate: {scheduler.optimizer.param_groups[0]['lr']:.6f}")
+    
         # Early stopping and save best model
         if val_loss < (best_val_loss - early_stopping_delta):
             best_val_acc = val_metrics[most_important_metric]
             best_val_loss = val_loss
             epochs_no_improve = 0
             torch.save(model.state_dict(), best_model_path)
-            print(f"Epoch: {epoch}, Model saved with validation {most_important_metric.capitalize()}: {best_val_acc:.4f}")
+            logging.info(f"Model saved with validation {most_important_metric.capitalize()}: {best_val_acc:.4f}")
         else:
             epochs_no_improve += 1
-            print(f"Epoch: {epoch}, Validation {most_important_metric.capitalize()}: {best_val_acc:.4f}, Brier_score: {val_loss}, Learning Rate: {scheduler.optimizer.param_groups[0]['lr']}")
-            
             if epochs_no_improve >= early_stopping_patience:
-                print(f"Early stopping activated at epoch number {epoch}")
+                logging.info(f"Early stopping triggered at epoch {epoch+1}")
                 break
 
     # Caricamento miglior modello
@@ -248,7 +215,7 @@ def main(days_to_consider=1,
     
     # Trova la soglia migliore sul validation set con il migliore modello trovato
     final_threshold = find_best_threshold(model=model, val_loader=val_loader)
-    print(f"\nBest Threshold: {final_threshold:.4f}")
+    logging.info(f"\nBest Threshold Found: {final_threshold:.4f}")
 
     # Model update with the best threshold
     torch.save({
@@ -261,21 +228,22 @@ def main(days_to_consider=1,
         'num_layers': num_layers,
         'batch_size': batch_size
     }, best_model_path)
+    logging.info(f"Final model saved to: {best_model_path}")
 
     # Valutazione finale
     test_metrics = evaluate_model_torch(model, test_loader, threshold=final_threshold)
     
-    print("\n===== FINAL TEST RESULTS =====")
+    logging.info("\n===== FINAL TEST RESULTS =====")
     for metric, value in test_metrics.items():
         if (metric!="conf_matrix") and (metric!="fpr") and (metric!="tpr"):
-            print(f"{metric.capitalize()}: {value:.4f}")
+            logging.info(f"{metric.capitalize()}: {value:.4f}")
+    
+    # Save plots
     plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
                    test_metrics['roc_auc'], 
                    os.path.join(output_dir_plots, f"roc_curve_LSTMFCN_{days_to_consider}Days.png"))
-
-    # Salvataggio matrice di confusione
     cm_path = os.path.join(output_dir_plots, f"confusion_matrix_LSTMFCN_{days_to_consider}Days.png")
-    save_confusion_matrix(conf_matrix=test_metrics["conf_matrix"], filename=cm_path)
+    save_confusion_matrix(conf_matrix=test_metrics["conf_matrix"], filename=cm_path, model_name="LSTMFCN")
     
     return test_metrics
 
@@ -291,5 +259,8 @@ if __name__ == "__main__":
          dropout=conf.dropout_FCN,
          num_layers=conf.num_layers_FCN,
          learning_rate=conf.learning_rate_FCN,
-         num_epochs=conf.num_epochs_FCN)
+         num_epochs=conf.num_epochs_FCN,
+         log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                   "logging_files"),
+         log_filename=f'train_LSTMFCN_based_on_{conf.method_optical_flow}')
     print(f"Tempo esecuzione LSTM-FCN: {(time.time() - start_time):.2f}s")

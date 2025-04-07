@@ -4,32 +4,6 @@ import matplotlib.pyplot as plt
 import torch
 import seaborn as sns
 
-# Metodo per plottare curva ROC
-def plot_roc_curve(fpr, tpr, roc_auc, filename):
-    plt.figure()
-    plt.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic')
-    plt.legend(loc="lower right")
-    plt.savefig(filename)
-    plt.close()
-
-
-# Metodo per salvare la matrice di confusione
-def save_confusion_matrix(conf_matrix, filename):
-    plt.figure(figsize=(6, 6))
-    sns.heatmap(conf_matrix, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-    plt.title("Confusion Matrix - ConvTran")
-    plt.savefig(filename)
-    plt.close()
-
-
 def load_my_data(train_path, val_path, test_path, val_ratio=0.2, batch_size=16):
     print("Reading training data ...")
     data_train = pd.read_csv(train_path)

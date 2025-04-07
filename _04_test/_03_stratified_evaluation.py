@@ -23,9 +23,8 @@ sys.path.append(parent_dir)
 
 from config import Config_03_train as conf
 from _03_train._c_ConvTranUtils import CustomDataset
-from _03_train._b_LSTMFCN import LSTMFCN
-from _99_ConvTranModel.model import model_factory
-import _04_test._myFunctions as _myFunctions
+import _04_test._testFunctions as _testFunctions
+import _utils_._utils as utils
 
 
 def load_models(day, model_path, device, model_types, data):
@@ -34,7 +33,7 @@ def load_models(day, model_path, device, model_types, data):
     
     try:
         for model_type in model_types:
-            model_info = _myFunctions.load_model_by_type(
+            model_info = _testFunctions.load_model_by_type(
                 model_type=model_type,
                 days=day,
                 base_models_path=model_path,
@@ -54,7 +53,7 @@ def load_models(day, model_path, device, model_types, data):
 def evaluate_model(model_type, model_info, X, y, device):
     """Generic model evaluation function"""
     if model_type == 'ROCKET':
-        y_pred, y_prob = _myFunctions.test_model_ROCKET(model_info=model_info, X=X)
+        y_pred, y_prob = _testFunctions.test_model_ROCKET(model_info=model_info, X=X)
         return y_pred, y_prob
     
     # PyTorch model evaluation
@@ -371,7 +370,7 @@ def stratified_evaluation(merge_types, days=1,
         y = df_merged["BLASTO NY"].values
 
         # Aggiorno conf.Data_shape ed il num_labels in base ad X
-        conv_config = _myFunctions.value_for_config_convTran(X)
+        conv_config = _testFunctions.value_for_config_convTran(X)
         conf.num_labels = conv_config["num_labels"]
         conf.Data_shape = conv_config["data_shape"]
 
@@ -383,7 +382,7 @@ def stratified_evaluation(merge_types, days=1,
         for model_name, model_info in models.items():
             # Overall evaluation
             y_pred, y_prob = evaluate_model(model_name, model_info, X, y, device)
-            metrics = _myFunctions.calculate_metrics(y, y_pred, y_prob)
+            metrics = utils.calculate_metrics(y, y_pred, y_prob)
             df_merged[f"{model_name}_prob"] = y_prob
             results.append({
                 "Model": model_name,
@@ -399,7 +398,7 @@ def stratified_evaluation(merge_types, days=1,
                 X_grp = group_df[temporal_cols].values
                 y_grp = group_df["BLASTO NY"].values
                 y_pred_grp, y_prob_grp = evaluate_model(model_name, model_info, X_grp, y_grp, device)
-                metrics_grp = _myFunctions.calculate_metrics(y_grp, y_pred_grp, y_prob_grp)
+                metrics_grp = utils.calculate_metrics(y_grp, y_pred_grp, y_prob_grp)
                 results.append({
                     "Model": model_name,
                     "Stratum": group,
@@ -412,10 +411,10 @@ def stratified_evaluation(merge_types, days=1,
                 
             # Create a single summary ROC plot for this model & day
             if roc_data:
-                _myFunctions.plot_summary_roc_curves(model_name, roc_data, day, output_path_per_day_and_merge)
+                _testFunctions.plot_summary_roc_curves(model_name, roc_data, day, output_path_per_day_and_merge)
             # Create a single summary confusion matrix plot for this model & day
             if cm_data:
-                _myFunctions.plot_summary_confusion_matrices(model_name, cm_data, day, output_path_per_day_and_merge)
+                _testFunctions.plot_summary_confusion_matrices(model_name, cm_data, day, output_path_per_day_and_merge)
 
 
         # Save results

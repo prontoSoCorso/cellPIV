@@ -152,6 +152,13 @@ class Config_02b_normalization:
     temporalDataType = Config_02_temporalData.dict
     train_size = 0.7
     embedding_type = ""
+    inf_quantile = 0.05
+    sup_quantile = 0.95
+    embedding_type=""   # "umap" OR "tsne"
+    save_normalization_example_single_pt=False
+    mean_data_visualization=False
+    specific_patient_to_analyse=0
+    mean_data_visualization_stratified=False
 
     # Per gestire dati a N giorni
     days_to_consider = 7  # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
@@ -203,6 +210,7 @@ class Config_03_train:
     num_labels = 2
     Data_shape = (1,93) #variabile di base, verrà aggiornata in ConvTran
     days_to_consider = 3
+    method_optical_flow = "Farneback"
 
     @staticmethod
     def seed_everything(seed):

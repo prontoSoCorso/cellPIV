@@ -1,17 +1,14 @@
 import sys
 import os
 import pandas as pd
+import logging
 from sktime.transformations.panel.rocket import Rocket
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 import torch
-
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix, f1_score
-from sklearn.metrics import roc_curve, auc, precision_score, recall_score, matthews_corrcoef
+from sklearn.metrics import balanced_accuracy_score
 import timeit
-import seaborn as sns
-import matplotlib.pyplot as plt
 import numpy as np
 
 import joblib
@@ -24,41 +21,12 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
+import _utils_._utils as utils
 from config import Config_03_train as conf
-
 
 class InvalidHeadModelError(Exception):
     """Eccezione sollevata quando il modello scelto per la classificazione (post ROCKET) non è valido."""
     pass
-
-
-# Funzione per caricare i dati normalizzati da CSV
-def load_data(csv_file_path):
-    return pd.read_csv(csv_file_path)
-
-# Funzione per salvare la matrice di confusione come immagine
-def save_confusion_matrix(conf_matrix, filename, num_kernels):
-    plt.figure(figsize=(6, 6))
-    sns.heatmap(conf_matrix, annot=True, fmt='g', cmap='Blues', cbar=False, xticklabels=["Class 0", "Class 1"], yticklabels=["Class 0", "Class 1"])
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
-    plt.title(f"Confusion Matrix - {num_kernels} Kernels")
-    plt.savefig(filename)
-    plt.close()
-
-def plot_roc_curve(fpr, tpr, roc_auc, filename):
-    plt.figure()
-    plt.plot(fpr, tpr, label=f'ROC curve (area = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver Operating Characteristic')
-    plt.legend(loc="lower right")
-    plt.savefig(filename)
-    plt.close()
-
 
 def classification_model(head_type="RF"):
     if head_type.upper()=="RF":
@@ -111,31 +79,21 @@ def evaluate_model(model, X, y_true, threshold=0.5):
     y_prob = model.predict_proba(X)[:, 1]
     y_pred = (y_prob >= threshold).astype(int)
     
-    fpr, tpr, _ = roc_curve(y_true, y_prob)
-    roc_auc = auc(fpr, tpr)
-    
-    return {
-        "accuracy": accuracy_score(y_true, y_pred),
-        "balanced_accuracy": balanced_accuracy_score(y_true, y_pred),
-        "roc_auc": roc_auc,
-        "precision": precision_score(y_true, y_pred),
-        "recall": recall_score(y_true, y_pred),
-        "MCC": matthews_corrcoef(y_true, y_pred),
-        "kappa": cohen_kappa_score(y_true, y_pred),
-        "brier": brier_score_loss(y_true, y_prob),
-        "f1": f1_score(y_true, y_pred),
-        "conf_matrix": confusion_matrix(y_true, y_pred),
-        "fpr": fpr,
-        "tpr": tpr
-    }
+    metrics = utils.calculate_metrics(y_true=y_true, y_pred=y_pred, y_prob=y_prob)
+    return metrics
 
 
 def main(train_path="", val_path="", test_path="", default_path=True, 
          kernels=conf.kernels_set, seed=conf.seed, output_dir_plots=os.path.join(current_dir, "tmp_test_results_after_training"), 
          output_model_dir=os.path.join(parent_dir, "_04_test"), 
          days_to_consider=conf.days_to_consider, type_model_classification="RF",
-         most_important_metric="balanced_accuracy"):
+         most_important_metric="balanced_accuracy",
+         log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                   "logging_files"),
+         log_filename=f'train_ROCKET_based_on_{conf.method_optical_flow}'):
     
+    utils.config_logging(log_dir=log_dir, log_filename=log_filename)
+
     os.makedirs(output_dir_plots, exist_ok=True)
     best_metric_dict = {}
     best_metric = 0
@@ -147,9 +105,9 @@ def main(train_path="", val_path="", test_path="", default_path=True,
         train_path, val_path, test_path = conf.get_paths(days_to_consider)
 
     # Carico i dati normalizzati
-    df_train = load_data(train_path)
-    df_val = load_data(val_path)
-    df_test = load_data(test_path)
+    df_train = utils.load_data(train_path)
+    df_val = utils.load_data(val_path)
+    df_test = utils.load_data(test_path)
 
     # Seleziono le colonne che contengono i valori temporali e creo X e y (labels) 
     temporal_columns = [col for col in df_train.columns if col.startswith("value_")]
@@ -186,25 +144,27 @@ def main(train_path="", val_path="", test_path="", default_path=True,
         # Salva l'accuratezza del test nel dizionario
         best_metric_dict[kernel] = val_metrics[most_important_metric]
 
-        # Stampa dei risultati per il train set
-        print(f'=====RESULTS WITH {kernel} KERNELS=====')
+        # Log training and validation metrics
+        logging.info(f'===== ROCKET - {days_to_consider} DAYS =====')
+        logging.info(f'===== RESULTS WITH {kernel} KERNELS =====')
+        """
         for metric, value in train_metrics.items():
-            if (metric!="conf_matrix") and (metric!="fpr") and (metric!="tpr"):
-                print(f"Train {metric.capitalize()}: {value:.4f}")
-
+            if metric not in ("conf_matrix", "fpr", "tpr"):
+                logging.info(f"Train {metric.capitalize()}: {value:.4f}")
+        """
         for metric, value in val_metrics.items():
-            if (metric!="conf_matrix") and (metric!="fpr") and (metric!="tpr"):
-                print(f"Validation {metric.capitalize()}: {value:.4f}")
+            if metric not in ("conf_matrix", "fpr", "tpr"):
+                logging.info(f"Validation {metric.capitalize()}: {value:.4f}")
+
+        if val_metrics[most_important_metric] > best_metric:
+            best_metric, best_kernel, final_threshold = val_metrics[most_important_metric], kernel, best_threshold
 
         # Aggiorna il modello migliore se l'accuratezza sul test è la migliore trovata finora
         if val_metrics[most_important_metric] > best_metric:
             best_metric, best_kernel, final_threshold = val_metrics[most_important_metric], kernel, best_threshold
 
-    # Stampa il dizionario delle accuratezze
-    print("Accuratezza su test set per ogni kernel:", best_metric_dict)
-
-    # Stampa il modello con la migliore accuratezza
-    print(f"Best Model: {best_kernel} kernels, {most_important_metric}: {best_metric:.4f}, Threshold: {final_threshold:.4f}")
+    logging.info(f"Validation metrics per kernel: {best_metric_dict}")
+    logging.info(f"Best Model: {best_kernel} kernels, {most_important_metric}: {best_metric:.4f}, Threshold: {final_threshold:.4f}")
 
     # Rialleno il modello su tutti i dati con il numero di kernel migliore che ho trovato e lo salvo
     # Combina i due DataFrame in un unico DataFrame
@@ -224,16 +184,18 @@ def main(train_path="", val_path="", test_path="", default_path=True,
     X_test_features = final_rocket.transform(X_test)
     test_metrics = evaluate_model(final_model, X_test_features, y_test, threshold=final_threshold)
 
-    print("\n===== FINAL TEST RESULTS =====")
+    logging.info("\n===== FINAL TEST RESULTS =====")
     for metric, value in test_metrics.items():
-        if (metric!="conf_matrix") and (metric!="fpr") and (metric!="tpr"):
-            print(f"{metric.capitalize()}: {value:.4f}")
-    plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
+        if metric not in ("conf_matrix", "fpr", "tpr"):
+            logging.info(f"{metric.capitalize()}: {value:.4f}")
+
+    utils.plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
                    test_metrics['roc_auc'], 
-                   os.path.join(output_dir_plots, f"roc_curve_ROCKET_{days_to_consider}Days.png"))
+                   os.path.join(output_dir_plots, 
+                                f"roc_curve_ROCKET_{days_to_consider}Days.png"))
 
     cm_path = os.path.join(output_dir_plots, f"confusion_matrix_ROCKET_{days_to_consider}Days.png")
-    save_confusion_matrix(conf_matrix=test_metrics["conf_matrix"], filename=cm_path, num_kernels=best_kernel)
+    utils.save_confusion_matrix(conf_matrix=test_metrics["conf_matrix"], filename=cm_path, model_name="ROCKET", num_kernels=best_kernel)
 
     # Save both rocket transformer and classifier
     best_model_path = os.path.join(output_model_dir, f"best_rocket_model_{days_to_consider}Days.joblib")
@@ -242,8 +204,8 @@ def main(train_path="", val_path="", test_path="", default_path=True,
         "classifier": final_model,
         "final_threshold": final_threshold,
         "num_kernels": best_kernel
-    }, best_model_path)
-    print(f'Model saved at: {best_model_path}')
+        }, best_model_path)
+    logging.info(f'Model saved at: {best_model_path}')
 
     '''
     # Load threshold when loading model
@@ -257,5 +219,13 @@ def main(train_path="", val_path="", test_path="", default_path=True,
 
 if __name__ == "__main__":
     # Misura il tempo di esecuzione della funzione main()
-    execution_time = timeit.timeit(lambda: main(kernels=[50,100,300,500,700,1000,1250,1500,2500,5000,10000], days_to_consider=7, type_model_classification="RF"), number=1)
-    print(f"Tempo impiegato per l'esecuzione di Rocket con vari kernel:", execution_time, "secondi")
+    day = 7
+    execution_time = timeit.timeit(
+        lambda: main(train_path="", val_path="", test_path="", default_path=True, 
+                    kernels=[50,100,300,500,700,1000,1250,1500,2500,5000,10000], 
+                    seed=conf.seed, 
+                    output_dir_plots=os.path.join(current_dir, "tmp_test_results_after_training"), 
+                    output_model_dir=os.path.join(parent_dir, "_04_test"), 
+                    days_to_consider=day, type_model_classification="RF",
+                    most_important_metric="balanced_accuracy"), number=1)
+    logging.info(f"Total execution time: {execution_time:.2f} seconds")

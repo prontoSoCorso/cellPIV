@@ -25,16 +25,17 @@ sys.path.append(parent_dir)
 # Import project modules
 from config import Config_03_train as conf
 from _03_train._c_ConvTranUtils import CustomDataset
-import _04_test._myFunctions as _myFunctions
+import _04_test._testFunctions as _testFunctions
+import _utils_._utils as utils
 
 ##########################################
 # Helper functions for bootstrap and stats
 ##########################################
 def load_and_prepare_test_data(model_type, days_val, base_test_csv_path):
-    df_test = _myFunctions.load_test_data(days_val=days_val, base_test_csv_path=base_test_csv_path)
+    df_test = _testFunctions.load_test_data(days_val=days_val, base_test_csv_path=base_test_csv_path)
     if df_test is None:
         return None
-    X, y = _myFunctions.prepare_data(model_type=model_type, df=df_test)
+    X, y = _testFunctions.prepare_data(model_type=model_type, df=df_test)
     
     if model_type == "LSTMFCN":
         X_tensor = torch.tensor(X, dtype=torch.float32)
@@ -56,7 +57,7 @@ def bootstrap_metrics(y_true, y_pred, y_prob, n_bootstraps=30, alpha=0.95,
         indices = np.random.randint(0, len(y_true), int(len(y_true)*undersampling_proportion))
         if len(np.unique(y_true[indices])) < 2 or len(np.unique(y_pred[indices])) < 2:
             continue
-        metrics = _myFunctions.calculate_metrics(y_true[indices], y_pred[indices], y_prob[indices])
+        metrics = utils.calculate_metrics(y_true[indices], y_pred[indices], y_prob[indices])
         # Store metrics as ordered list of values
         bootstrapped_metrics.append([metrics[key] for key in metric_order])
 
@@ -94,7 +95,7 @@ def test_model_wrapper(model_type, model_info, test_data, device):
     """
     if model_type == "ROCKET":
         X, y = test_data
-        y_pred, y_prob = _myFunctions.test_model_ROCKET(model_info=model_info, X=X)
+        y_pred, y_prob = _testFunctions.test_model_ROCKET(model_info=model_info, X=X)
         return y, y_pred, y_prob
     
     elif model_type == "LSTMFCN":
@@ -205,7 +206,7 @@ def boostrap_evaluation(base_path=os.path.join(current_dir, "bootstrap_test_metr
             if test_data is None:
                 continue
 
-            model_info = _myFunctions.load_model_by_type(m_type, day_val, base_models_path, device, data=test_data)
+            model_info = _testFunctions.load_model_by_type(m_type, day_val, base_models_path, device, data=test_data)
             if model_info is None:
                 continue
 

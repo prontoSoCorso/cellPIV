@@ -1,7 +1,9 @@
 import torch
-from sklearn.metrics import f1_score, accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix
-from sklearn.metrics import roc_curve, auc, matthews_corrcoef, precision_score, recall_score
+from sklearn.metrics import balanced_accuracy_score
 import numpy as np
+import logging
+
+import _utils_._utils as utils
 
 class SupervisedTrainer:
     def __init__(self, model, data_loader, device, criterion, optimizer=None, print_interval=100, writer=None, is_training=True):
@@ -42,14 +44,11 @@ class SupervisedTrainer:
             total_samples += targets.size(0)
             accuracy = total_correct / total_samples
 
-            # Aggiungi la perdita e l'accuratezza a TensorBoard
-            if self.writer is not None:
-                self.writer.add_scalar('Loss/train', loss.item(), epoch * len(self.data_loader) + i)
-                self.writer.add_scalar('Accuracy/train', accuracy, epoch * len(self.data_loader) + i)
-
+            """
             # Stampa la perdita e l'accuratezza nel terminale
             if i % self.print_interval == 0:
-                print(f'Train Step: {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}')
+                logging.info(f'Train Step: {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}')
+            """
 
     def evaluate(self, epoch=None, keep_all=False):
         self.model.eval()
@@ -119,25 +118,9 @@ class SupervisedTrainer:
                 targets_list.extend(targets.cpu().numpy())
 
         # Calcolo metriche complete
-        fpr, tpr, _ = roc_curve(targets_list, probs_list)
-        roc_auc = auc(fpr, tpr)
-
-        return {
-            'accuracy': accuracy_score(targets_list, preds_list),
-            'balanced_accuracy': balanced_accuracy_score(targets_list, preds_list),
-            'roc_auc': roc_auc,
-            'precision': precision_score(targets_list, preds_list),
-            'recall': recall_score(targets_list, preds_list),
-            'MCC': matthews_corrcoef(targets_list, preds_list),
-            'kappa': cohen_kappa_score(targets_list, preds_list),
-            'brier': brier_score_loss(targets_list, probs_list),
-            'f1': f1_score(targets_list, preds_list),
-            'conf_matrix': confusion_matrix(targets_list, preds_list),
-            'fpr': fpr,
-            'tpr': tpr
-        }
+        metrics = utils.calculate_metrics(y_true=targets_list, y_pred=preds_list, y_prob=probs_list)
+        return metrics
     
-
 
 def find_best_threshold(model, val_loader, device, thresholds=np.linspace(0.0, 1.0, 101)):
     """ Trova la soglia ottimale sul validation set """
@@ -182,18 +165,20 @@ def train_runner(config, model, trainer, val_evaluator, save_path):
         # Validation phase
         val_loss, val_acc = val_evaluator.evaluate(epoch, keep_all=True)
         scheduler.step(val_loss)
+
+        # Log epoch results
+        logging.info(f"Epoch {epoch+1}/{config.epochs}")
+        logging.info(f"Validation Loss: {val_loss:.4f} | Accuracy: {val_acc:.4f}")
+        logging.info(f"Learning Rate: {scheduler.optimizer.param_groups[0]['lr']:.6f}")
         
         # Early stopping
         if val_loss < (best_val_loss-early_stopping_delta):
             best_val_loss = val_loss
             epochs_no_improve = 0
             torch.save(model.state_dict(), save_path)
-            print(f"Epoch {epoch}: Miglioramento - Loss: {val_loss:.4f}, LR: {scheduler.optimizer.param_groups[0]['lr']:.6f}")
+            logging.info("New best model saved")
         else:
             epochs_no_improve += 1
-            print(f"Epoch {epoch}: Nessun miglioramento da {epochs_no_improve} epoche")
             if epochs_no_improve >= early_stopping_patience:
-                print("Early stopping attivato!")
+                logging.info(f"Early stopping triggered after {epoch+1} epochs")
                 break
-
-    print(f'Epoch {epoch+1}/{config.epochs}')
