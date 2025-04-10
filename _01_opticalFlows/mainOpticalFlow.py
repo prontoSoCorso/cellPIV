@@ -4,7 +4,6 @@ import sys
 import time
 import logging
 import numpy as np
-from _01_opticalFlows._process_optical_flow import process_frames
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
@@ -17,6 +16,8 @@ sys.path.append(parent_dir)
 from config import Config_01_OpticalFlow as conf
 from config import user_paths as myPaths
 from config import utils as utils
+from _01_opticalFlows._process_optical_flow import process_frames
+from _utils_._utils import config_logging
 
 def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.path_BlastoData, 
          img_size=conf.img_size, num_minimum_frames=conf.num_minimum_frames, 
@@ -26,51 +27,54 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
          output_path_optical_flow_images=conf.output_path_optical_flow_images,
          save_overlay_optical_flow=conf.save_overlay_optical_flow,
          save_final_data=conf.save_final_data):
+    # Configure logging
+    log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                           f'optical_flow_complete_analysis_{method_optical_flow}.log')
+    config_logging(log_dir=os.path.dirname(log_file), log_filename=os.path.basename(log_file))
     
-    # Specify the desired log file path
-    logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                              f'optical_flow_complete_analysis_{method_optical_flow}.log'), 
-                        level=logging.INFO, 
-                        format='%(asctime)s - %(levelname)s - %(message)s')
-    # Success/Error counters
-    n_video = 0
-    n_video_blasto = 0
-    n_video_no_blasto = 0
-    n_video_error_blasto = 0
-    n_video_error_no_blasto = 0
-    n_video_success_blasto = 0
-    n_video_success_no_blasto = 0
-    errors_blasto = []
-    errors_no_blasto = []
+    # Initialize counters
+    counters = {
+        'total': 0,
+        'blasto': {'total': 0, 'success': 0, 'errors': 0, 'error_list': []},
+        'no_blasto': {'total': 0, 'success': 0, 'errors': 0, 'error_list': []}
+    }
 
-    # Dizionari per memorizzare le metriche
-    mean_magnitude_dict = {}
-    vorticity_dict = {}
-    hybrid_dict = {}
-    sum_mean_mag_dict = {}
+    # Initialize metrics dictionaries
+    metrics_dicts = {
+        'mean_magnitude': {},
+        'vorticity': {},
+        'hybrid': {},
+        'sum_mean_mag': {}
+    }
 
-    logging.info(f"Starting analysis with method: {method_optical_flow}")
+    logging.info(f"Starting optical flow analysis using method: {method_optical_flow.upper()}")
+    logging.info(f"Configuration parameters:\n"
+                 f"- Image size: {img_size}\n"
+                 f"- Minimum frames: {num_minimum_frames}\n"
+                 f"- Initial frames to cut: {num_initial_frames_to_cut}\n"
+                 f"- Forward frames: {num_forward_frame}")
 
     for class_sample in ['blasto', 'no_blasto']:
-        path_all_folders = os.path.join(path_BlastoData, class_sample)
-        total_videos = len(os.listdir(path_all_folders))
+        class_path = os.path.join(path_BlastoData, class_sample)
+        samples = os.listdir(class_path)
+        total_videos = len(samples)
+        logging.info(f"\nProcessing {class_sample.upper()} class with {total_videos} samples")
 
-        for idx, sample in enumerate(os.listdir(path_all_folders), start=1):
-            n_video += 1
-            if class_sample == "blasto":
-                n_video_blasto += 1
-            else:
-                n_video_no_blasto += 1
-
-            logging.info(f"Processing video n: {idx}/{total_videos}, {class_sample}/{sample}")
-
+        for idx, sample in enumerate(samples, start=1):
+            counters['total'] += 1
+            counters[class_sample]['total'] += 1
+            sample_path = os.path.join(class_path, sample)
+            
             try:
-                sample_path = os.path.join(path_all_folders, sample)
-                output_metrics_base_path=os.path.join(output_metrics_base_dir, method_optical_flow, class_sample)
-                os.makedirs(output_metrics_base_path, exist_ok=True)
-                output_path_images = os.path.join(output_path_optical_flow_images, method_optical_flow, class_sample, sample)
-                os.makedirs(output_path_images, exist_ok=True)
+                logging.info(f"[{idx}/{total_videos}] Processing {class_sample}: {sample}")
+                
+                # Prepare output paths
+                output_metrics_path = os.path.join(output_metrics_base_dir, method_optical_flow, class_sample)
+                output_images_path = os.path.join(output_path_optical_flow_images, method_optical_flow, class_sample, sample)
+                os.makedirs(output_metrics_path, exist_ok=True)
+                os.makedirs(output_images_path, exist_ok=True)
 
+                # Process frames
                 metrics = process_frames(
                     folder_path=sample_path, 
                     dish_well=sample, 
@@ -79,66 +83,51 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
                     num_initial_frames_to_cut=num_initial_frames_to_cut, 
                     num_forward_frame=num_forward_frame, 
                     method_optical_flow=method_optical_flow,
-                    output_metrics_base_path=output_metrics_base_path,
+                    output_metrics_base_path=output_metrics_path,
                     save_metrics=save_metrics,
                     save_overlay_optical_flow=save_overlay_optical_flow,
-                    output_path_images_with_optical_flow=output_path_images
+                    output_path_images_with_optical_flow=output_images_path
                     )
                 
-                mean_magnitude_dict[sample] = np.array(metrics["mean_magnitude"]).astype(float)
-                vorticity_dict[sample] = np.array(metrics["vorticity"]).astype(float)
-                hybrid_dict[sample] = np.array(metrics["hybrid"]).astype(float)
-                sum_mean_mag_dict[sample] = np.array(metrics["sum_mean_mag"]).astype(float)
-
-                if class_sample == "blasto":
-                    n_video_success_blasto += 1
-                else:
-                    n_video_success_no_blasto += 1
+                # Store metrics
+                for metric in metrics_dicts.keys():
+                    metrics_dicts[metric][sample] = np.array(metrics[metric]).astype(float)
+                
+                counters[class_sample]['success'] += 1
         
             except Exception as e:
-                if class_sample == "blasto":
-                    n_video_error_blasto += 1
-                    errors_blasto.append(sample)
-                else:
-                    n_video_error_no_blasto += 1
-                    errors_no_blasto.append(sample)
-
-                print('-------------------')
-                print(f"Errore nel sample: {sample}")
-                print(e)
-                print('-------------------')
+                counters[class_sample]['errors'] += 1
+                counters[class_sample]['error_list'].append(sample)
+                logging.error(f"Error processing {class_sample} sample {sample}", exc_info=True)
                 continue
         
 
-    print('===================')
-    print("Terminata Elaborazione...")
-    print('===================')
+    # Log final summary
+    logging.info("\n" + "="*50)
+    logging.info("Processing Summary:")
+    logging.info(f"Total videos processed: {counters['total']}")
+    
+    for class_type in ['blasto', 'no_blasto']:
+        logging.info(f"\n{class_type.upper()} Class:")
+        logging.info(f"- Total samples: {counters[class_type]['total']}")
+        logging.info(f"- Successful processing: {counters[class_type]['success']}")
+        logging.info(f"- Failed processing: {counters[class_type]['errors']}")
+        if counters[class_type]['errors'] > 0:
+            logging.warning(f"- Error list: {counters[class_type]['error_list']}")
 
-    # Stampo quanti frame con successo e quanti errori
-    print('===================')
-    print('===================')
-    print(f"Analizzati {n_video} video: {n_video_blasto} blasto, {n_video_no_blasto} no_blasto")
-    print(f"Successi: {n_video_success_blasto} blasto, {n_video_success_no_blasto} no_blasto")
-    print(f"Errori: {n_video_error_blasto} blasto, {n_video_error_no_blasto} no_blasto")
-
-    print('===================')
-    print('===================')
-    print(f'Errors in "blasto":', errors_blasto)
-
-    print('===================')
-    print('===================')
-    print(f'Errors in "no_blasto":', errors_no_blasto)
-
-    # Salvataggio dei risultati
+    # Save final data
     if save_final_data:
-        temporal_data_directory = os.path.join(parent_dir, '_02_temporalData', f"files_all_days_{method_optical_flow}")
-        os.makedirs(temporal_data_directory, exist_ok=True)
-        for dict_name, dict_data in zip(
-            ['mean_magnitude_dict', 'vorticity_dict', 'hybrid_dict', 'sum_mean_mag_dict'],
-            [mean_magnitude_dict, vorticity_dict, hybrid_dict, sum_mean_mag_dict]):
-            file_path = os.path.join(temporal_data_directory, f"{dict_name}_{method_optical_flow}.pkl")
+        temporal_data_dir = os.path.join(parent_dir, '_02_temporalData', f"files_all_days_{method_optical_flow}")
+        os.makedirs(temporal_data_dir, exist_ok=True)
+        
+        logging.info(f"\nSaving metrics data to: {temporal_data_dir}")
+        for metric_name, metric_data in metrics_dicts.items():
+            file_path = os.path.join(temporal_data_dir, f"{metric_name}_{method_optical_flow}.pkl")
             with open(file_path, 'wb') as f:
-                pickle.dump(dict_data, f)
+                pickle.dump(metric_data, f)
+            logging.debug(f"Saved {metric_name} metrics ({len(metric_data)} entries) to {file_path}")
+
+    logging.info("\nAnalysis completed successfully")
 
 if __name__ == "__main__":
     start_time = time.time()

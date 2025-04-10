@@ -14,7 +14,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_03_train as config
+from config import Config_03_train as conf
 import _utils_._utils as utils
 from _c_ConvTranTraining import SupervisedTrainer, train_runner, find_best_threshold
 from _c_ConvTranUtils import load_my_data
@@ -24,60 +24,68 @@ from _99_ConvTranModel.loss import get_loss_module
 from _99_ConvTranModel.utils import load_model
 
 def Initialization():
-    config.seed_everything(config.seed)
-    device = config.device
-    print(f"Using device: {config.device}")
+    conf.seed_everything(conf.seed)
+    device = conf.device
+    print(f"Using device: {conf.device}")
     return device
 
-def main(days_to_consider=config.days_to_consider, 
-         save_conf_matrix=True,
-         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training"),
+def main(days_to_consider=conf.days_to_consider, 
+         train_path="", val_path="", test_path="", default_path=True, 
+         save_plots=conf.save_plots,
+         output_dir_plots = conf.output_dir_plots,
+         output_model_base_dir=conf.output_model_base_dir,
+         most_important_metric = conf.most_important_metric,
+
          log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                               "logging_files"),
-         log_filename=f'train_ConvTran_based_on_{config.method_optical_flow}'):
+         log_filename=f'train_ConvTran_based_on_{conf.method_optical_flow}'):
     
+    # Makedirs
+    os.makedirs(output_model_base_dir, exist_ok=True)
+
     # File di Log & initialization
     utils.config_logging(log_dir=log_dir, log_filename=log_filename)
     logging.info(f"\n{'='*30} Starting ConvTran Training {'='*30}")
     device = Initialization()
 
-    # Ottieni i percorsi dal config
-    train_path, val_path, test_path = config.get_paths(days_to_consider)
+    if default_path:
+        # Ottieni i percorsi dal config
+        train_path, val_path, test_path = conf.get_paths(days_to_consider=days_to_consider)
 
     # Load Data
-    train_loader, val_loader, test_loader = load_my_data(train_path, val_path, test_path, config.val_ratio, config.batch_size)
+    train_loader, val_loader, test_loader = load_my_data(train_path, val_path, test_path, conf.val_ratio, conf.batch_size)
 
     # Aggiungi numero di etichette uniche
-    config.num_labels = len(np.unique(train_loader.dataset.labels))
-    config.Data_shape = (train_loader.dataset[0][0].shape[0], train_loader.dataset[0][0].shape[1])
+    conf.num_labels = len(np.unique(train_loader.dataset.labels))
+    conf.Data_shape = (train_loader.dataset[0][0].shape[0], train_loader.dataset[0][0].shape[1])
     
     # Build Model
-    model = model_factory(config)
+    model = model_factory(conf)
     model.to(device)
 
     logging.info(f"Model architecture:\n{model}")
     logging.info(f"Total parameters: {count_parameters(model):,}")
 
     # Optimizer and Loss
-    optimizer = get_optimizer("RAdam")(model.parameters(), lr=config.lr)
+    optimizer = get_optimizer("RAdam")(model.parameters(), lr=conf.lr)
     loss_module = get_loss_module()
 
     # Training
-    save_path = os.path.join(parent_dir, config.test_dir, f"best_convtran_model_{days_to_consider}Days.pkl")
+    save_path = os.path.join(output_model_base_dir, f"best_convtran_model_{days_to_consider}Days.pkl")
 
     trainer = SupervisedTrainer(
         model, train_loader, device, loss_module, optimizer, 
-        print_interval=config.print_interval, is_training=True
+        print_interval=conf.print_interval, is_training=True
     )
     val_evaluator = SupervisedTrainer(
         model, val_loader, device, loss_module,
-        print_interval=config.print_interval, is_training=False
+        print_interval=conf.print_interval, is_training=False
     )
 
     # Start training
     logging.info("\nStarting training process...")
     train_runner(
-        config=config,
+        config=conf,
         model=model,
         trainer=trainer,
         val_evaluator=val_evaluator,
@@ -93,7 +101,7 @@ def main(days_to_consider=config.days_to_consider,
     # Valutazione sul test con soglia ottimale
     best_test_evaluator = SupervisedTrainer(
         best_model, test_loader, device, loss_module, 
-        print_interval=config.print_interval, is_training=False
+        print_interval=conf.print_interval, is_training=False
     )
 
     # Esegui la valutazione e salva la matrice di confusione
@@ -112,15 +120,16 @@ def main(days_to_consider=config.days_to_consider,
             logging.info(f"{metric.capitalize()}: {value:.4f}")
 
     # Save plots
-    utils.plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
-                   test_metrics['roc_auc'], 
-                   os.path.join(output_dir_plots, f"roc_curve_ConvTran_{days_to_consider}Days.png"))
-    conf_matrix_filename=os.path.join(output_dir_plots,f'confusion_matrix_ConvTran_{days_to_consider}Days.png')
-    if save_conf_matrix:
-        utils.save_confusion_matrix(conf_matrix=test_metrics['conf_matrix'], filename=conf_matrix_filename, model_name="ConvTran")
-        utils.plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], test_metrics['roc_auc'], 
-                       conf_matrix_filename.replace('confusion', 'roc'))
-
+    if save_plots:
+        complete_output_dir = os.path.join(output_dir_plots, f"day{days_to_consider}")
+        os.makedirs(complete_output_dir, exist_ok=True)
+        conf_matrix_filename=os.path.join(complete_output_dir,f'confusion_matrix_ConvTran_{days_to_consider}Days.png')
+        utils.save_confusion_matrix(conf_matrix=test_metrics['conf_matrix'], 
+                                    filename=conf_matrix_filename, 
+                                    model_name="ConvTran")
+        utils.plot_roc_curve(fpr=test_metrics['fpr'], tpr=test_metrics['tpr'], 
+                             roc_auc=test_metrics['roc_auc'], 
+                             filename=conf_matrix_filename.replace('confusion_matrix', 'roc'))
 
     """
     Caricamento del modello:

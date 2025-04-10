@@ -1,151 +1,151 @@
 Comparison,Days,Metric,Cohen_d,Effect Size,p_value,Significance,p_value_fdr,Significance_fdr
-ROCKET vs LSTMFCN,1,Accuracy,-0.242,Small,0.1989,NS,0.2043,NS
-ROCKET vs ConvTran,1,Accuracy,-0.2923,Small,0.1233,NS,0.1302,NS
-LSTMFCN vs ConvTran,1,Accuracy,-0.0913,Negligible,0.6867,NS,0.6913,NS
-ROCKET vs LSTMFCN,1,Balanced Accuracy,0.9812,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,1,Balanced Accuracy,-1.2746,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,1,Balanced Accuracy,-2.3446,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,1,Precision,-1.8213,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,1,Precision,0.4671,Small,0.0007,***,0.0008,***
-LSTMFCN vs ConvTran,1,Precision,2.2972,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,1,Recall,7.0369,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,1,Recall,-7.137,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,1,Recall,-15.8476,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,1,F1 Score,3.4585,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,1,F1 Score,-2.6107,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,1,F1 Score,-5.9913,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,3,Accuracy,-0.4714,Small,0.0208,*,0.0231,*
-ROCKET vs ConvTran,3,Accuracy,-1.3553,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,3,Accuracy,-1.0407,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,3,Balanced Accuracy,0.2212,Small,0.2443,NS,0.2493,NS
-ROCKET vs ConvTran,3,Balanced Accuracy,-1.4232,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,3,Balanced Accuracy,-1.8061,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,3,Precision,-1.533,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,3,Precision,-1.0309,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,3,Precision,0.5562,Medium,0.0,***,0.0,***
-ROCKET vs LSTMFCN,3,Recall,6.0248,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,3,Recall,-0.3964,Small,0.0742,NS,0.0789,NS
-LSTMFCN vs ConvTran,3,Recall,-6.3024,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,3,F1 Score,1.0985,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,3,F1 Score,-1.0682,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,3,F1 Score,-2.4054,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,5,Accuracy,-0.2835,Small,0.1379,NS,0.1447,NS
-ROCKET vs ConvTran,5,Accuracy,-1.4247,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,5,Accuracy,-1.3471,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,5,Balanced Accuracy,0.3357,Small,0.0722,NS,0.0774,NS
-ROCKET vs ConvTran,5,Balanced Accuracy,-1.1746,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,5,Balanced Accuracy,-1.7124,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,5,Precision,-2.172,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,5,Precision,-1.914,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,5,Precision,0.3007,Small,0.021,*,0.0232,*
-ROCKET vs LSTMFCN,5,Recall,4.4568,Large,0.0,***,0.0,***
-ROCKET vs ConvTran,5,Recall,1.1707,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,5,Recall,-3.056,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,5,F1 Score,0.7162,Medium,0.0003,***,0.0003,***
-ROCKET vs ConvTran,5,F1 Score,-0.9385,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,5,F1 Score,-1.8541,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,7,Accuracy,-0.2531,Small,0.2806,NS,0.2844,NS
-ROCKET vs ConvTran,7,Accuracy,-2.1265,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,7,Accuracy,-2.0091,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,7,Balanced Accuracy,-0.3272,Small,0.164,NS,0.1708,NS
-ROCKET vs ConvTran,7,Balanced Accuracy,-2.2677,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,7,Balanced Accuracy,-2.1413,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,7,Precision,0.2978,Small,0.0482,*,0.052,NS
-ROCKET vs ConvTran,7,Precision,0.2697,Small,0.0426,*,0.0463,*
-LSTMFCN vs ConvTran,7,Precision,-0.0442,Negligible,0.7852,NS,0.7852,NS
-ROCKET vs LSTMFCN,7,Recall,-0.6458,Medium,0.0078,**,0.0087,**
-ROCKET vs ConvTran,7,Recall,-2.7886,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,7,Recall,-2.4462,Large,0.0,***,0.0,***
-ROCKET vs LSTMFCN,7,F1 Score,-0.3031,Small,0.1733,NS,0.1793,NS
-ROCKET vs ConvTran,7,F1 Score,-2.0718,Large,0.0,***,0.0,***
-LSTMFCN vs ConvTran,7,F1 Score,-1.9817,Large,0.0,***,0.0,***
-ROCKET 1Days vs 3Days,1 vs 3,Accuracy,-3.4939,Large,0.0,***,0.0,***
-ROCKET 1Days vs 5Days,1 vs 5,Accuracy,-8.2709,Large,0.0,***,0.0,***
-ROCKET 1Days vs 7Days,1 vs 7,Accuracy,-16.0641,Large,0.0,***,0.0,***
-ROCKET 3Days vs 5Days,3 vs 5,Accuracy,-3.8474,Large,0.0,***,0.0,***
-ROCKET 3Days vs 7Days,3 vs 7,Accuracy,-9.0683,Large,0.0,***,0.0,***
-ROCKET 5Days vs 7Days,5 vs 7,Accuracy,-5.2062,Large,0.0,***,0.0,***
-ROCKET 1Days vs 3Days,1 vs 3,Balanced Accuracy,-4.378,Large,0.0,***,0.0,***
-ROCKET 1Days vs 5Days,1 vs 5,Balanced Accuracy,-8.558,Large,0.0,***,0.0,***
-ROCKET 1Days vs 7Days,1 vs 7,Balanced Accuracy,-14.8253,Large,0.0,***,0.0,***
-ROCKET 3Days vs 5Days,3 vs 5,Balanced Accuracy,-3.7857,Large,0.0,***,0.0,***
-ROCKET 3Days vs 7Days,3 vs 7,Balanced Accuracy,-8.7739,Large,0.0,***,0.0,***
-ROCKET 5Days vs 7Days,5 vs 7,Balanced Accuracy,-4.6614,Large,0.0,***,0.0,***
-ROCKET 1Days vs 3Days,1 vs 3,Precision,-1.7421,Large,0.0,***,0.0,***
-ROCKET 1Days vs 5Days,1 vs 5,Precision,-5.4832,Large,0.0,***,0.0,***
-ROCKET 1Days vs 7Days,1 vs 7,Precision,-14.4082,Large,0.0,***,0.0,***
-ROCKET 3Days vs 5Days,3 vs 5,Precision,-3.5188,Large,0.0,***,0.0,***
-ROCKET 3Days vs 7Days,3 vs 7,Precision,-11.0499,Large,0.0,***,0.0,***
-ROCKET 5Days vs 7Days,5 vs 7,Precision,-6.702,Large,0.0,***,0.0,***
-ROCKET 1Days vs 3Days,1 vs 3,Recall,-7.99,Large,0.0,***,0.0,***
-ROCKET 1Days vs 5Days,1 vs 5,Recall,-7.1561,Large,0.0,***,0.0,***
-ROCKET 1Days vs 7Days,1 vs 7,Recall,-6.5522,Large,0.0,***,0.0,***
-ROCKET 3Days vs 5Days,3 vs 5,Recall,0.5743,Medium,0.022,*,0.0241,*
-ROCKET 3Days vs 7Days,3 vs 7,Recall,1.6477,Large,0.0,***,0.0,***
-ROCKET 5Days vs 7Days,5 vs 7,Recall,0.9547,Large,0.0,***,0.0,***
-ROCKET 1Days vs 3Days,1 vs 3,F1 Score,-4.5668,Large,0.0,***,0.0,***
-ROCKET 1Days vs 5Days,1 vs 5,F1 Score,-7.5576,Large,0.0,***,0.0,***
-ROCKET 1Days vs 7Days,1 vs 7,F1 Score,-12.7318,Large,0.0,***,0.0,***
-ROCKET 3Days vs 5Days,3 vs 5,F1 Score,-2.8863,Large,0.0,***,0.0,***
-ROCKET 3Days vs 7Days,3 vs 7,F1 Score,-7.4127,Large,0.0,***,0.0,***
-ROCKET 5Days vs 7Days,5 vs 7,F1 Score,-4.2456,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 3Days,1 vs 3,Accuracy,-4.7003,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 5Days,1 vs 5,Accuracy,-10.2607,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 7Days,1 vs 7,Accuracy,-18.2205,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 5Days,3 vs 5,Accuracy,-4.8316,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 7Days,3 vs 7,Accuracy,-11.2321,Large,0.0,***,0.0,***
-LSTMFCN 5Days vs 7Days,5 vs 7,Accuracy,-6.505,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 3Days,1 vs 3,Balanced Accuracy,-5.8409,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 5Days,1 vs 5,Balanced Accuracy,-11.0998,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 7Days,1 vs 7,Balanced Accuracy,-18.8351,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 5Days,3 vs 5,Balanced Accuracy,-4.4772,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 7Days,3 vs 7,Balanced Accuracy,-10.7626,Large,0.0,***,0.0,***
-LSTMFCN 5Days vs 7Days,5 vs 7,Balanced Accuracy,-6.5604,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 3Days,1 vs 3,Precision,-1.4331,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 5Days,1 vs 5,Precision,-5.7945,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 7Days,1 vs 7,Precision,-10.7676,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 5Days,3 vs 5,Precision,-4.7893,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 7Days,3 vs 7,Precision,-10.3592,Large,0.0,***,0.0,***
-LSTMFCN 5Days vs 7Days,5 vs 7,Precision,-4.4593,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 3Days,1 vs 3,Recall,-10.3284,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 5Days,1 vs 5,Recall,-11.3853,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 7Days,1 vs 7,Recall,-16.8998,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 5Days,3 vs 5,Recall,-0.8128,Large,0.0022,**,0.0025,**
-LSTMFCN 3Days vs 7Days,3 vs 7,Recall,-5.3051,Large,0.0,***,0.0,***
-LSTMFCN 5Days vs 7Days,5 vs 7,Recall,-4.5784,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 3Days,1 vs 3,F1 Score,-7.1244,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 5Days,1 vs 5,F1 Score,-10.5593,Large,0.0,***,0.0,***
-LSTMFCN 1Days vs 7Days,1 vs 7,F1 Score,-15.9099,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 5Days,3 vs 5,F1 Score,-3.9637,Large,0.0,***,0.0,***
-LSTMFCN 3Days vs 7Days,3 vs 7,F1 Score,-10.4449,Large,0.0,***,0.0,***
-LSTMFCN 5Days vs 7Days,5 vs 7,F1 Score,-6.4423,Large,0.0,***,0.0,***
-ConvTran 1Days vs 3Days,1 vs 3,Accuracy,-4.8039,Large,0.0,***,0.0,***
-ConvTran 1Days vs 5Days,1 vs 5,Accuracy,-9.3016,Large,0.0,***,0.0,***
-ConvTran 1Days vs 7Days,1 vs 7,Accuracy,-14.9714,Large,0.0,***,0.0,***
-ConvTran 3Days vs 5Days,3 vs 5,Accuracy,-4.9142,Large,0.0,***,0.0,***
-ConvTran 3Days vs 7Days,3 vs 7,Accuracy,-11.3238,Large,0.0,***,0.0,***
-ConvTran 5Days vs 7Days,5 vs 7,Accuracy,-6.238,Large,0.0,***,0.0,***
-ConvTran 1Days vs 3Days,1 vs 3,Balanced Accuracy,-5.0523,Large,0.0,***,0.0,***
-ConvTran 1Days vs 5Days,1 vs 5,Balanced Accuracy,-9.0479,Large,0.0,***,0.0,***
-ConvTran 1Days vs 7Days,1 vs 7,Balanced Accuracy,-15.3184,Large,0.0,***,0.0,***
-ConvTran 3Days vs 5Days,3 vs 5,Balanced Accuracy,-4.3839,Large,0.0,***,0.0,***
-ConvTran 3Days vs 7Days,3 vs 7,Balanced Accuracy,-11.0036,Large,0.0,***,0.0,***
-ConvTran 5Days vs 7Days,5 vs 7,Balanced Accuracy,-5.9047,Large,0.0,***,0.0,***
-ConvTran 1Days vs 3Days,1 vs 3,Precision,-3.5796,Large,0.0,***,0.0,***
-ConvTran 1Days vs 5Days,1 vs 5,Precision,-8.7232,Large,0.0,***,0.0,***
-ConvTran 1Days vs 7Days,1 vs 7,Precision,-16.0381,Large,0.0,***,0.0,***
-ConvTran 3Days vs 5Days,3 vs 5,Precision,-5.1238,Large,0.0,***,0.0,***
-ConvTran 3Days vs 7Days,3 vs 7,Precision,-11.4674,Large,0.0,***,0.0,***
-ConvTran 5Days vs 7Days,5 vs 7,Precision,-5.0687,Large,0.0,***,0.0,***
-ConvTran 1Days vs 3Days,1 vs 3,Recall,-0.962,Large,0.002,**,0.0023,**
-ConvTran 1Days vs 5Days,1 vs 5,Recall,1.1425,Large,0.0002,***,0.0002,***
-ConvTran 1Days vs 7Days,1 vs 7,Recall,-1.7574,Large,0.0,***,0.0,***
-ConvTran 3Days vs 5Days,3 vs 5,Recall,2.1005,Large,0.0,***,0.0,***
-ConvTran 3Days vs 7Days,3 vs 7,Recall,-0.9041,Large,0.0016,**,0.0018,**
-ConvTran 5Days vs 7Days,5 vs 7,Recall,-2.8016,Large,0.0,***,0.0,***
-ConvTran 1Days vs 3Days,1 vs 3,F1 Score,-3.605,Large,0.0,***,0.0,***
-ConvTran 1Days vs 5Days,1 vs 5,F1 Score,-6.8025,Large,0.0,***,0.0,***
-ConvTran 1Days vs 7Days,1 vs 7,F1 Score,-12.9213,Large,0.0,***,0.0,***
-ConvTran 3Days vs 5Days,3 vs 5,F1 Score,-3.3776,Large,0.0,***,0.0,***
-ConvTran 3Days vs 7Days,3 vs 7,F1 Score,-9.616,Large,0.0,***,0.0,***
-ConvTran 5Days vs 7Days,5 vs 7,F1 Score,-5.7632,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,1,Accuracy,-2.1694,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,1,Accuracy,0.392,Small,0.0264,*,0.0298,*
+LSTMFCN vs ConvTran,1,Accuracy,2.3012,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,1,Balanced Accuracy,-1.03,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,1,Balanced Accuracy,0.1004,Negligible,0.5706,NS,0.5822,NS
+LSTMFCN vs ConvTran,1,Balanced Accuracy,1.0671,Large,0.0002,***,0.0003,***
+ROCKET vs LSTMFCN,1,Precision,-1.7047,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,1,Precision,0.2757,Small,0.003,**,0.0036,**
+LSTMFCN vs ConvTran,1,Precision,1.8655,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,1,Recall,3.1931,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,1,Recall,-1.2564,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,1,Recall,-4.3595,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,1,F1 Score,0.3938,Small,0.0356,*,0.0392,*
+ROCKET vs ConvTran,1,F1 Score,-0.2535,Small,0.0505,NS,0.0545,NS
+LSTMFCN vs ConvTran,1,F1 Score,-0.5845,Medium,0.0038,**,0.0046,**
+ROCKET vs LSTMFCN,3,Accuracy,1.4205,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,3,Accuracy,2.3861,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,3,Accuracy,0.6947,Medium,0.0027,**,0.0033,**
+ROCKET vs LSTMFCN,3,Balanced Accuracy,2.958,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,3,Balanced Accuracy,2.3233,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,3,Balanced Accuracy,-1.0957,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,3,Precision,0.0054,Negligible,0.9721,NS,0.9721,NS
+ROCKET vs ConvTran,3,Precision,1.3522,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,3,Precision,1.1539,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,3,Recall,8.5343,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,3,Recall,-0.9206,Large,0.0001,***,0.0001,***
+LSTMFCN vs ConvTran,3,Recall,-9.2866,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,3,F1 Score,3.6196,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,3,F1 Score,0.9333,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,3,F1 Score,-2.7778,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,5,Accuracy,2.3627,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,5,Accuracy,3.7456,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,5,Accuracy,1.3184,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,5,Balanced Accuracy,5.5797,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,5,Balanced Accuracy,8.1175,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,5,Balanced Accuracy,2.2162,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,5,Precision,-3.9557,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,5,Precision,-4.4013,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,5,Precision,-0.3002,Small,0.151,NS,0.1595,NS
+ROCKET vs LSTMFCN,5,Recall,13.2115,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,5,Recall,16.6579,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,5,Recall,2.9305,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,5,F1 Score,6.9738,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,5,F1 Score,9.4689,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,5,F1 Score,2.6556,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,7,Accuracy,8.9919,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,7,Accuracy,8.8237,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,7,Accuracy,-0.2953,Small,0.0334,*,0.0371,*
+ROCKET vs LSTMFCN,7,Balanced Accuracy,12.2049,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,7,Balanced Accuracy,12.7052,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,7,Balanced Accuracy,-0.2338,Small,0.2167,NS,0.2257,NS
+ROCKET vs LSTMFCN,7,Precision,1.7117,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,7,Precision,0.4903,Small,0.0358,*,0.0392,*
+LSTMFCN vs ConvTran,7,Precision,-1.1349,Large,0.0,***,0.0,***
+ROCKET vs LSTMFCN,7,Recall,14.32,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,7,Recall,14.2609,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,7,Recall,0.3061,Small,0.1174,NS,0.1249,NS
+ROCKET vs LSTMFCN,7,F1 Score,11.8707,Large,0.0,***,0.0,***
+ROCKET vs ConvTran,7,F1 Score,11.8336,Large,0.0,***,0.0,***
+LSTMFCN vs ConvTran,7,F1 Score,0.0809,Negligible,0.6681,NS,0.6771,NS
+ROCKET 1Days vs 3Days,1 vs 3,Accuracy,-3.1932,Large,0.0,***,0.0,***
+ROCKET 1Days vs 5Days,1 vs 5,Accuracy,-7.803,Large,0.0,***,0.0,***
+ROCKET 1Days vs 7Days,1 vs 7,Accuracy,-14.0204,Large,0.0,***,0.0,***
+ROCKET 3Days vs 5Days,3 vs 5,Accuracy,-4.2818,Large,0.0,***,0.0,***
+ROCKET 3Days vs 7Days,3 vs 7,Accuracy,-10.1123,Large,0.0,***,0.0,***
+ROCKET 5Days vs 7Days,5 vs 7,Accuracy,-6.069,Large,0.0,***,0.0,***
+ROCKET 1Days vs 3Days,1 vs 3,Balanced Accuracy,-4.0304,Large,0.0,***,0.0,***
+ROCKET 1Days vs 5Days,1 vs 5,Balanced Accuracy,-7.4666,Large,0.0,***,0.0,***
+ROCKET 1Days vs 7Days,1 vs 7,Balanced Accuracy,-12.2405,Large,0.0,***,0.0,***
+ROCKET 3Days vs 5Days,3 vs 5,Balanced Accuracy,-3.7571,Large,0.0,***,0.0,***
+ROCKET 3Days vs 7Days,3 vs 7,Balanced Accuracy,-8.6952,Large,0.0,***,0.0,***
+ROCKET 5Days vs 7Days,5 vs 7,Balanced Accuracy,-4.5612,Large,0.0,***,0.0,***
+ROCKET 1Days vs 3Days,1 vs 3,Precision,-1.3998,Large,0.0,***,0.0,***
+ROCKET 1Days vs 5Days,1 vs 5,Precision,-4.2911,Large,0.0,***,0.0,***
+ROCKET 1Days vs 7Days,1 vs 7,Precision,-12.4238,Large,0.0,***,0.0,***
+ROCKET 3Days vs 5Days,3 vs 5,Precision,-2.8209,Large,0.0,***,0.0,***
+ROCKET 3Days vs 7Days,3 vs 7,Precision,-10.4641,Large,0.0,***,0.0,***
+ROCKET 5Days vs 7Days,5 vs 7,Precision,-7.228,Large,0.0,***,0.0,***
+ROCKET 1Days vs 3Days,1 vs 3,Recall,-4.4726,Large,0.0,***,0.0,***
+ROCKET 1Days vs 5Days,1 vs 5,Recall,-2.8166,Large,0.0,***,0.0,***
+ROCKET 1Days vs 7Days,1 vs 7,Recall,-0.2098,Small,0.4491,NS,0.4614,NS
+ROCKET 3Days vs 5Days,3 vs 5,Recall,1.554,Large,0.0,***,0.0,***
+ROCKET 3Days vs 7Days,3 vs 7,Recall,4.5976,Large,0.0,***,0.0,***
+ROCKET 5Days vs 7Days,5 vs 7,Recall,2.7947,Large,0.0,***,0.0,***
+ROCKET 1Days vs 3Days,1 vs 3,F1 Score,-2.8341,Large,0.0,***,0.0,***
+ROCKET 1Days vs 5Days,1 vs 5,F1 Score,-4.9763,Large,0.0,***,0.0,***
+ROCKET 1Days vs 7Days,1 vs 7,F1 Score,-8.3223,Large,0.0,***,0.0,***
+ROCKET 3Days vs 5Days,3 vs 5,F1 Score,-1.8055,Large,0.0,***,0.0,***
+ROCKET 3Days vs 7Days,3 vs 7,F1 Score,-4.7802,Large,0.0,***,0.0,***
+ROCKET 5Days vs 7Days,5 vs 7,F1 Score,-3.2076,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 3Days,1 vs 3,Accuracy,0.6941,Medium,0.016,*,0.0185,*
+LSTMFCN 1Days vs 5Days,1 vs 5,Accuracy,-1.8652,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 7Days,1 vs 7,Accuracy,-0.7488,Medium,0.0079,**,0.0094,**
+LSTMFCN 3Days vs 5Days,3 vs 5,Accuracy,-2.3857,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 7Days,3 vs 7,Accuracy,-1.3748,Large,0.0,***,0.0,***
+LSTMFCN 5Days vs 7Days,5 vs 7,Accuracy,1.1353,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 3Days,1 vs 3,Balanced Accuracy,0.6796,Medium,0.0176,*,0.0202,*
+LSTMFCN 1Days vs 5Days,1 vs 5,Balanced Accuracy,-0.2349,Small,0.365,NS,0.3776,NS
+LSTMFCN 1Days vs 7Days,1 vs 7,Balanced Accuracy,1.2612,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 5Days,3 vs 5,Balanced Accuracy,-0.9625,Large,0.0009,***,0.0011,**
+LSTMFCN 3Days vs 7Days,3 vs 7,Balanced Accuracy,0.4568,Small,0.1,NS,0.1071,NS
+LSTMFCN 5Days vs 7Days,5 vs 7,Balanced Accuracy,1.6778,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 3Days,1 vs 3,Precision,0.4197,Small,0.0272,*,0.0304,*
+LSTMFCN 1Days vs 5Days,1 vs 5,Precision,-5.3724,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 7Days,1 vs 7,Precision,-4.5965,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 5Days,3 vs 5,Precision,-5.6777,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 7Days,3 vs 7,Precision,-4.8962,Large,0.0,***,0.0,***
+LSTMFCN 5Days vs 7Days,5 vs 7,Precision,0.3356,Small,0.1624,NS,0.1703,NS
+LSTMFCN 1Days vs 3Days,1 vs 3,Recall,0.5595,Medium,0.0379,*,0.0412,*
+LSTMFCN 1Days vs 5Days,1 vs 5,Recall,6.0899,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 7Days,1 vs 7,Recall,8.3683,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 5Days,3 vs 5,Recall,5.8885,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 7Days,3 vs 7,Recall,8.3439,Large,0.0,***,0.0,***
+LSTMFCN 5Days vs 7Days,5 vs 7,Recall,2.034,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 3Days,1 vs 3,F1 Score,0.5861,Medium,0.0194,*,0.022,*
+LSTMFCN 1Days vs 5Days,1 vs 5,F1 Score,2.2909,Large,0.0,***,0.0,***
+LSTMFCN 1Days vs 7Days,1 vs 7,F1 Score,4.2229,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 5Days,3 vs 5,F1 Score,1.8529,Large,0.0,***,0.0,***
+LSTMFCN 3Days vs 7Days,3 vs 7,F1 Score,3.8972,Large,0.0,***,0.0,***
+LSTMFCN 5Days vs 7Days,5 vs 7,F1 Score,1.8948,Large,0.0,***,0.0,***
+ConvTran 1Days vs 3Days,1 vs 3,Accuracy,-0.8229,Large,0.0008,***,0.001,**
+ConvTran 1Days vs 5Days,1 vs 5,Accuracy,-2.5036,Large,0.0,***,0.0,***
+ConvTran 1Days vs 7Days,1 vs 7,Accuracy,-3.3437,Large,0.0,***,0.0,***
+ConvTran 3Days vs 5Days,3 vs 5,Accuracy,-1.7914,Large,0.0,***,0.0,***
+ConvTran 3Days vs 7Days,3 vs 7,Accuracy,-2.5863,Large,0.0,***,0.0,***
+ConvTran 5Days vs 7Days,5 vs 7,Accuracy,-0.5515,Medium,0.0006,***,0.0008,***
+ConvTran 1Days vs 3Days,1 vs 3,Balanced Accuracy,-1.6264,Large,0.0,***,0.0,***
+ConvTran 1Days vs 5Days,1 vs 5,Balanced Accuracy,0.7149,Medium,0.0125,*,0.0146,*
+ConvTran 1Days vs 7Days,1 vs 7,Balanced Accuracy,-0.0404,Negligible,0.8895,NS,0.8955,NS
+ConvTran 3Days vs 5Days,3 vs 5,Balanced Accuracy,2.4539,Large,0.0,***,0.0,***
+ConvTran 3Days vs 7Days,3 vs 7,Balanced Accuracy,1.7427,Large,0.0,***,0.0,***
+ConvTran 5Days vs 7Days,5 vs 7,Balanced Accuracy,-0.8218,Large,0.0005,***,0.0006,***
+ConvTran 1Days vs 3Days,1 vs 3,Precision,-0.3084,Small,0.0126,*,0.0147,*
+ConvTran 1Days vs 5Days,1 vs 5,Precision,-8.0042,Large,0.0,***,0.0,***
+ConvTran 1Days vs 7Days,1 vs 7,Precision,-8.9235,Large,0.0,***,0.0,***
+ConvTran 3Days vs 5Days,3 vs 5,Precision,-8.0374,Large,0.0,***,0.0,***
+ConvTran 3Days vs 7Days,3 vs 7,Precision,-9.0075,Large,0.0,***,0.0,***
+ConvTran 5Days vs 7Days,5 vs 7,Precision,-0.5548,Medium,0.0117,*,0.0138,*
+ConvTran 1Days vs 3Days,1 vs 3,Recall,-4.1271,Large,0.0,***,0.0,***
+ConvTran 1Days vs 5Days,1 vs 5,Recall,15.1577,Large,0.0,***,0.0,***
+ConvTran 1Days vs 7Days,1 vs 7,Recall,14.9433,Large,0.0,***,0.0,***
+ConvTran 3Days vs 5Days,3 vs 5,Recall,19.6751,Large,0.0,***,0.0,***
+ConvTran 3Days vs 7Days,3 vs 7,Recall,19.6999,Large,0.0,***,0.0,***
+ConvTran 5Days vs 7Days,5 vs 7,Recall,-0.7579,Medium,0.001,***,0.0012,**
+ConvTran 1Days vs 3Days,1 vs 3,F1 Score,-1.4941,Large,0.0,***,0.0,***
+ConvTran 1Days vs 5Days,1 vs 5,F1 Score,5.7148,Large,0.0,***,0.0,***
+ConvTran 1Days vs 7Days,1 vs 7,F1 Score,5.1826,Large,0.0,***,0.0,***
+ConvTran 3Days vs 5Days,3 vs 5,F1 Score,7.09,Large,0.0,***,0.0,***
+ConvTran 3Days vs 7Days,3 vs 7,F1 Score,6.6577,Large,0.0,***,0.0,***
+ConvTran 5Days vs 7Days,5 vs 7,F1 Score,-0.7954,Medium,0.0006,***,0.0008,***

@@ -19,21 +19,30 @@ if __name__ == "__main__":
     start_time = time.time()
     models_to_train = ["ROCKET", "ConvTran", "LSTMFCN"]   # possible choices: ["ROCKET","LSTMFCN","ConvTran"]
     day = 1
-    output_dir_name = "tmp_test_results_after_training"
+    logging_files_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                                       "logging_files")
 
     for model in models_to_train:
-        if model.lower == "rocket":
-            rocket_main(train_path="", val_path="", test_path="", default_path=True, 
-                        kernels=[50,100,300,500,700,1000,1250,1500,2500,5000,10000], 
-                        seed=conf.seed, 
-                        output_dir_plots=os.path.join(current_dir, output_dir_name), 
-                        output_model_dir=os.path.join(parent_dir, "_04_test"), 
-                        days_to_consider=day, type_model_classification="RF",
-                        most_important_metric="balanced_accuracy")
+        if model.lower() == "rocket":
+            rocket_main(days_to_consider=day, 
+                        train_path="", val_path="", test_path="", default_path=True, 
+                        kernels=conf.kernels_set, 
+                        seed=conf.seed,
+                        save_plots=conf.save_plots, 
+                        output_dir_plots=conf.output_dir_plots, 
+                        output_model_base_dir=conf.output_model_base_dir,
+                        type_model_classification=conf.type_model_classification,
+                        most_important_metric=conf.most_important_metric,
+                        log_dir=logging_files_dir,
+                        log_filename=f'train_ROCKET_based_on_{conf.method_optical_flow}'
+                        )
 
         elif model.lower()=="lstmfcn":
             lstm_main(days_to_consider=day,
-                      output_dir_plots = os.path.join(current_dir, output_dir_name), 
+                      train_path="", val_path="", test_path="", default_path=True, 
+                      save_plots=conf.save_plots,
+                      output_dir_plots = conf.output_dir_plots, 
+                      output_model_base_dir=conf.output_model_base_dir,
                       batch_size=conf.batch_size_FCN, 
                       lstm_size=conf.lstm_size_FCN,
                       filter_sizes=conf.filter_sizes_FCN,
@@ -41,14 +50,23 @@ if __name__ == "__main__":
                       dropout=conf.dropout_FCN,
                       num_layers=conf.num_layers_FCN,
                       learning_rate=conf.learning_rate_FCN,
-                      num_epochs=conf.num_epochs_FCN)
+                      num_epochs=conf.num_epochs_FCN,
+                      most_important_metric = conf.most_important_metric,
+                      log_dir=logging_files_dir,
+                      log_filename=f'train_LSTMFCN_based_on_{conf.method_optical_flow}'
+                      )
             print(f"Tempo esecuzione LSTM-FCN: {(time.time() - start_time):.2f}s")
 
 
         elif model.lower()=="convtran":
             convtran_main(days_to_consider=day, 
-                          save_conf_matrix=True,
-                          output_dir_plots = os.path.join(current_dir, output_dir_name))
+                          train_path="", val_path="", test_path="", default_path=True, 
+                          save_plots=conf.save_plots,
+                          output_dir_plots = conf.output_dir_plots,
+                          output_model_base_dir=conf.output_model_base_dir,
+                          most_important_metric = conf.most_important_metric,
+                          log_dir=logging_files_dir,
+                          log_filename=f'train_ConvTran_based_on_{conf.method_optical_flow}')
     
     
 

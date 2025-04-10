@@ -42,7 +42,6 @@ class SupervisedTrainer:
             _, predicted = outputs.max(1)
             total_correct += predicted.eq(targets).sum().item()
             total_samples += targets.size(0)
-            accuracy = total_correct / total_samples
 
             """
             # Stampa la perdita e l'accuratezza nel terminale

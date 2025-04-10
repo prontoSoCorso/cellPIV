@@ -2,7 +2,6 @@ import os
 import cv2
 import numpy as np
 import logging
-#logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)) , 'optical_flow_errors.log'), level=logging.ERROR)
 
 from _01_opticalFlows._opticalFlow_functions import (calculate_vorticity, 
                                    sort_files_by_slice_number, 

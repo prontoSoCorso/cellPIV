@@ -4,7 +4,6 @@ import os
 import torch
 import random
 import numpy as np
-import cv2
 
 # Rileva il percorso della cartella "cellPIV" in modo dinamico
 current_file_path = os.path.abspath(__file__)
@@ -30,19 +29,19 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class user_paths:
     if sourceForPath == 0:
         #Per computer fisso nuovo
-        path_excels = PROJECT_ROOT 
+        dataset = os.path.join(PROJECT_ROOT, "datasets")
         path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti"
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
-        path_excels = PROJECT_ROOT
+        dataset = os.path.join(PROJECT_ROOT, "datasets")
         path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData"
 
     elif sourceForPath == 2:
         #Per AWS
-        path_excels = "/home/ec2-user/cellPIV/"
+        dataset = "/home/ec2-user/cellPIV/"
         path_BlastoData = "/mnt/s3bucket/blastocisti"
-    
+
 
 class utils:
     # Dim
@@ -56,9 +55,8 @@ class utils:
 
     num_classes                 = 2
     project_name                = "BlastoClass_3days_optflow_Farneback"
-    hours2cut                   = 4
+    hours2cut                   = 1
     start_frame                 = framePerHour*hours2cut
-    logging_files_dir           = "_z_logging_files"
 
     # Seed everything
     seed = 2024
@@ -77,10 +75,10 @@ class Config_00_preprocessing:
     path_main_folder = dest_dir_extracted_equator
 
     # Preprocessing
-    path_original_excel     = os.path.join(user_paths.path_excels, "DB morpheus UniPV.xlsx")
+    path_original_excel     = os.path.join(user_paths.dataset, "DB morpheus UniPV.xlsx")
     #path_original_excel     = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
-    path_addedID_csv        = os.path.join(user_paths.path_excels, "_00b_preprocessing_excels", "DB_Morpheus_withID.csv")
-    path_double_dish_excel  = os.path.join(user_paths.path_excels, "pz con doppia dish.xlsx")
+    path_addedID_csv        = os.path.join(user_paths.dataset, "DB_Morpheus_withID.csv")
+    path_double_dish_excel  = os.path.join(user_paths.dataset, "pz con doppia dish.xlsx")
 
     # Percorso della directory di destinazione
     dest_dir_blastoData = user_paths.path_BlastoData
@@ -92,7 +90,7 @@ class Config_01_OpticalFlow:
     output_path_optical_flow_images = "/home/phd2/Scrivania/CorsoData/opticalFlowExamples"
 
     # Settings
-    save_metrics = True
+    save_metrics = False
     save_overlay_optical_flow = True
     save_final_data = True
 
@@ -106,48 +104,50 @@ class Config_01_OpticalFlow:
     if method_optical_flow == "LucasKanade":
         # LUCAS KANADE
         # LK parameters
-        winSize         = 15
-        maxLevelPyramid = 4
-        maxCorners      = 500
-        qualityLevel    = 0.1
+        winSize         = 11
+        maxLevelPyramid = 3
+        maxCorners      = 400
+        qualityLevel    = 0.05
         minDistance     = 5
         blockSize       = 5
 
     elif method_optical_flow == "Farneback":
         # FARNEBACK
         # Farneback parameters
-        pyr_scale = 0.3
-        levels = 5
-        winSize = 15
+        pyr_scale = 0.5
+        levels = 3
+        winSize = 11
         iterations = 5
         poly_n = 7
-        poly_sigma = 1.5
+        poly_sigma = 1.2
 
     else:
         raise SystemExit("\n===== Scegliere un metodo di flusso ottico valido nel config =====\n")
 
 
-
 class Config_02_temporalData:
     dict                        = "sum_mean_mag"
-    OptFlow                     = "Farneback"
-    type_files                  = f"files_all_days_{OptFlow}"
-    dict_in                     = dict + "_dict_" + OptFlow + ".pkl"
+    method_optical_flow         = "Farneback"
+    type_files                  = f"files_all_days_{method_optical_flow}"
+    dict_in                     = dict + "_" + method_optical_flow + ".pkl"
     
     path_pkl                    = os.path.join(type_files, dict_in)
-    dictAndOptFlowType          = dict + "_" + OptFlow + ".csv"
+    dictAndOptFlowType          = dict + "_" + method_optical_flow + ".csv"
 
     # Path in cui salvo il file csv che ottengo leggendo i pkl delle serie temporali e che sarà poi quello usato per creare il csv finale
     temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series_csv', dictAndOptFlowType)
     csv_file_Danilo_path        = Config_00_preprocessing.path_addedID_csv  # File che ho ottenuto dal preprocessing degli excel (singolo csv con ID)
     # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
-    final_csv_path              = os.path.join(user_paths.path_excels, "_02_temporalData", "FinalBlastoLabels.csv")
+    final_csv_path              = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
 
     embedding_type = "UMAP"
     num_max_days = 7
     days_to_consider_for_dim_reduction = [1,3,5,7]    # array perché fa ciclo per poter svolgere umap su più giorni
 
+
 class Config_02b_normalization:
+    method_optical_flow = "Farneback"   #LucasKanade / Farneback
+
     # Data
     temporalDataType = Config_02_temporalData.dict
     train_size = 0.7
@@ -164,24 +164,27 @@ class Config_02b_normalization:
     days_to_consider = 7  # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
 
     # Paths file completo
-    csv_file_path = Config_02_temporalData.final_csv_path
-    
+    csv_file_path = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
+
     # Base path generico per i file normalizzati
     @staticmethod
-    def get_normalized_base_path(days_to_consider):
-        return os.path.join(user_paths.path_excels, f"Normalized_{Config_02b_normalization.temporalDataType}_{days_to_consider}Days")
+    def get_normalized_base_path(days_to_consider, method_optical_flow):
+        subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow,"subsets")
+        return os.path.join(subsets_base_path, 
+                            f"Normalized_{Config_02b_normalization.temporalDataType}_{days_to_consider}Days")
 
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @staticmethod
-    def get_paths(days_to_consider=7):
+    def get_paths(days_to_consider):
         """
         Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
 
         :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
         :return: Tuple con i percorsi di train, validation e test.
         """
-        base_path = Config_02b_normalization.get_normalized_base_path(days_to_consider)
+        base_path = Config_02b_normalization.get_normalized_base_path(days_to_consider=days_to_consider, 
+                                                                      method_optical_flow=Config_02b_normalization.method_optical_flow)
         train_path = f"{base_path}_train.csv"
         val_path = f"{base_path}_val.csv"
         test_path = f"{base_path}_test.csv"
@@ -198,7 +201,6 @@ class Config_02b_normalization:
             torch.cuda.manual_seed_all(seed)
 
 
-
 class Config_03_train:
     project_name = utils.project_name
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -206,11 +208,13 @@ class Config_03_train:
     num_classes = utils.num_classes
     img_size = utils.img_size
     seed = utils.seed
-    test_dir = "_04_test"
     num_labels = 2
     Data_shape = (1,93) #variabile di base, verrà aggiornata in ConvTran
     days_to_consider = 3
     method_optical_flow = "Farneback"
+    output_model_base_dir = os.path.join(PROJECT_ROOT, "_04_test", "best_models", method_optical_flow)
+    save_plots = True
+    output_dir_plots = os.path.join(PROJECT_ROOT, "_03_train", "test_results_after_training", method_optical_flow)
 
     @staticmethod
     def seed_everything(seed):
@@ -223,17 +227,15 @@ class Config_03_train:
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @staticmethod
-    def get_paths(days_to_consider=days_to_consider):
+    def get_paths(days_to_consider):
         """
         Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
 
         :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
         :return: Tuple con i percorsi di train, validation e test.
         """
-        base_path = os.path.join(
-            user_paths.path_excels,
-            f"Normalized_{Config_02b_normalization.temporalDataType}_{days_to_consider}Days"
-        )
+        base_path = Config_02b_normalization.get_normalized_base_path(days_to_consider=days_to_consider, 
+                                                                      method_optical_flow=Config_03_train.method_optical_flow)
         train_path = f"{base_path}_train.csv"
         val_path = f"{base_path}_val.csv"
         test_path = f"{base_path}_test.csv"
@@ -242,6 +244,8 @@ class Config_03_train:
 
     # ROCKET
     kernels_set     = [50,100,200,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    type_model_classification = "RF"    #or "LR" or "XGB"
+    most_important_metric = "balanced_accuracy"
     
     # LSTM-FCN
     num_epochs_FCN      = 300
@@ -261,7 +265,7 @@ class Config_03_train:
 
     # ConvTran
     # ConvTran - Input & Output                                  
-    output_dir      = user_paths.path_excels
+    output_dir      = user_paths.dataset
     Norm            = False        # Data Normalization
     val_ratio       = 0.2     # Propotion of train-set to be used as validation
     print_interval  = 50 # Print batch info every this many batches

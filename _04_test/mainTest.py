@@ -18,7 +18,7 @@ from _04_test._03_stratified_evaluation import stratified_evaluation
 def main():
     test_all(
         base_path = os.path.join(current_dir, "plots_and_metrics_test"), 
-        days=[1,3,5,7], 
+        days=[1,3], 
         models = ['ROCKET', 'LSTMFCN', 'ConvTran'], 
         base_models_path=current_dir, 
         base_test_csv_path=parent_dir

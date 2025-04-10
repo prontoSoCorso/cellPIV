@@ -113,7 +113,10 @@ def evaluate_model_torch(model, dataloader, threshold=0.5):
 
 
 def main(days_to_consider=1,
-         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training"), 
+         train_path="", val_path="", test_path="", default_path=True, 
+         save_plots=conf.save_plots,
+         output_dir_plots = conf.output_dir_plots, 
+         output_model_base_dir=conf.output_model_base_dir,
          batch_size=conf.batch_size_FCN, 
          lstm_size=conf.lstm_size_FCN,
          filter_sizes=conf.filter_sizes_FCN,
@@ -122,14 +125,18 @@ def main(days_to_consider=1,
          num_layers=conf.num_layers_FCN,
          learning_rate=conf.learning_rate_FCN,
          num_epochs=conf.num_epochs_FCN,
+         most_important_metric = conf.most_important_metric,
+
          log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                    "logging_files"),
          log_filename=f'train_LSTMFCN_based_on_{conf.method_optical_flow}'):
     
     config_logging(log_dir=log_dir, log_filename=log_filename)
 
-    os.makedirs(output_dir_plots, exist_ok=True)
-    train_path, val_path, test_path = conf.get_paths(days_to_consider)
+    os.makedirs(output_model_base_dir, exist_ok=True)
+    if default_path:
+        # Ottieni i percorsi dal config
+        train_path, val_path, test_path = conf.get_paths(days_to_consider)
     
     # Caricamento e preparazione dati
     df_train = load_data(train_path)
@@ -167,8 +174,7 @@ def main(days_to_consider=1,
     best_val_loss = float('inf')
 
     best_val_acc = 0
-    most_important_metric = "balanced_accuracy"
-    best_model_path = os.path.join(parent_dir, "_04_test", f"best_lstmfcn_model_{days_to_consider}Days.pth")
+    best_model_path = os.path.join(output_model_base_dir, f"best_lstmfcn_model_{days_to_consider}Days.pth")
 
     # Addestramento
     for epoch in range(num_epochs):
@@ -192,10 +198,15 @@ def main(days_to_consider=1,
 
         # Log epoch metrics
         logging.info(f"\nEpoch {epoch+1}/{num_epochs}")
-        logging.info(f"Train Loss: {train_loss/len(train_loader.dataset):.4f}")
-        logging.info(f"Val Brier Score: {val_loss:.4f}")
-        logging.info(f"Val Balanced Accuracy: {val_metrics['balanced_accuracy']:.4f}")
-        logging.info(f"Learning Rate: {scheduler.optimizer.param_groups[0]['lr']:.6f}")
+        #logging.info(f"Train Loss: {train_loss/len(train_loader.dataset):.4f}")
+        logging.info((
+            f"Val Brier Score: {val_loss:.4f} | "
+            f"Val {most_important_metric.capitalize()}: {val_metrics[most_important_metric]:.4f} | "
+            f"Learning Rate: {scheduler.optimizer.param_groups[0]['lr']:.6f}" 
+            )
+        )
+        logging.info(f"Val {most_important_metric.capitalize()}: {val_metrics[most_important_metric]:.4f}")
+        logging.info(f"")
     
         # Early stopping and save best model
         if val_loss < (best_val_loss - early_stopping_delta):
@@ -239,28 +250,21 @@ def main(days_to_consider=1,
             logging.info(f"{metric.capitalize()}: {value:.4f}")
     
     # Save plots
-    plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
-                   test_metrics['roc_auc'], 
-                   os.path.join(output_dir_plots, f"roc_curve_LSTMFCN_{days_to_consider}Days.png"))
-    cm_path = os.path.join(output_dir_plots, f"confusion_matrix_LSTMFCN_{days_to_consider}Days.png")
-    save_confusion_matrix(conf_matrix=test_metrics["conf_matrix"], filename=cm_path, model_name="LSTMFCN")
-    
+    if save_plots:
+        complete_output_dir = os.path.join(output_dir_plots, f"day{days_to_consider}")
+        os.makedirs(complete_output_dir, exist_ok=True)
+        conf_matrix_filename=os.path.join(complete_output_dir,f'confusion_matrix_LSTMFCN_{days_to_consider}Days.png')
+        save_confusion_matrix(conf_matrix=test_metrics['conf_matrix'], 
+                                filename=conf_matrix_filename, 
+                                model_name="LSTMFCN")
+        plot_roc_curve(fpr=test_metrics['fpr'], tpr=test_metrics['tpr'], 
+                        roc_auc=test_metrics['roc_auc'], 
+                        filename=conf_matrix_filename.replace('confusion_matrix', 'roc'))
+
     return test_metrics
 
 if __name__ == "__main__":
     import time
     start_time = time.time()
-    main(days_to_consider=7,
-         output_dir_plots = os.path.join(current_dir, "tmp_test_results_after_training"), 
-         batch_size=conf.batch_size_FCN, 
-         lstm_size=conf.lstm_size_FCN,
-         filter_sizes=conf.filter_sizes_FCN,
-         kernel_sizes=conf.kernel_sizes_FCN,
-         dropout=conf.dropout_FCN,
-         num_layers=conf.num_layers_FCN,
-         learning_rate=conf.learning_rate_FCN,
-         num_epochs=conf.num_epochs_FCN,
-         log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                   "logging_files"),
-         log_filename=f'train_LSTMFCN_based_on_{conf.method_optical_flow}')
-    print(f"Tempo esecuzione LSTM-FCN: {(time.time() - start_time):.2f}s")
+    main(days_to_consider=7)
+    print(f"Total execution time LSTMFCN: {(time.time() - start_time):.2f}s")

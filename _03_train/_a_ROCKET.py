@@ -84,17 +84,22 @@ def evaluate_model(model, X, y_true, threshold=0.5):
 
 
 def main(train_path="", val_path="", test_path="", default_path=True, 
-         kernels=conf.kernels_set, seed=conf.seed, output_dir_plots=os.path.join(current_dir, "tmp_test_results_after_training"), 
-         output_model_dir=os.path.join(parent_dir, "_04_test"), 
-         days_to_consider=conf.days_to_consider, type_model_classification="RF",
-         most_important_metric="balanced_accuracy",
+         kernels=conf.kernels_set, 
+         seed=conf.seed,
+         save_plots=conf.save_plots, 
+         output_dir_plots=conf.output_dir_plots, 
+         output_model_base_dir=conf.output_model_base_dir, 
+         days_to_consider=conf.days_to_consider, 
+         type_model_classification=conf.type_model_classification,
+         most_important_metric=conf.most_important_metric,
+
          log_dir=os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                    "logging_files"),
          log_filename=f'train_ROCKET_based_on_{conf.method_optical_flow}'):
     
     utils.config_logging(log_dir=log_dir, log_filename=log_filename)
 
-    os.makedirs(output_dir_plots, exist_ok=True)
+    os.makedirs(output_model_base_dir, exist_ok=True)
     best_metric_dict = {}
     best_metric = 0
     best_kernel = None
@@ -189,16 +194,21 @@ def main(train_path="", val_path="", test_path="", default_path=True,
         if metric not in ("conf_matrix", "fpr", "tpr"):
             logging.info(f"{metric.capitalize()}: {value:.4f}")
 
-    utils.plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], 
-                   test_metrics['roc_auc'], 
-                   os.path.join(output_dir_plots, 
-                                f"roc_curve_ROCKET_{days_to_consider}Days.png"))
-
-    cm_path = os.path.join(output_dir_plots, f"confusion_matrix_ROCKET_{days_to_consider}Days.png")
-    utils.save_confusion_matrix(conf_matrix=test_metrics["conf_matrix"], filename=cm_path, model_name="ROCKET", num_kernels=best_kernel)
-
+    # Save plots
+    if save_plots:
+        complete_output_dir = os.path.join(output_dir_plots, f"day{days_to_consider}")
+        os.makedirs(complete_output_dir, exist_ok=True)
+        conf_matrix_filename=os.path.join(complete_output_dir,f'confusion_matrix_ROCKET_{days_to_consider}Days.png')
+        utils.save_confusion_matrix(conf_matrix=test_metrics['conf_matrix'], 
+                                    filename=conf_matrix_filename, 
+                                    model_name="ROCKET",
+                                    num_kernels=best_kernel)
+        utils.plot_roc_curve(fpr=test_metrics['fpr'], tpr=test_metrics['tpr'], 
+                             roc_auc=test_metrics['roc_auc'], 
+                             filename=conf_matrix_filename.replace('confusion_matrix', 'roc'))
+        
     # Save both rocket transformer and classifier
-    best_model_path = os.path.join(output_model_dir, f"best_rocket_model_{days_to_consider}Days.joblib")
+    best_model_path = os.path.join(output_model_base_dir, f"best_rocket_model_{days_to_consider}Days.joblib")
     joblib.dump({
         "rocket": final_rocket,
         "classifier": final_model,
@@ -218,14 +228,7 @@ def main(train_path="", val_path="", test_path="", default_path=True,
     
 
 if __name__ == "__main__":
-    # Misura il tempo di esecuzione della funzione main()
-    day = 7
-    execution_time = timeit.timeit(
-        lambda: main(train_path="", val_path="", test_path="", default_path=True, 
-                    kernels=[50,100,300,500,700,1000,1250,1500,2500,5000,10000], 
-                    seed=conf.seed, 
-                    output_dir_plots=os.path.join(current_dir, "tmp_test_results_after_training"), 
-                    output_model_dir=os.path.join(parent_dir, "_04_test"), 
-                    days_to_consider=day, type_model_classification="RF",
-                    most_important_metric="balanced_accuracy"), number=1)
-    logging.info(f"Total execution time: {execution_time:.2f} seconds")
+    import time
+    start_time = time.time()
+    main(days_to_consider=7)
+    logging.info(f"Total execution time ROCKET: {(time.time() - start_time):.2f}s")
