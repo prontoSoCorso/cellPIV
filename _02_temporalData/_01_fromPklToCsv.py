@@ -60,6 +60,23 @@ def create_final_csv(input_temporal_csv_path, original_csv_path, output_final_cs
         4568    640     D2019.03.13_S02233_I0141_D     5  D2019.03.13_S02233_I0141_D_5      41         normo  ...         -  23.2415225016666  22.9910616672222    -         -  2
     '''
 
+    # Handle NaN/empty values and standardize annotations
+    labels_data['eup_aneup'] = labels_data['eup_aneup'].fillna('non analizzato')
+    
+    # Standardize capitalization
+    def standardize_eup_aneup(label):
+        label = str(label).strip().lower()
+        if label == 'euploide':
+            return 'Euploide'
+        elif label == 'aneuploide':
+            return 'Aneuploide'
+        elif label in ['non analizzato', 'nan', '']:
+            return 'not_analyzed'
+        else:
+            return label.capitalize()
+    
+    labels_data['eup_aneup'] = labels_data['eup_aneup'].apply(standardize_eup_aneup)
+
     # Mantieni solo le colonne necessarie
     columns_to_keep = ["dish_well"] + [col for col in temporal_data.columns if col.startswith("time_")]
     temporal_data = temporal_data[columns_to_keep]
@@ -68,12 +85,13 @@ def create_final_csv(input_temporal_csv_path, original_csv_path, output_final_cs
     merged_data = pd.merge(labels_data, temporal_data, on="dish_well", how="inner")
 
     # Seleziona solo le colonne richieste
-    columns_to_keep_final = ["patient_id", "dish_well", "BLASTO NY"] + [col for col in temporal_data.columns if col.startswith("time_")]
+    meta_colums = ["patient_id", "dish_well", "BLASTO NY", "eup_aneup", "PN"]
+    columns_to_keep_final = meta_colums + [col for col in temporal_data.columns if col.startswith("time_")]
     merged_data = merged_data[columns_to_keep_final]
 
     # Rinomina le colonne temporali in value_1, value_2, ..., value_N
-    num_temporal_columns = len(columns_to_keep_final) - 3
-    new_column_names = ["patient_id", "dish_well", "BLASTO NY"] + [f"value_{i+1}" for i in range(num_temporal_columns)]
+    num_temporal_columns = len(columns_to_keep_final) - len(meta_colums)
+    new_column_names = meta_colums + [f"value_{i+1}" for i in range(num_temporal_columns)]
     merged_data.columns = new_column_names
 
     # Salva il nuovo file CSV

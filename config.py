@@ -91,7 +91,7 @@ class Config_01_OpticalFlow:
 
     # Settings
     save_metrics = False
-    save_overlay_optical_flow = True
+    save_overlay_optical_flow = False
     save_final_data = True
 
     # Var
@@ -131,6 +131,7 @@ class Config_02_temporalData:
     type_files                  = f"files_all_days_{method_optical_flow}"
     dict_in                     = dict + "_" + method_optical_flow + ".pkl"
     
+    convert_pkl_to_csv          = True
     path_pkl                    = os.path.join(type_files, dict_in)
     dictAndOptFlowType          = dict + "_" + method_optical_flow + ".csv"
 
@@ -141,8 +142,11 @@ class Config_02_temporalData:
     final_csv_path              = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
 
     embedding_type = "UMAP"
+    use_plotly_lib = True
+    path_output_dim_reduction_files = os.path.join("dim_reduction_files", method_optical_flow)
     num_max_days = 7
     days_to_consider_for_dim_reduction = [1,3,5,7]    # array perché fa ciclo per poter svolgere umap su più giorni
+
 
 
 class Config_02b_normalization:
