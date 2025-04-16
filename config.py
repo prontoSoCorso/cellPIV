@@ -145,7 +145,7 @@ class Config_02_temporalData:
     use_plotly_lib = True
     path_output_dim_reduction_files = os.path.join("dim_reduction_files", method_optical_flow)
     num_max_days = 7
-    days_to_consider_for_dim_reduction = [1,3]    # array perché fa ciclo per poter svolgere umap su più giorni
+    days_to_consider_for_dim_reduction = [1,3,5,7]    # array perché fa ciclo per poter svolgere umap su più giorni
 
 
 

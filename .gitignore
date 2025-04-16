@@ -1,0 +1,10 @@
+# .gitignore
+
+# Python compiled files
+*.pyc
+*.pyo
+*.pyd
+
+# Python cache directories
+__pycache__/
+*.egg-info/

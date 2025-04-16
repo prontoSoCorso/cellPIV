@@ -204,7 +204,7 @@ def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path
     # Se output_path_base non è vuoto, salva la figura come immagine PNG e la mostra
     if output_path_base:
         output_file = os.path.join(output_path_base, f"umap_{days_to_consider}Days.png")
-        base_fig.write_image(output_file)  # Assicurarsi di avere "kaleido" installato per il salvataggio in PNG
+        base_fig.write_image(output_file)
         print(f"Grafico interattivo salvato in: {output_file}")
         base_fig.show()
     else:
@@ -302,7 +302,9 @@ if __name__ == "__main__":
 
     day = 1
     max_frames = utils.num_frames_by_days(day)
-    compute_UMAP_with_plotly(csv_path="/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/Farneback/FinalDataset.csv", 
+    csv_path = "/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/Farneback/FinalDataset.csv"
+    
+    compute_UMAP_with_plotly(csv_path=csv_path, 
                              days_to_consider=day, 
                              max_frames=max_frames, 
                              output_path_base="")
