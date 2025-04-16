@@ -112,8 +112,8 @@ def compare_with_McNemar(models_type: str, days: Tuple[int, int], data_dir: str,
         # Load both models
         models = []
         for day in days:
-            test_path = os.path.join(data_dir, f"Normalized_sum_mean_mag_{day}Days_test.csv")
-            X, y = _testFunctions.prepare_data(model_type=model_type, path_csv=test_path)
+            df_test = _testFunctions.load_test_data(day)
+            X, y = _testFunctions.prepare_data(model_type=model_type, df=df_test)
             model_info = _testFunctions.load_model_by_type(model_type=model_type, days=day, base_models_path=model_dir, device=device, data=(X,y))
             model = model_info["model"]
             params = {key: value for key, value in model_info.items() if key != "model"}

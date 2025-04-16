@@ -31,8 +31,8 @@ import _utils_._utils as utils
 ##########################################
 # Helper functions for bootstrap and stats
 ##########################################
-def load_and_prepare_test_data(model_type, days_val, base_test_csv_path):
-    df_test = _testFunctions.load_test_data(days_val=days_val, base_test_csv_path=base_test_csv_path)
+def load_and_prepare_test_data(model_type, days_val):
+    df_test = _testFunctions.load_test_data(days_val=days_val)
     if df_test is None:
         return None
     X, y = _testFunctions.prepare_data(model_type=model_type, df=df_test)
@@ -202,7 +202,7 @@ def boostrap_evaluation(base_path=os.path.join(current_dir, "bootstrap_test_metr
         for m_type in models_list:
             print(f"Processing {m_type} for {day_val} Days...")
             # Load test data
-            test_data = load_and_prepare_test_data(m_type, day_val, base_test_csv_path)
+            test_data = load_and_prepare_test_data(m_type, day_val)
             if test_data is None:
                 continue
 

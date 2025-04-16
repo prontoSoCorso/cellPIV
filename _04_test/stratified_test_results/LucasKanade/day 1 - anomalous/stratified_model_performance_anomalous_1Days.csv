@@ -1,0 +1,16 @@
+Model,Stratum,balanced_accuracy,f1
+ROCKET,Overall,0.6611,0.6611
+ROCKET,0PN,0.925,0.0
+ROCKET,2PN,0.5784,0.6772
+ROCKET,anomalous,0.7008,0.5538
+ROCKET,deg,0.8571,0.0
+LSTMFCN,Overall,0.6574,0.6468
+LSTMFCN,0PN,0.9375,0.0
+LSTMFCN,2PN,0.5873,0.6667
+LSTMFCN,anomalous,0.6038,0.4483
+LSTMFCN,deg,0.9143,0.0
+ConvTran,Overall,0.6487,0.6421
+ConvTran,0PN,0.95,0.0
+ConvTran,2PN,0.5766,0.6635
+ConvTran,anomalous,0.5621,0.4127
+ConvTran,deg,0.9429,0.0

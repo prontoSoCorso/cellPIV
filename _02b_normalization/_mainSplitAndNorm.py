@@ -16,8 +16,10 @@ sys.path.append(parent_dir)
 from config import Config_02b_normalization as conf
 from config import utils
 from _02b_normalization._01_split_normalization import load_data, normalize_data, save_data, stratified_split
-from _02b_normalization._02_visualization import visualize_normalized_data_single_pt, create_and_save_plots_mean_temp_data, create_and_save_stratified_plots_mean_temp_data
-from _utils_.dimReduction import compute_UMAP, compute_tSNE
+from _02b_normalization._02_visualization import (visualize_normalized_data_single_pt, 
+                                                  create_and_save_plots_mean_temp_data, 
+                                                  create_and_save_stratified_plots_mean_temp_data)
+from _utils_.dimReduction import compute_UMAP, compute_tSNE, compute_UMAP_with_plotly
 
 
 def import_original_db_and_merge_data(data, original_db_path=os.path.join(parent_dir, "DB morpheus UniPV.xlsx")):
@@ -69,7 +71,7 @@ def main(days_to_consider=conf.days_to_consider, train_size=conf.train_size, see
 
         if embedding_type.lower()=="umap":
             print("Computing UMAP...")
-            compute_UMAP(csv_path=train_path, days_to_consider=days_to_consider, max_frames=max_frames, output_path_base=output_path_base)
+            compute_UMAP_with_plotly(csv_path=train_path, days_to_consider=days_to_consider, max_frames=max_frames, output_path_base=output_path_base)
         elif embedding_type.lower()=="tsne":
             print("Computing tSNE...")
             compute_tSNE(csv_path=train_path, days_to_consider=days_to_consider, max_frames=max_frames, output_path_base=output_path_base)

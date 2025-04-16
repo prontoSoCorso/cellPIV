@@ -1,9 +1,6 @@
 import seaborn as sns
 import torch
 import pandas as pd
-from torch.utils.data import TensorDataset
-from sklearn.metrics import accuracy_score, balanced_accuracy_score, cohen_kappa_score, brier_score_loss, confusion_matrix, f1_score
-from sklearn.metrics import roc_curve, auc, precision_score, recall_score, matthews_corrcoef
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -113,8 +110,8 @@ def instantiate_LSTMFCN(checkpoint, device):
 
 
 # Funzione per importare dati di test
-def load_test_data(days_val, base_test_csv_path):
-    test_path = os.path.join(base_test_csv_path, f"Normalized_sum_mean_mag_{days_val}Days_test.csv")
+def load_test_data(days_val):
+    train_path, val_path, test_path = conf.get_paths(days_val)
     if not os.path.exists(test_path):
         print(f"Test file not found: {test_path}")
         return None, None

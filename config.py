@@ -215,10 +215,11 @@ class Config_03_train:
     num_labels = 2
     Data_shape = (1,93) #variabile di base, verrà aggiornata in ConvTran
     days_to_consider = 3
-    method_optical_flow = "Farneback"
+    method_optical_flow = "LucasKanade"
     output_model_base_dir = os.path.join(PROJECT_ROOT, "_04_test", "best_models", method_optical_flow)
     save_plots = True
     output_dir_plots = os.path.join(PROJECT_ROOT, "_03_train", "test_results_after_training", method_optical_flow)
+    path_original_excel = os.path.join(user_paths.dataset, "DB morpheus UniPV.xlsx")
 
     @staticmethod
     def seed_everything(seed):

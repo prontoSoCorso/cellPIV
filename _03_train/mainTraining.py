@@ -18,7 +18,7 @@ from _c_ConvTran import main as convtran_main
 if __name__ == "__main__":
     start_time = time.time()
     models_to_train = ["ROCKET", "ConvTran", "LSTMFCN"]   # possible choices: ["ROCKET","LSTMFCN","ConvTran"]
-    day = 1
+    day = 3
     logging_files_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                                        "logging_files")
 

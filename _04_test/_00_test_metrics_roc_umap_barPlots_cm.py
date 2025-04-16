@@ -19,8 +19,10 @@ sys.path.append(parent_dir)
 
 # Import config and model definitions
 from config import Config_03_train as conf
+from config import user_paths
 from _03_train._b_LSTMFCN import LSTMFCN
 from _03_train._c_ConvTranUtils import CustomDataset
+import _04_test._testFunctions as _testFunctions
 from _99_ConvTranModel.model import model_factory
 import _04_test._testFunctions as _testFunctions
 import _utils_._utils as utils
@@ -28,10 +30,15 @@ import _utils_._utils as utils
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"), 
-         days=[1, 3, 5, 7], models = ['ROCKET', 'LSTMFCN', 'ConvTran'], base_models_path=current_dir, base_test_csv_path=parent_dir):
+def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
+             days=[1, 3, 5, 7],
+             models = ['ROCKET', 'LSTMFCN', 'ConvTran'],
+             base_models_path=conf.output_model_base_dir):
+    
+    # Makedirs
     os.makedirs(base_path, exist_ok=True)
 
+    # Instance arrays
     roc_data = []
     metrics_data = []
     umap_results = []
@@ -41,8 +48,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         os.makedirs(output_path_per_day, exist_ok=True)
 
         # Load test data
-        test_csv = os.path.join(base_test_csv_path, f"Normalized_sum_mean_mag_{day}Days_test.csv")
-        df_test = pd.read_csv(test_csv)
+        df_test = _testFunctions.load_test_data(day)
         temporal_columns = [col for col in df_test.columns if col.startswith('value_')]
         X = df_test[temporal_columns].values
         y_true = df_test['BLASTO NY'].values

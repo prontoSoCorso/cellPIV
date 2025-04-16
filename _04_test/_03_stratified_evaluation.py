@@ -277,13 +277,13 @@ def visual_model_evaluation(csv_path, output_dir, merge_type, day, df_merged):
     plt.close()
 
 
-def stratified_evaluation(merge_types, days=1, 
-         base_path=os.path.join(current_dir, "stratified_test_results"), 
-         base_model_path=current_dir,
-         base_test_csv_path=parent_dir,
-         db_file=os.path.join(parent_dir, "DB morpheus UniPV.xlsx"),
-         model_types=["ROCKET", "LSTMFCN", "ConvTran"]
-         ):
+def stratified_evaluation(merge_types="no_merging", 
+                          days=1, 
+                          base_path=os.path.join(current_dir, "stratified_test_results", conf.method_optical_flow), 
+                          base_model_path=conf.output_model_base_dir,
+                          db_file=conf.path_original_excel,
+                          model_types=["ROCKET", "LSTMFCN", "ConvTran"]
+                          ):
     os.makedirs(base_path, exist_ok=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mp.set_start_method("spawn", force=True)  # Imposta multiprocessing con spawn
@@ -323,7 +323,7 @@ def stratified_evaluation(merge_types, days=1,
         # ---------------------------
         # Caricamento del test set da stratificare
         # ---------------------------
-        df_test = pd.read_csv(os.path.join(base_test_csv_path, f"Normalized_sum_mean_mag_{day}Days_test.csv"))
+        df_test = _testFunctions.load_test_data(day)
 
         # ---------------------------
         # Merge categories and merging test
