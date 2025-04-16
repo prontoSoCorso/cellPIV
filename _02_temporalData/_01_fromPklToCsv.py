@@ -85,7 +85,7 @@ def create_final_csv(input_temporal_csv_path, original_csv_path, output_final_cs
     merged_data = pd.merge(labels_data, temporal_data, on="dish_well", how="inner")
 
     # Seleziona solo le colonne richieste
-    meta_colums = ["patient_id", "dish_well", "BLASTO NY", "eup_aneup", "PN"]
+    meta_colums = ["patient_id", "dish_well", "BLASTO NY", "eup_aneup", "PN", "maternal age"]
     columns_to_keep_final = meta_colums + [col for col in temporal_data.columns if col.startswith("time_")]
     merged_data = merged_data[columns_to_keep_final]
 

@@ -3,12 +3,23 @@ from sklearn.model_selection import train_test_split
 
 
 # Caricamento del file CSV
-def load_data(csv_file_path, max_frames):
+def load_data(csv_file_path, initial_frames_to_cut, max_frames):
+    # Load the CSV file
     data = pd.read_csv(csv_file_path)
 
-    # Filtra il numero di giorni da considerare
-    data = data.iloc[:, :max_frames]
-    return data
+    # Identify all columns that start with "value_"
+    value_columns = [col for col in data.columns if col.startswith("value_")]
+
+    # Selects frames starting at index initial_frames_to_cut for the next max_frames columns.
+    pruned_value_columns = value_columns[initial_frames_to_cut: initial_frames_to_cut + max_frames]
+
+    # Identify the meta columns by excluding the ones starting with "value_"
+    meta_columns = [col for col in data.columns if not col.startswith("value_")]
+    
+    # Concatenate meta_columns with the pruned subset of value columns
+    pruned_data = data[meta_columns + pruned_value_columns]
+    
+    return pruned_data
 
 
 # Split dei dati in base a patient_id

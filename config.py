@@ -30,11 +30,13 @@ class user_paths:
     if sourceForPath == 0:
         #Per computer fisso nuovo
         dataset = os.path.join(PROJECT_ROOT, "datasets")
+        path_original_excel = os.path.join(dataset, "DB morpheus UniPV.xlsx")
         path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti"
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
         dataset = os.path.join(PROJECT_ROOT, "datasets")
+        path_original_excel = os.path.join(dataset, "DB morpheus UniPV.xlsx")
         path_BlastoData = "C:/Users/loren/Documents/Data/BlastoData"
 
     elif sourceForPath == 2:
@@ -59,7 +61,7 @@ class utils:
     start_frame                 = framePerHour*hours2cut
 
     # Seed everything
-    seed = 2024
+    seed = 2025
 
 
 class Config_00_preprocessing:
@@ -75,7 +77,7 @@ class Config_00_preprocessing:
     path_main_folder = dest_dir_extracted_equator
 
     # Preprocessing
-    path_original_excel     = os.path.join(user_paths.dataset, "DB morpheus UniPV.xlsx")
+    path_original_excel     = user_paths.path_original_excel
     #path_original_excel     = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
     path_addedID_csv        = os.path.join(user_paths.dataset, "DB_Morpheus_withID.csv")
     path_double_dish_excel  = os.path.join(user_paths.dataset, "pz con doppia dish.xlsx")
@@ -86,7 +88,7 @@ class Config_00_preprocessing:
 
 class Config_01_OpticalFlow:
     #method_optical_flow = "LucasKanade"
-    method_optical_flow = "Farneback"
+    method_optical_flow = "LucasKanade"
     output_path_optical_flow_images = "/home/phd2/Scrivania/CorsoData/opticalFlowExamples"
 
     # Settings
@@ -131,7 +133,7 @@ class Config_02_temporalData:
     type_files                  = f"files_all_days_{method_optical_flow}"
     dict_in                     = dict + "_" + method_optical_flow + ".pkl"
     
-    convert_pkl_to_csv          = False
+    convert_pkl_to_csv          = True
     path_pkl                    = os.path.join(type_files, dict_in)
     dictAndOptFlowType          = dict + "_" + method_optical_flow + ".csv"
 
@@ -155,24 +157,27 @@ class Config_02b_normalization:
     # Data
     temporalDataType = Config_02_temporalData.dict
     train_size = 0.7
-    embedding_type = ""
-    inf_quantile = 0.05
-    sup_quantile = 0.95
     embedding_type=""   # "umap" OR "tsne"
     save_normalization_example_single_pt=False
     mean_data_visualization=False
     specific_patient_to_analyse=0
     mean_data_visualization_stratified=False
+    path_original_excel = user_paths.path_original_excel
 
-    # Per gestire dati a N giorni
-    days_to_consider = 7  # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
+    # Per gestire dati a N giorni a partire dalla i-esima ora con limiti normalizzazione
+    days_to_consider = [1,3]        # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
+    inf_quantile = 0.05
+    sup_quantile = 0.95
+    initial_hours_to_cut = 0    # Remember that I already cut the first hour
+    initial_frames_to_cut = initial_hours_to_cut*utils.framePerHour
+    start_frame = initial_frames_to_cut+utils.start_frame
 
     # Paths file completo
     csv_file_path = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
 
     # Base path generico per i file normalizzati
     @staticmethod
-    def get_normalized_base_path(days_to_consider, method_optical_flow):
+    def get_normalized_base_path(days_to_consider, method_optical_flow=method_optical_flow):
         subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow,"subsets")
         return os.path.join(subsets_base_path, 
                             f"Normalized_{Config_02b_normalization.temporalDataType}_{days_to_consider}Days")
@@ -215,11 +220,11 @@ class Config_03_train:
     num_labels = 2
     Data_shape = (1,93) #variabile di base, verrà aggiornata in ConvTran
     days_to_consider = 3
-    method_optical_flow = "LucasKanade"
+    method_optical_flow = "Farneback"
     output_model_base_dir = os.path.join(PROJECT_ROOT, "_04_test", "best_models", method_optical_flow)
     save_plots = True
     output_dir_plots = os.path.join(PROJECT_ROOT, "_03_train", "test_results_after_training", method_optical_flow)
-    path_original_excel = os.path.join(user_paths.dataset, "DB morpheus UniPV.xlsx")
+    path_original_excel = user_paths.path_original_excel
 
     @staticmethod
     def seed_everything(seed):

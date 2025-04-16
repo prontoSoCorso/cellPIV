@@ -5,7 +5,6 @@ from umap.umap_ import UMAP
 from sklearn.preprocessing import StandardScaler
 import os
 import mplcursors
-import plotly.express as px
 import plotly.graph_objects as go
 import dash
 from dash import dcc, html, Input, Output
@@ -212,7 +211,7 @@ def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path
         # Create dropdown menus—one for each categorical feature
         dropdowns = []
         for feature in categorical_features:
-            unique_values = umap_df[feature].unique()
+            unique_values = sorted(umap_df[feature].unique())
             # Inserisci sempre un'opzione "All" per visualizzare tutti i dati
             options = [{"label": f"All {feature}", "value": "All"}] + [
                 {"label": val, "value": val} for val in unique_values
@@ -288,7 +287,6 @@ def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path
     
 
 
-
 if __name__ == "__main__":
     import sys
     # Individua la cartella 'cellPIV' come riferimento
@@ -297,12 +295,12 @@ if __name__ == "__main__":
     while os.path.basename(parent_dir) != "cellPIV":
         parent_dir = os.path.dirname(parent_dir)
     sys.path.append(parent_dir)
-    from config import Config_02_temporalData as conf
     from config import utils
 
     day = 1
     max_frames = utils.num_frames_by_days(day)
-    csv_path = "/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/Farneback/FinalDataset.csv"
+    method_optical_flow = "Farneback"
+    csv_path = f"/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/{method_optical_flow}/FinalDataset.csv"
     
     compute_UMAP_with_plotly(csv_path=csv_path, 
                              days_to_consider=day, 

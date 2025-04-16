@@ -20,18 +20,20 @@ from _04_test._03_stratified_evaluation import stratified_evaluation
 def main(do_test_all=False, 
          do_McNemar=False, 
          do_bootstrap=False, 
-         do_stratified_evaluation=False):
-    # General Variable
-    models = ['ROCKET', 'LSTMFCN', 'ConvTran']
-    base_models_path = conf.output_model_base_dir
-    base_test_csv_path = user_paths.dataset
-    path_original_excel = conf.path_original_excel
-    days_for_analysis = [1,3]   # (not for mcNemar)
-    method_optical_flow = conf.method_optical_flow
+         do_stratified_evaluation=False,
+         models = ['ROCKET', 'LSTMFCN', 'ConvTran'],
+         days_for_analysis = [1,3],
+         days_mcNemar = [1,3],
+         base_models_path = conf.output_model_base_dir,
+         base_test_csv_path = user_paths.dataset,
+         path_original_excel = conf.path_original_excel,
+         method_optical_flow = conf.method_optical_flow
+         ):
+    
 
     # Test different models for different days
     if do_test_all:
-        base_plot_path = os.path.join(current_dir, "plots_and_metrics_test",method_optical_flow)
+        base_plot_path = os.path.join(current_dir, "plots_and_metrics_test", method_optical_flow)
         test_all(
             base_path = base_plot_path,
             days=days_for_analysis,
@@ -42,7 +44,6 @@ def main(do_test_all=False,
     # McNemar test (select 2 days to compare)
     if do_McNemar:
         model_type = models
-        days_mcNemar = [1,3]
         base_output_dir = os.path.join(current_dir, "mcnemar_results", method_optical_flow)
         compare_with_McNemar(
             models_type=model_type,
@@ -79,5 +80,15 @@ def main(do_test_all=False,
 
 if __name__ == "__main__":
     start_time = time.time()
-    main(do_test_all=True, do_McNemar=True, do_bootstrap=True, do_stratified_evaluation=True)
+    main(do_test_all=True, 
+         do_McNemar=False, 
+         do_bootstrap=False, 
+         do_stratified_evaluation=True,
+         models = ['ROCKET', 'LSTMFCN', 'ConvTran'],
+         days_for_analysis = [1,3],
+         days_mcNemar = [1,3],
+         base_models_path = conf.output_model_base_dir,
+         base_test_csv_path = user_paths.dataset,
+         path_original_excel = conf.path_original_excel,
+         method_optical_flow = conf.method_optical_flow)
     print("Execution time: ", str(time.time()-start_time), "seconds")

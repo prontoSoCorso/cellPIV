@@ -1,0 +1,5 @@
+analysis_date: 2025-04-16 21:10:50
+total_patients: 836
+age_range: 23 - 46
+total_embryos: 6052
+mean_proportion: 0.44566168754002977
