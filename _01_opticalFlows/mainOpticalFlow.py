@@ -4,6 +4,7 @@ import sys
 import time
 import logging
 import numpy as np
+import cv2
 
 # Configurazione dei percorsi e dei parametri
 current_file_path = os.path.abspath(__file__)
@@ -86,7 +87,22 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
                     output_metrics_base_path=output_metrics_path,
                     save_metrics=save_metrics,
                     save_overlay_optical_flow=save_overlay_optical_flow,
-                    output_path_images_with_optical_flow=output_images_path
+                    output_path_images_with_optical_flow=output_images_path,
+
+                    pyr_scale           = conf.pyr_scale,
+                    levels              = conf.levels,
+                    winsize_Farneback   = conf.winSize_Farneback,
+                    iterations          = conf.iterations,
+                    poly_n              = conf.poly_n,
+                    poly_sigma          = conf.poly_sigma,
+                    flags               = cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+
+                    winSize_LK      = conf.winSize_LK,
+                    maxLevelPyramid = conf.maxLevelPyramid,
+                    maxCorners      = conf.maxCorners,
+                    qualityLevel    = conf.qualityLevel,
+                    minDistance     = conf.minDistance,
+                    blockSize       = conf.blockSize
                     )
                 
                 # Store metrics

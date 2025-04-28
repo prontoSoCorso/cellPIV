@@ -108,7 +108,7 @@ def compute_tSNE(csv_path, days_to_consider, max_frames, output_path_base):
 
 
 
-def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path_base):
+def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path_base, port=8050):
     """
     Computes a 2D UMAP projection of time series features and visualizes it using Plotly.
 
@@ -283,7 +283,7 @@ def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path
             return fig
         
         # Run dell'app
-        app.run_server(debug=True)
+        app.run_server(debug=True, port=port)
     
 
 
@@ -301,8 +301,11 @@ if __name__ == "__main__":
     max_frames = utils.num_frames_by_days(day)
     method_optical_flow = "Farneback"
     csv_path = f"/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/{method_optical_flow}/FinalDataset.csv"
+    port = 8050
     
     compute_UMAP_with_plotly(csv_path=csv_path, 
                              days_to_consider=day, 
                              max_frames=max_frames, 
-                             output_path_base="")
+                             output_path_base="",
+                             port=port)
+    

@@ -12,7 +12,6 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_01_OpticalFlow as conf
 from config import utils as utils
 
 def sort_files_by_slice_number(file_list):
@@ -168,7 +167,15 @@ def calculate_vorticity_field(flow):
     return vorticity_field
 
 
-def compute_optical_flowFarneback(prev_frame, current_frame):
+def compute_optical_flowFarneback(prev_frame, current_frame,
+                                  pyr_scale,
+                                  levels,
+                                  winSize,
+                                  iterations,
+                                  poly_n,
+                                  poly_sigma,
+                                  flags):
+    
     """Enhanced Farneback optical flow with hybrid GPU/CPU processing"""
     
     # Check OpenCL availability once at start
@@ -188,13 +195,13 @@ def compute_optical_flowFarneback(prev_frame, current_frame):
         # Compute flow with automatic GPU fallback
         flow = cv2.calcOpticalFlowFarneback(
             prev_umat, curr_umat, None,
-            pyr_scale=conf.pyr_scale,
-            levels=conf.levels,
-            winsize=conf.winSize,
-            iterations=conf.iterations,
-            poly_n=conf.poly_n,
-            poly_sigma=conf.poly_sigma,
-            flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN
+            pyr_scale=pyr_scale,
+            levels=levels,
+            winsize=winSize,
+            iterations=iterations,
+            poly_n=poly_n,
+            poly_sigma=poly_sigma,
+            flags=flags
             )
         
         # If using OpenCL, convert UMat to numpy array
@@ -216,13 +223,13 @@ def compute_optical_flowFarneback(prev_frame, current_frame):
         # Fallback to CPU-only processing
         flow = cv2.calcOpticalFlowFarneback(
             prev_frame, current_frame, None,
-            pyr_scale=conf.pyr_scale,
-            levels=conf.levels,
-            winsize=conf.winSize,
-            iterations=conf.iterations,
-            poly_n=conf.poly_n,
-            poly_sigma=conf.poly_sigma,
-            flags=cv2.OPTFLOW_FARNEBACK_GAUSSIAN
+            pyr_scale=pyr_scale,
+            levels=levels,
+            winsize=winSize,
+            iterations=iterations,
+            poly_n=poly_n,
+            poly_sigma=poly_sigma,
+            flags=flags
             )
         magnitude, angle = cv2.cartToPolar(flow[...,0], flow[...,1])
 
@@ -232,7 +239,14 @@ def compute_optical_flowFarneback(prev_frame, current_frame):
     return magnitude, angle_degrees, flow
 
 
-def compute_optical_flowPyrLK(prev_frame, current_frame):
+def compute_optical_flowPyrLK(prev_frame, current_frame,
+                              winSize,
+                              maxLevelPyramid,
+                              maxCorners, 
+                              qualityLevel, 
+                              minDistance, 
+                              blockSize
+                              ):
 
     # Convert frames to GPU Mats (if CUDA available)
     use_cuda = cv2.cuda.getCudaEnabledDeviceCount() > 0
@@ -248,10 +262,10 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
     # goodFeaturesToTrack() trova i punti di interesse nel prev_frame. 
     # Questi punti di interesse sono selezionati utilizzando l'algoritmo di Shi-Tomasi
     prev_pts = cv2.goodFeaturesToTrack(prev_frame, 
-                                       maxCorners=conf.maxCorners, 
-                                       qualityLevel=conf.qualityLevel, 
-                                       minDistance=conf.minDistance, 
-                                       blockSize=conf.blockSize
+                                       maxCorners=maxCorners, 
+                                       qualityLevel=qualityLevel, 
+                                       minDistance=minDistance, 
+                                       blockSize=blockSize,
                                        )
     
     """
@@ -276,10 +290,10 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
     if use_cuda:
         # CUDA LK implementation
         lk = cv2.cuda.SparsePyrLKOpticalFlow_create(
-            winSize=(conf.winSize, conf.winSize),
-            maxLevel=conf.maxLevelPyramid,
-            numIters=conf.iterations
-        )
+            winSize=(winSize, winSize),
+            maxLevel=maxLevelPyramid,
+            numIters=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03)
+            )
         
         # Upload points to GPU
         gpu_prev_pts = cv2.cuda_GpuMat(prev_pts.astype(np.float32))
@@ -288,7 +302,7 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
         gpu_next_pts, status = lk.calc(
             gpu_prev, gpu_curr,
             gpu_prev_pts, None
-        )
+            )
         
         # Download results
         next_pts = gpu_next_pts.download()
@@ -296,8 +310,8 @@ def compute_optical_flowPyrLK(prev_frame, current_frame):
     else:
         # OpenCL acceleration
         lk_params = dict(
-            winSize=(conf.winSize, conf.winSize),
-            maxLevel=conf.maxLevelPyramid,
+            winSize=(winSize, winSize),
+            maxLevel=maxLevelPyramid,
             criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03)
             )
         

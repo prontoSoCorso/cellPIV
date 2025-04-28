@@ -32,7 +32,22 @@ def process_frames(folder_path,
                    save_metrics=False,
                    output_metrics_base_path="", 
                    save_overlay_optical_flow=False,
-                   output_path_images_with_optical_flow=""
+                   output_path_images_with_optical_flow="",
+
+                   pyr_scale         = 0.5,
+                   levels            = 3,
+                   winsize_Farneback = 11,
+                   iterations        = 5,
+                   poly_n            = 5,
+                   poly_sigma        = 1.2,
+                   flags             = cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+
+                   winSize_LK      = 9,
+                   maxLevelPyramid = 3,
+                   maxCorners      = 400,
+                   qualityLevel    = 0.05,
+                   minDistance     = 5,
+                   blockSize       = 5
                    ):
     """Main processing function with enhanced GPU support and error handling"""
     target_size = (img_size, img_size)  # Imposto la dimensione delle immagini
@@ -78,9 +93,24 @@ def process_frames(folder_path,
 
             # Scelgo il metodo di Optical Flow
             if method_optical_flow == "LucasKanade":
-                magnitude, angle_degrees, flow, _ = compute_optical_flowPyrLK(prev_frame, current_frame)
+                magnitude, angle_degrees, flow, _ = compute_optical_flowPyrLK(prev_frame, current_frame,
+                                                                              winSize         = winSize_LK,
+                                                                              maxLevelPyramid = maxLevelPyramid,
+                                                                              maxCorners      = maxCorners,
+                                                                              qualityLevel    = qualityLevel,
+                                                                              minDistance     = minDistance,
+                                                                              blockSize       = blockSize
+                                                                              )
             elif method_optical_flow == "Farneback":
-                magnitude, angle_degrees, flow = compute_optical_flowFarneback(prev_frame, current_frame)
+                magnitude, angle_degrees, flow = compute_optical_flowFarneback(prev_frame, current_frame,
+                                                                               pyr_scale=pyr_scale,
+                                                                               levels=levels,
+                                                                               winSize=winsize_Farneback,
+                                                                               iterations=iterations,
+                                                                               poly_n=poly_n,
+                                                                               poly_sigma=poly_sigma,
+                                                                               flags=flags
+                                                                               )
             else:
                 raise InvalidOpticalFlowMethodError(f"Il metodo selezionato, {method_optical_flow}, non è implementato")
 

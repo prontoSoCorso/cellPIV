@@ -61,7 +61,7 @@ class utils:
     start_frame                 = framePerHour*hours2cut
 
     # Seed everything
-    seed = 2025
+    seed = 2024
 
 
 class Config_00_preprocessing:
@@ -89,7 +89,6 @@ class Config_00_preprocessing:
 class Config_01_OpticalFlow:
     #method_optical_flow = "LucasKanade"
     method_optical_flow = "LucasKanade"
-    output_path_optical_flow_images = "/home/phd2/Scrivania/CorsoData/opticalFlowExamples"
 
     # Settings
     save_metrics = False
@@ -103,26 +102,29 @@ class Config_01_OpticalFlow:
                                                         # (prima delle 4 ore no pronuclei e pochi movimenti cellulari)
     num_forward_frame           = 4     # Numero di frame per sum_mean_mag
 
-    if method_optical_flow == "LucasKanade":
-        # LUCAS KANADE
-        # LK parameters
-        winSize         = 11
-        maxLevelPyramid = 3
-        maxCorners      = 400
-        qualityLevel    = 0.05
-        minDistance     = 5
-        blockSize       = 5
+    # LUCAS KANADE
+    # LK parameters
+    winSize_LK      = 13
+    maxLevelPyramid = 4
+    maxCorners      = 300
+    qualityLevel    = 0.05
+    minDistance     = 5
+    blockSize       = 7
 
-    elif method_optical_flow == "Farneback":
-        # FARNEBACK
-        # Farneback parameters
-        pyr_scale = 0.5
-        levels = 3
-        winSize = 11
-        iterations = 5
-        poly_n = 7
-        poly_sigma = 1.2
+    # FARNEBACK
+    # Farneback parameters
+    pyr_scale = 0.5
+    levels = 4
+    winSize_Farneback = 13
+    iterations = 5
+    poly_n = 5
+    poly_sigma = 1.1
 
+    base_out_example = f"/home/phd2/Scrivania/CorsoData/opticalFlowExamples{method_optical_flow}" 
+    if method_optical_flow == "Farneback":
+        output_path_optical_flow_images = f"{base_out_example}_{str(winSize_Farneback)}_{str(levels)}_{str(pyr_scale)}_{str(iterations)}_{str(poly_n)}_{str(poly_sigma)}"
+    elif method_optical_flow == "LucasKanade":
+                output_path_optical_flow_images = f"{base_out_example}_{str(winSize_LK)}_{str(maxLevelPyramid)}_{str(maxCorners)}"
     else:
         raise SystemExit("\n===== Scegliere un metodo di flusso ottico valido nel config =====\n")
 
@@ -165,10 +167,10 @@ class Config_02b_normalization:
     path_original_excel = user_paths.path_original_excel
 
     # Per gestire dati a N giorni a partire dalla i-esima ora con limiti normalizzazione
-    days_to_consider = [1,3]        # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
+    days_to_consider = [1,3,5,7]        # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
     inf_quantile = 0.05
     sup_quantile = 0.95
-    initial_hours_to_cut = 0    # Remember that I already cut the first hour
+    initial_hours_to_cut = 3    # Remember that I already cut the first hour
     initial_frames_to_cut = initial_hours_to_cut*utils.framePerHour
     start_frame = initial_frames_to_cut+utils.start_frame
 
@@ -301,5 +303,32 @@ class Config_03_train:
     # ConvTran - System
     gpu             = -1             # GPU index, -1 for CPU
     console         = False     # Optimize printout for console output; otherwise for file
+
+
+
+
+class Config_03_train_with_optimization(Config_03_train):
+    # Enable/disable test evaluation
+    run_test_evaluation = True
+    
+    # Optuna optimization control
+    optimize_with_optuna = True
+    optuna_n_trials = 50
+    
+    # ROCKET search space
+    rocket_kernels_options = [50,100,200,300,500,1000,2500,5000,10000]
+    rocket_classifier_options = ["RF", "XGB"]
+    
+    # LSTM-FCN search space (to be added when we modify that script)
+    # ConvTran search space (to be added when we modify that script)
+
+
+
+
+
+
+
+
+
 
 

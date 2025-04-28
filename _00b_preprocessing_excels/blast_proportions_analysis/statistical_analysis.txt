@@ -6,8 +6,8 @@ Model:                                          GLM   Df Residuals:             
 Model Family:                              Binomial   Df Model:                            1
 Link Function:                                Logit   Scale:                          1.0000
 Method:                                        IRLS   Log-Likelihood:                -1253.9
-Date:                              mer, 16 apr 2025   Deviance:                       446.29
-Time:                                      21:10:50   Pearson chi2:                     416.
+Date:                              gio, 17 apr 2025   Deviance:                       446.29
+Time:                                      16:54:18   Pearson chi2:                     416.
 No. Iterations:                                   4   Pseudo R-squ. (CS):            0.01786
 Covariance Type:                          nonrobust                                         
 ==============================================================================

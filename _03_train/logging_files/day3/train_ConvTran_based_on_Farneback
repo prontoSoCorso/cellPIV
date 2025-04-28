@@ -750,3 +750,389 @@ Final model saved to: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_model
 2025-04-16 20:17:21 - INFO - Kappa: 0.4555
 2025-04-16 20:17:21 - INFO - Brier: 0.1629
 2025-04-16 20:17:21 - INFO - F1: 0.6938
+2025-04-23 11:15:01 - INFO - 
+============================== Starting ConvTran Training ==============================
+2025-04-23 11:15:01 - INFO - Model architecture:
+ConvTran(
+  (embed_layer): Sequential(
+    (0): Conv2d(1, 512, kernel_size=(1, 8), stride=(1, 1), padding=same)
+    (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): GELU(approximate='none')
+    (3): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), padding=valid)
+    (4): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (5): GELU(approximate='none')
+  )
+  (Fix_Position): tAPE(
+    (dropout): Dropout(p=0.2, inplace=False)
+  )
+  (attention_layer): Attention_Rel_Scl(
+    (key): Linear(in_features=128, out_features=128, bias=False)
+    (value): Linear(in_features=128, out_features=128, bias=False)
+    (query): Linear(in_features=128, out_features=128, bias=False)
+    (dropout): Dropout(p=0.2, inplace=False)
+    (to_out): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+  )
+  (LayerNorm): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+  (LayerNorm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+  (FeedForward): Sequential(
+    (0): Linear(in_features=128, out_features=256, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.2, inplace=False)
+    (3): Linear(in_features=256, out_features=128, bias=True)
+    (4): Dropout(p=0.2, inplace=False)
+  )
+  (gap): AdaptiveAvgPool1d(output_size=1)
+  (flatten): Flatten(start_dim=1, end_dim=-1)
+  (out): Linear(in_features=128, out_features=2, bias=True)
+)
+2025-04-23 11:15:01 - INFO - Total parameters: 192,250
+2025-04-23 11:15:01 - INFO - 
+Starting training process...
+2025-04-23 11:15:02 - INFO - Epoch 1/100
+2025-04-23 11:15:02 - INFO - Validation Loss: 0.6096 | Accuracy: 0.6273
+2025-04-23 11:15:02 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:02 - INFO - New best model saved
+2025-04-23 11:15:03 - INFO - Epoch 2/100
+2025-04-23 11:15:03 - INFO - Validation Loss: 0.5743 | Accuracy: 0.6787
+2025-04-23 11:15:03 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:03 - INFO - New best model saved
+2025-04-23 11:15:04 - INFO - Epoch 3/100
+2025-04-23 11:15:04 - INFO - Validation Loss: 0.5138 | Accuracy: 0.7268
+2025-04-23 11:15:04 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:04 - INFO - New best model saved
+2025-04-23 11:15:05 - INFO - Epoch 4/100
+2025-04-23 11:15:05 - INFO - Validation Loss: 0.5992 | Accuracy: 0.6426
+2025-04-23 11:15:05 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:05 - INFO - Epoch 5/100
+2025-04-23 11:15:05 - INFO - Validation Loss: 0.5093 | Accuracy: 0.7333
+2025-04-23 11:15:05 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:05 - INFO - New best model saved
+2025-04-23 11:15:06 - INFO - Epoch 6/100
+2025-04-23 11:15:06 - INFO - Validation Loss: 0.5635 | Accuracy: 0.6809
+2025-04-23 11:15:06 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:07 - INFO - Epoch 7/100
+2025-04-23 11:15:07 - INFO - Validation Loss: 0.4960 | Accuracy: 0.7290
+2025-04-23 11:15:07 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:07 - INFO - New best model saved
+2025-04-23 11:15:08 - INFO - Epoch 8/100
+2025-04-23 11:15:08 - INFO - Validation Loss: 0.5561 | Accuracy: 0.6831
+2025-04-23 11:15:08 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:08 - INFO - Epoch 9/100
+2025-04-23 11:15:08 - INFO - Validation Loss: 0.5010 | Accuracy: 0.7333
+2025-04-23 11:15:08 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:09 - INFO - Epoch 10/100
+2025-04-23 11:15:09 - INFO - Validation Loss: 0.5118 | Accuracy: 0.7246
+2025-04-23 11:15:09 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:10 - INFO - Epoch 11/100
+2025-04-23 11:15:10 - INFO - Validation Loss: 0.4991 | Accuracy: 0.7464
+2025-04-23 11:15:10 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:11 - INFO - Epoch 12/100
+2025-04-23 11:15:11 - INFO - Validation Loss: 0.4876 | Accuracy: 0.7355
+2025-04-23 11:15:11 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:11 - INFO - New best model saved
+2025-04-23 11:15:12 - INFO - Epoch 13/100
+2025-04-23 11:15:12 - INFO - Validation Loss: 0.4999 | Accuracy: 0.7104
+2025-04-23 11:15:12 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:12 - INFO - Epoch 14/100
+2025-04-23 11:15:12 - INFO - Validation Loss: 0.5707 | Accuracy: 0.6645
+2025-04-23 11:15:12 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:13 - INFO - Epoch 15/100
+2025-04-23 11:15:13 - INFO - Validation Loss: 0.4978 | Accuracy: 0.7311
+2025-04-23 11:15:13 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:14 - INFO - Epoch 16/100
+2025-04-23 11:15:14 - INFO - Validation Loss: 0.5112 | Accuracy: 0.7388
+2025-04-23 11:15:14 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:15 - INFO - Epoch 17/100
+2025-04-23 11:15:15 - INFO - Validation Loss: 0.4922 | Accuracy: 0.7377
+2025-04-23 11:15:15 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:16 - INFO - Epoch 18/100
+2025-04-23 11:15:16 - INFO - Validation Loss: 0.4870 | Accuracy: 0.7257
+2025-04-23 11:15:16 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:16 - INFO - Epoch 19/100
+2025-04-23 11:15:16 - INFO - Validation Loss: 0.5249 | Accuracy: 0.7213
+2025-04-23 11:15:16 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:17 - INFO - Epoch 20/100
+2025-04-23 11:15:17 - INFO - Validation Loss: 0.5280 | Accuracy: 0.7257
+2025-04-23 11:15:17 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:18 - INFO - Epoch 21/100
+2025-04-23 11:15:18 - INFO - Validation Loss: 0.6161 | Accuracy: 0.6667
+2025-04-23 11:15:18 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:19 - INFO - Epoch 22/100
+2025-04-23 11:15:19 - INFO - Validation Loss: 0.5308 | Accuracy: 0.7060
+2025-04-23 11:15:19 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:20 - INFO - Epoch 23/100
+2025-04-23 11:15:20 - INFO - Validation Loss: 0.5203 | Accuracy: 0.7377
+2025-04-23 11:15:20 - INFO - Learning Rate: 0.001000
+2025-04-23 11:15:20 - INFO - Epoch 24/100
+2025-04-23 11:15:20 - INFO - Validation Loss: 0.5428 | Accuracy: 0.7148
+2025-04-23 11:15:20 - INFO - Learning Rate: 0.000500
+2025-04-23 11:15:21 - INFO - Epoch 25/100
+2025-04-23 11:15:21 - INFO - Validation Loss: 0.5785 | Accuracy: 0.7060
+2025-04-23 11:15:21 - INFO - Learning Rate: 0.000500
+2025-04-23 11:15:22 - INFO - Epoch 26/100
+2025-04-23 11:15:22 - INFO - Validation Loss: 0.6466 | Accuracy: 0.6809
+2025-04-23 11:15:22 - INFO - Learning Rate: 0.000500
+2025-04-23 11:15:23 - INFO - Epoch 27/100
+2025-04-23 11:15:23 - INFO - Validation Loss: 0.5879 | Accuracy: 0.7148
+2025-04-23 11:15:23 - INFO - Learning Rate: 0.000500
+2025-04-23 11:15:23 - INFO - Epoch 28/100
+2025-04-23 11:15:23 - INFO - Validation Loss: 0.6111 | Accuracy: 0.7180
+2025-04-23 11:15:23 - INFO - Learning Rate: 0.000500
+2025-04-23 11:15:24 - INFO - Epoch 29/100
+2025-04-23 11:15:24 - INFO - Validation Loss: 0.6106 | Accuracy: 0.7148
+2025-04-23 11:15:24 - INFO - Learning Rate: 0.000500
+2025-04-23 11:15:25 - INFO - Epoch 30/100
+2025-04-23 11:15:25 - INFO - Validation Loss: 0.6225 | Accuracy: 0.7311
+2025-04-23 11:15:25 - INFO - Learning Rate: 0.000250
+2025-04-23 11:15:26 - INFO - Epoch 31/100
+2025-04-23 11:15:26 - INFO - Validation Loss: 0.6108 | Accuracy: 0.7115
+2025-04-23 11:15:26 - INFO - Learning Rate: 0.000250
+2025-04-23 11:15:27 - INFO - Epoch 32/100
+2025-04-23 11:15:27 - INFO - Validation Loss: 0.6589 | Accuracy: 0.7071
+2025-04-23 11:15:27 - INFO - Learning Rate: 0.000250
+2025-04-23 11:15:27 - INFO - Epoch 33/100
+2025-04-23 11:15:27 - INFO - Validation Loss: 0.6718 | Accuracy: 0.7082
+2025-04-23 11:15:27 - INFO - Learning Rate: 0.000250
+2025-04-23 11:15:28 - INFO - Epoch 34/100
+2025-04-23 11:15:28 - INFO - Validation Loss: 0.7205 | Accuracy: 0.6973
+2025-04-23 11:15:28 - INFO - Learning Rate: 0.000250
+2025-04-23 11:15:29 - INFO - Epoch 35/100
+2025-04-23 11:15:29 - INFO - Validation Loss: 0.6780 | Accuracy: 0.7126
+2025-04-23 11:15:29 - INFO - Learning Rate: 0.000250
+2025-04-23 11:15:30 - INFO - Epoch 36/100
+2025-04-23 11:15:30 - INFO - Validation Loss: 0.7298 | Accuracy: 0.6973
+2025-04-23 11:15:30 - INFO - Learning Rate: 0.000125
+2025-04-23 11:15:31 - INFO - Epoch 37/100
+2025-04-23 11:15:31 - INFO - Validation Loss: 0.7956 | Accuracy: 0.6885
+2025-04-23 11:15:31 - INFO - Learning Rate: 0.000125
+2025-04-23 11:15:31 - INFO - Epoch 38/100
+2025-04-23 11:15:31 - INFO - Validation Loss: 0.7577 | Accuracy: 0.7049
+2025-04-23 11:15:31 - INFO - Learning Rate: 0.000125
+2025-04-23 11:15:32 - INFO - Epoch 39/100
+2025-04-23 11:15:32 - INFO - Validation Loss: 0.8316 | Accuracy: 0.6896
+2025-04-23 11:15:32 - INFO - Learning Rate: 0.000125
+2025-04-23 11:15:33 - INFO - Epoch 40/100
+2025-04-23 11:15:33 - INFO - Validation Loss: 0.8430 | Accuracy: 0.6885
+2025-04-23 11:15:33 - INFO - Learning Rate: 0.000125
+2025-04-23 11:15:34 - INFO - Epoch 41/100
+2025-04-23 11:15:34 - INFO - Validation Loss: 0.8179 | Accuracy: 0.6929
+2025-04-23 11:15:34 - INFO - Learning Rate: 0.000125
+2025-04-23 11:15:35 - INFO - Epoch 42/100
+2025-04-23 11:15:35 - INFO - Validation Loss: 0.7830 | Accuracy: 0.7137
+2025-04-23 11:15:35 - INFO - Learning Rate: 0.000063
+2025-04-23 11:15:35 - INFO - Epoch 43/100
+2025-04-23 11:15:35 - INFO - Validation Loss: 0.8111 | Accuracy: 0.6951
+2025-04-23 11:15:35 - INFO - Learning Rate: 0.000063
+2025-04-23 11:15:35 - INFO - Early stopping triggered after 43 epochs
+2025-04-23 11:15:35 - INFO - 
+Optimal threshold determined: 0.3900
+2025-04-23 11:15:36 - INFO - 
+Final model saved to: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_convtran_model_3Days.pkl
+2025-04-23 11:15:36 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-04-23 11:15:36 - INFO - Accuracy: 0.7199
+2025-04-23 11:15:36 - INFO - Balanced_accuracy: 0.7427
+2025-04-23 11:15:36 - INFO - Roc_auc: 0.8228
+2025-04-23 11:15:36 - INFO - Precision: 0.5778
+2025-04-23 11:15:36 - INFO - Recall: 0.8242
+2025-04-23 11:15:36 - INFO - Mcc: 0.4662
+2025-04-23 11:15:36 - INFO - Kappa: 0.4440
+2025-04-23 11:15:36 - INFO - Brier: 0.1656
+2025-04-23 11:15:36 - INFO - F1: 0.6793
+2025-04-23 16:02:04 - INFO - 
+============================== Starting ConvTran Training ==============================
+2025-04-23 16:02:04 - INFO - Model architecture:
+ConvTran(
+  (embed_layer): Sequential(
+    (0): Conv2d(1, 512, kernel_size=(1, 8), stride=(1, 1), padding=same)
+    (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): GELU(approximate='none')
+    (3): Conv2d(512, 128, kernel_size=(1, 1), stride=(1, 1), padding=valid)
+    (4): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (5): GELU(approximate='none')
+  )
+  (Fix_Position): tAPE(
+    (dropout): Dropout(p=0.2, inplace=False)
+  )
+  (attention_layer): Attention_Rel_Scl(
+    (key): Linear(in_features=128, out_features=128, bias=False)
+    (value): Linear(in_features=128, out_features=128, bias=False)
+    (query): Linear(in_features=128, out_features=128, bias=False)
+    (dropout): Dropout(p=0.2, inplace=False)
+    (to_out): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+  )
+  (LayerNorm): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+  (LayerNorm2): LayerNorm((128,), eps=1e-05, elementwise_affine=True)
+  (FeedForward): Sequential(
+    (0): Linear(in_features=128, out_features=256, bias=True)
+    (1): ReLU()
+    (2): Dropout(p=0.2, inplace=False)
+    (3): Linear(in_features=256, out_features=128, bias=True)
+    (4): Dropout(p=0.2, inplace=False)
+  )
+  (gap): AdaptiveAvgPool1d(output_size=1)
+  (flatten): Flatten(start_dim=1, end_dim=-1)
+  (out): Linear(in_features=128, out_features=2, bias=True)
+)
+2025-04-23 16:02:04 - INFO - Total parameters: 192,250
+2025-04-23 16:02:04 - INFO - 
+Starting training process...
+2025-04-23 16:02:05 - INFO - Epoch 1/100
+2025-04-23 16:02:05 - INFO - Validation Loss: 0.5897 | Accuracy: 0.6503
+2025-04-23 16:02:05 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:05 - INFO - New best model saved
+2025-04-23 16:02:05 - INFO - Epoch 2/100
+2025-04-23 16:02:05 - INFO - Validation Loss: 0.5947 | Accuracy: 0.6885
+2025-04-23 16:02:05 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:06 - INFO - Epoch 3/100
+2025-04-23 16:02:06 - INFO - Validation Loss: 0.4936 | Accuracy: 0.7454
+2025-04-23 16:02:06 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:06 - INFO - New best model saved
+2025-04-23 16:02:07 - INFO - Epoch 4/100
+2025-04-23 16:02:07 - INFO - Validation Loss: 0.4886 | Accuracy: 0.7290
+2025-04-23 16:02:07 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:07 - INFO - New best model saved
+2025-04-23 16:02:08 - INFO - Epoch 5/100
+2025-04-23 16:02:08 - INFO - Validation Loss: 0.5017 | Accuracy: 0.7410
+2025-04-23 16:02:08 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:09 - INFO - Epoch 6/100
+2025-04-23 16:02:09 - INFO - Validation Loss: 0.5671 | Accuracy: 0.6710
+2025-04-23 16:02:09 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:09 - INFO - Epoch 7/100
+2025-04-23 16:02:09 - INFO - Validation Loss: 0.4774 | Accuracy: 0.7475
+2025-04-23 16:02:09 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:09 - INFO - New best model saved
+2025-04-23 16:02:10 - INFO - Epoch 8/100
+2025-04-23 16:02:10 - INFO - Validation Loss: 0.5360 | Accuracy: 0.6973
+2025-04-23 16:02:10 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:11 - INFO - Epoch 9/100
+2025-04-23 16:02:11 - INFO - Validation Loss: 0.4799 | Accuracy: 0.7454
+2025-04-23 16:02:11 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:12 - INFO - Epoch 10/100
+2025-04-23 16:02:12 - INFO - Validation Loss: 0.4929 | Accuracy: 0.7377
+2025-04-23 16:02:12 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:13 - INFO - Epoch 11/100
+2025-04-23 16:02:13 - INFO - Validation Loss: 0.4817 | Accuracy: 0.7563
+2025-04-23 16:02:13 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:13 - INFO - Epoch 12/100
+2025-04-23 16:02:13 - INFO - Validation Loss: 0.4798 | Accuracy: 0.7432
+2025-04-23 16:02:13 - INFO - Learning Rate: 0.001000
+2025-04-23 16:02:14 - INFO - Epoch 13/100
+2025-04-23 16:02:14 - INFO - Validation Loss: 0.4926 | Accuracy: 0.7290
+2025-04-23 16:02:14 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:15 - INFO - Epoch 14/100
+2025-04-23 16:02:15 - INFO - Validation Loss: 0.4824 | Accuracy: 0.7475
+2025-04-23 16:02:15 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:16 - INFO - Epoch 15/100
+2025-04-23 16:02:16 - INFO - Validation Loss: 0.4745 | Accuracy: 0.7530
+2025-04-23 16:02:16 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:16 - INFO - New best model saved
+2025-04-23 16:02:16 - INFO - Epoch 16/100
+2025-04-23 16:02:16 - INFO - Validation Loss: 0.4815 | Accuracy: 0.7574
+2025-04-23 16:02:16 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:17 - INFO - Epoch 17/100
+2025-04-23 16:02:17 - INFO - Validation Loss: 0.4851 | Accuracy: 0.7443
+2025-04-23 16:02:17 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:18 - INFO - Epoch 18/100
+2025-04-23 16:02:18 - INFO - Validation Loss: 0.5017 | Accuracy: 0.7377
+2025-04-23 16:02:18 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:19 - INFO - Epoch 19/100
+2025-04-23 16:02:19 - INFO - Validation Loss: 0.5096 | Accuracy: 0.7301
+2025-04-23 16:02:19 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:20 - INFO - Epoch 20/100
+2025-04-23 16:02:20 - INFO - Validation Loss: 0.5016 | Accuracy: 0.7432
+2025-04-23 16:02:20 - INFO - Learning Rate: 0.000500
+2025-04-23 16:02:20 - INFO - Epoch 21/100
+2025-04-23 16:02:20 - INFO - Validation Loss: 0.5130 | Accuracy: 0.7213
+2025-04-23 16:02:20 - INFO - Learning Rate: 0.000250
+2025-04-23 16:02:21 - INFO - Epoch 22/100
+2025-04-23 16:02:21 - INFO - Validation Loss: 0.4907 | Accuracy: 0.7443
+2025-04-23 16:02:21 - INFO - Learning Rate: 0.000250
+2025-04-23 16:02:22 - INFO - Epoch 23/100
+2025-04-23 16:02:22 - INFO - Validation Loss: 0.5004 | Accuracy: 0.7475
+2025-04-23 16:02:22 - INFO - Learning Rate: 0.000250
+2025-04-23 16:02:23 - INFO - Epoch 24/100
+2025-04-23 16:02:23 - INFO - Validation Loss: 0.5101 | Accuracy: 0.7355
+2025-04-23 16:02:23 - INFO - Learning Rate: 0.000250
+2025-04-23 16:02:24 - INFO - Epoch 25/100
+2025-04-23 16:02:24 - INFO - Validation Loss: 0.5400 | Accuracy: 0.7202
+2025-04-23 16:02:24 - INFO - Learning Rate: 0.000250
+2025-04-23 16:02:24 - INFO - Epoch 26/100
+2025-04-23 16:02:24 - INFO - Validation Loss: 0.5358 | Accuracy: 0.7158
+2025-04-23 16:02:24 - INFO - Learning Rate: 0.000250
+2025-04-23 16:02:25 - INFO - Epoch 27/100
+2025-04-23 16:02:25 - INFO - Validation Loss: 0.5417 | Accuracy: 0.7333
+2025-04-23 16:02:25 - INFO - Learning Rate: 0.000125
+2025-04-23 16:02:26 - INFO - Epoch 28/100
+2025-04-23 16:02:26 - INFO - Validation Loss: 0.5426 | Accuracy: 0.7257
+2025-04-23 16:02:26 - INFO - Learning Rate: 0.000125
+2025-04-23 16:02:27 - INFO - Epoch 29/100
+2025-04-23 16:02:27 - INFO - Validation Loss: 0.5292 | Accuracy: 0.7290
+2025-04-23 16:02:27 - INFO - Learning Rate: 0.000125
+2025-04-23 16:02:28 - INFO - Epoch 30/100
+2025-04-23 16:02:28 - INFO - Validation Loss: 0.5357 | Accuracy: 0.7311
+2025-04-23 16:02:28 - INFO - Learning Rate: 0.000125
+2025-04-23 16:02:28 - INFO - Epoch 31/100
+2025-04-23 16:02:28 - INFO - Validation Loss: 0.5387 | Accuracy: 0.7377
+2025-04-23 16:02:28 - INFO - Learning Rate: 0.000125
+2025-04-23 16:02:29 - INFO - Epoch 32/100
+2025-04-23 16:02:29 - INFO - Validation Loss: 0.5454 | Accuracy: 0.7399
+2025-04-23 16:02:29 - INFO - Learning Rate: 0.000125
+2025-04-23 16:02:30 - INFO - Epoch 33/100
+2025-04-23 16:02:30 - INFO - Validation Loss: 0.5532 | Accuracy: 0.7257
+2025-04-23 16:02:30 - INFO - Learning Rate: 0.000063
+2025-04-23 16:02:31 - INFO - Epoch 34/100
+2025-04-23 16:02:31 - INFO - Validation Loss: 0.5489 | Accuracy: 0.7355
+2025-04-23 16:02:31 - INFO - Learning Rate: 0.000063
+2025-04-23 16:02:31 - INFO - Epoch 35/100
+2025-04-23 16:02:31 - INFO - Validation Loss: 0.5550 | Accuracy: 0.7301
+2025-04-23 16:02:31 - INFO - Learning Rate: 0.000063
+2025-04-23 16:02:32 - INFO - Epoch 36/100
+2025-04-23 16:02:32 - INFO - Validation Loss: 0.5673 | Accuracy: 0.7290
+2025-04-23 16:02:32 - INFO - Learning Rate: 0.000063
+2025-04-23 16:02:33 - INFO - Epoch 37/100
+2025-04-23 16:02:33 - INFO - Validation Loss: 0.6029 | Accuracy: 0.6984
+2025-04-23 16:02:33 - INFO - Learning Rate: 0.000063
+2025-04-23 16:02:34 - INFO - Epoch 38/100
+2025-04-23 16:02:34 - INFO - Validation Loss: 0.5721 | Accuracy: 0.7246
+2025-04-23 16:02:34 - INFO - Learning Rate: 0.000063
+2025-04-23 16:02:35 - INFO - Epoch 39/100
+2025-04-23 16:02:35 - INFO - Validation Loss: 0.5761 | Accuracy: 0.7202
+2025-04-23 16:02:35 - INFO - Learning Rate: 0.000031
+2025-04-23 16:02:35 - INFO - Epoch 40/100
+2025-04-23 16:02:35 - INFO - Validation Loss: 0.5947 | Accuracy: 0.7115
+2025-04-23 16:02:35 - INFO - Learning Rate: 0.000031
+2025-04-23 16:02:36 - INFO - Epoch 41/100
+2025-04-23 16:02:36 - INFO - Validation Loss: 0.5942 | Accuracy: 0.7115
+2025-04-23 16:02:36 - INFO - Learning Rate: 0.000031
+2025-04-23 16:02:37 - INFO - Epoch 42/100
+2025-04-23 16:02:37 - INFO - Validation Loss: 0.5706 | Accuracy: 0.7268
+2025-04-23 16:02:37 - INFO - Learning Rate: 0.000031
+2025-04-23 16:02:38 - INFO - Epoch 43/100
+2025-04-23 16:02:38 - INFO - Validation Loss: 0.5746 | Accuracy: 0.7344
+2025-04-23 16:02:38 - INFO - Learning Rate: 0.000031
+2025-04-23 16:02:39 - INFO - Epoch 44/100
+2025-04-23 16:02:39 - INFO - Validation Loss: 0.5926 | Accuracy: 0.7158
+2025-04-23 16:02:39 - INFO - Learning Rate: 0.000031
+2025-04-23 16:02:39 - INFO - Epoch 45/100
+2025-04-23 16:02:39 - INFO - Validation Loss: 0.5854 | Accuracy: 0.7180
+2025-04-23 16:02:39 - INFO - Learning Rate: 0.000016
+2025-04-23 16:02:40 - INFO - Epoch 46/100
+2025-04-23 16:02:40 - INFO - Validation Loss: 0.5796 | Accuracy: 0.7301
+2025-04-23 16:02:40 - INFO - Learning Rate: 0.000016
+2025-04-23 16:02:40 - INFO - Early stopping triggered after 46 epochs
+2025-04-23 16:02:40 - INFO - 
+Optimal threshold determined: 0.4500
+2025-04-23 16:02:40 - INFO - 
+Final model saved to: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_convtran_model_3Days.pkl
+2025-04-23 16:02:40 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-04-23 16:02:40 - INFO - Accuracy: 0.7251
+2025-04-23 16:02:40 - INFO - Balanced_accuracy: 0.7562
+2025-04-23 16:02:40 - INFO - Roc_auc: 0.8368
+2025-04-23 16:02:40 - INFO - Precision: 0.5788
+2025-04-23 16:02:40 - INFO - Recall: 0.8674
+2025-04-23 16:02:40 - INFO - Mcc: 0.4935
+2025-04-23 16:02:40 - INFO - Kappa: 0.4621
+2025-04-23 16:02:40 - INFO - Brier: 0.1682
+2025-04-23 16:02:40 - INFO - F1: 0.6943

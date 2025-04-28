@@ -2104,3 +2104,934 @@ Best Threshold Found: 0.4400
 2025-04-16 20:16:23 - INFO - Kappa: 0.3309
 2025-04-16 20:16:23 - INFO - Brier: 0.2002
 2025-04-16 20:16:23 - INFO - F1: 0.5821
+2025-04-23 11:13:50 - INFO - 
+Epoch 1/300
+2025-04-23 11:13:50 - INFO - Val Brier Score: 0.2388 | Val Balanced_accuracy: 0.5205 | Learning Rate: 0.000100
+2025-04-23 11:13:50 - INFO - Val Balanced_accuracy: 0.5205
+2025-04-23 11:13:50 - INFO - 
+2025-04-23 11:13:50 - INFO - Model saved with validation Balanced_accuracy: 0.5205
+2025-04-23 11:13:50 - INFO - 
+Epoch 2/300
+2025-04-23 11:13:50 - INFO - Val Brier Score: 0.2303 | Val Balanced_accuracy: 0.5695 | Learning Rate: 0.000100
+2025-04-23 11:13:50 - INFO - Val Balanced_accuracy: 0.5695
+2025-04-23 11:13:50 - INFO - 
+2025-04-23 11:13:50 - INFO - Model saved with validation Balanced_accuracy: 0.5695
+2025-04-23 11:13:51 - INFO - 
+Epoch 3/300
+2025-04-23 11:13:51 - INFO - Val Brier Score: 0.2314 | Val Balanced_accuracy: 0.5731 | Learning Rate: 0.000100
+2025-04-23 11:13:51 - INFO - Val Balanced_accuracy: 0.5731
+2025-04-23 11:13:51 - INFO - 
+2025-04-23 11:13:51 - INFO - 
+Epoch 4/300
+2025-04-23 11:13:51 - INFO - Val Brier Score: 0.2289 | Val Balanced_accuracy: 0.5782 | Learning Rate: 0.000100
+2025-04-23 11:13:51 - INFO - Val Balanced_accuracy: 0.5782
+2025-04-23 11:13:51 - INFO - 
+2025-04-23 11:13:51 - INFO - Model saved with validation Balanced_accuracy: 0.5782
+2025-04-23 11:13:52 - INFO - 
+Epoch 5/300
+2025-04-23 11:13:52 - INFO - Val Brier Score: 0.2302 | Val Balanced_accuracy: 0.5835 | Learning Rate: 0.000100
+2025-04-23 11:13:52 - INFO - Val Balanced_accuracy: 0.5835
+2025-04-23 11:13:52 - INFO - 
+2025-04-23 11:13:53 - INFO - 
+Epoch 6/300
+2025-04-23 11:13:53 - INFO - Val Brier Score: 0.2257 | Val Balanced_accuracy: 0.5992 | Learning Rate: 0.000100
+2025-04-23 11:13:53 - INFO - Val Balanced_accuracy: 0.5992
+2025-04-23 11:13:53 - INFO - 
+2025-04-23 11:13:53 - INFO - Model saved with validation Balanced_accuracy: 0.5992
+2025-04-23 11:13:53 - INFO - 
+Epoch 7/300
+2025-04-23 11:13:53 - INFO - Val Brier Score: 0.2274 | Val Balanced_accuracy: 0.5896 | Learning Rate: 0.000100
+2025-04-23 11:13:53 - INFO - Val Balanced_accuracy: 0.5896
+2025-04-23 11:13:53 - INFO - 
+2025-04-23 11:13:54 - INFO - 
+Epoch 8/300
+2025-04-23 11:13:54 - INFO - Val Brier Score: 0.2281 | Val Balanced_accuracy: 0.5958 | Learning Rate: 0.000100
+2025-04-23 11:13:54 - INFO - Val Balanced_accuracy: 0.5958
+2025-04-23 11:13:54 - INFO - 
+2025-04-23 11:13:54 - INFO - 
+Epoch 9/300
+2025-04-23 11:13:54 - INFO - Val Brier Score: 0.2293 | Val Balanced_accuracy: 0.5601 | Learning Rate: 0.000100
+2025-04-23 11:13:54 - INFO - Val Balanced_accuracy: 0.5601
+2025-04-23 11:13:54 - INFO - 
+2025-04-23 11:13:55 - INFO - 
+Epoch 10/300
+2025-04-23 11:13:55 - INFO - Val Brier Score: 0.2280 | Val Balanced_accuracy: 0.5703 | Learning Rate: 0.000100
+2025-04-23 11:13:55 - INFO - Val Balanced_accuracy: 0.5703
+2025-04-23 11:13:55 - INFO - 
+2025-04-23 11:13:55 - INFO - 
+Epoch 11/300
+2025-04-23 11:13:55 - INFO - Val Brier Score: 0.2277 | Val Balanced_accuracy: 0.5820 | Learning Rate: 0.000100
+2025-04-23 11:13:55 - INFO - Val Balanced_accuracy: 0.5820
+2025-04-23 11:13:55 - INFO - 
+2025-04-23 11:13:56 - INFO - 
+Epoch 12/300
+2025-04-23 11:13:56 - INFO - Val Brier Score: 0.2251 | Val Balanced_accuracy: 0.5835 | Learning Rate: 0.000100
+2025-04-23 11:13:56 - INFO - Val Balanced_accuracy: 0.5835
+2025-04-23 11:13:56 - INFO - 
+2025-04-23 11:13:56 - INFO - 
+Epoch 13/300
+2025-04-23 11:13:56 - INFO - Val Brier Score: 0.2274 | Val Balanced_accuracy: 0.5868 | Learning Rate: 0.000100
+2025-04-23 11:13:56 - INFO - Val Balanced_accuracy: 0.5868
+2025-04-23 11:13:56 - INFO - 
+2025-04-23 11:13:57 - INFO - 
+Epoch 14/300
+2025-04-23 11:13:57 - INFO - Val Brier Score: 0.2244 | Val Balanced_accuracy: 0.6010 | Learning Rate: 0.000100
+2025-04-23 11:13:57 - INFO - Val Balanced_accuracy: 0.6010
+2025-04-23 11:13:57 - INFO - 
+2025-04-23 11:13:57 - INFO - Model saved with validation Balanced_accuracy: 0.6010
+2025-04-23 11:13:57 - INFO - 
+Epoch 15/300
+2025-04-23 11:13:57 - INFO - Val Brier Score: 0.2247 | Val Balanced_accuracy: 0.5997 | Learning Rate: 0.000100
+2025-04-23 11:13:57 - INFO - Val Balanced_accuracy: 0.5997
+2025-04-23 11:13:57 - INFO - 
+2025-04-23 11:13:58 - INFO - 
+Epoch 16/300
+2025-04-23 11:13:58 - INFO - Val Brier Score: 0.2255 | Val Balanced_accuracy: 0.5899 | Learning Rate: 0.000100
+2025-04-23 11:13:58 - INFO - Val Balanced_accuracy: 0.5899
+2025-04-23 11:13:58 - INFO - 
+2025-04-23 11:13:58 - INFO - 
+Epoch 17/300
+2025-04-23 11:13:58 - INFO - Val Brier Score: 0.2270 | Val Balanced_accuracy: 0.6074 | Learning Rate: 0.000100
+2025-04-23 11:13:58 - INFO - Val Balanced_accuracy: 0.6074
+2025-04-23 11:13:58 - INFO - 
+2025-04-23 11:13:59 - INFO - 
+Epoch 18/300
+2025-04-23 11:13:59 - INFO - Val Brier Score: 0.2294 | Val Balanced_accuracy: 0.5827 | Learning Rate: 0.000100
+2025-04-23 11:13:59 - INFO - Val Balanced_accuracy: 0.5827
+2025-04-23 11:13:59 - INFO - 
+2025-04-23 11:13:59 - INFO - 
+Epoch 19/300
+2025-04-23 11:13:59 - INFO - Val Brier Score: 0.2244 | Val Balanced_accuracy: 0.6112 | Learning Rate: 0.000100
+2025-04-23 11:13:59 - INFO - Val Balanced_accuracy: 0.6112
+2025-04-23 11:13:59 - INFO - 
+2025-04-23 11:14:00 - INFO - 
+Epoch 20/300
+2025-04-23 11:14:00 - INFO - Val Brier Score: 0.2209 | Val Balanced_accuracy: 0.6191 | Learning Rate: 0.000100
+2025-04-23 11:14:00 - INFO - Val Balanced_accuracy: 0.6191
+2025-04-23 11:14:00 - INFO - 
+2025-04-23 11:14:00 - INFO - Model saved with validation Balanced_accuracy: 0.6191
+2025-04-23 11:14:01 - INFO - 
+Epoch 21/300
+2025-04-23 11:14:01 - INFO - Val Brier Score: 0.2227 | Val Balanced_accuracy: 0.6320 | Learning Rate: 0.000100
+2025-04-23 11:14:01 - INFO - Val Balanced_accuracy: 0.6320
+2025-04-23 11:14:01 - INFO - 
+2025-04-23 11:14:01 - INFO - 
+Epoch 22/300
+2025-04-23 11:14:01 - INFO - Val Brier Score: 0.2242 | Val Balanced_accuracy: 0.6002 | Learning Rate: 0.000100
+2025-04-23 11:14:01 - INFO - Val Balanced_accuracy: 0.6002
+2025-04-23 11:14:01 - INFO - 
+2025-04-23 11:14:02 - INFO - 
+Epoch 23/300
+2025-04-23 11:14:02 - INFO - Val Brier Score: 0.2207 | Val Balanced_accuracy: 0.6260 | Learning Rate: 0.000100
+2025-04-23 11:14:02 - INFO - Val Balanced_accuracy: 0.6260
+2025-04-23 11:14:02 - INFO - 
+2025-04-23 11:14:02 - INFO - 
+Epoch 24/300
+2025-04-23 11:14:02 - INFO - Val Brier Score: 0.2232 | Val Balanced_accuracy: 0.5865 | Learning Rate: 0.000100
+2025-04-23 11:14:02 - INFO - Val Balanced_accuracy: 0.5865
+2025-04-23 11:14:02 - INFO - 
+2025-04-23 11:14:03 - INFO - 
+Epoch 25/300
+2025-04-23 11:14:03 - INFO - Val Brier Score: 0.2273 | Val Balanced_accuracy: 0.5575 | Learning Rate: 0.000100
+2025-04-23 11:14:03 - INFO - Val Balanced_accuracy: 0.5575
+2025-04-23 11:14:03 - INFO - 
+2025-04-23 11:14:03 - INFO - 
+Epoch 26/300
+2025-04-23 11:14:03 - INFO - Val Brier Score: 0.2267 | Val Balanced_accuracy: 0.5967 | Learning Rate: 0.000100
+2025-04-23 11:14:03 - INFO - Val Balanced_accuracy: 0.5967
+2025-04-23 11:14:03 - INFO - 
+2025-04-23 11:14:04 - INFO - 
+Epoch 27/300
+2025-04-23 11:14:04 - INFO - Val Brier Score: 0.2223 | Val Balanced_accuracy: 0.6184 | Learning Rate: 0.000100
+2025-04-23 11:14:04 - INFO - Val Balanced_accuracy: 0.6184
+2025-04-23 11:14:04 - INFO - 
+2025-04-23 11:14:05 - INFO - 
+Epoch 28/300
+2025-04-23 11:14:05 - INFO - Val Brier Score: 0.2287 | Val Balanced_accuracy: 0.5663 | Learning Rate: 0.000100
+2025-04-23 11:14:05 - INFO - Val Balanced_accuracy: 0.5663
+2025-04-23 11:14:05 - INFO - 
+2025-04-23 11:14:05 - INFO - 
+Epoch 29/300
+2025-04-23 11:14:05 - INFO - Val Brier Score: 0.2230 | Val Balanced_accuracy: 0.5875 | Learning Rate: 0.000100
+2025-04-23 11:14:05 - INFO - Val Balanced_accuracy: 0.5875
+2025-04-23 11:14:05 - INFO - 
+2025-04-23 11:14:06 - INFO - 
+Epoch 30/300
+2025-04-23 11:14:06 - INFO - Val Brier Score: 0.2245 | Val Balanced_accuracy: 0.5967 | Learning Rate: 0.000100
+2025-04-23 11:14:06 - INFO - Val Balanced_accuracy: 0.5967
+2025-04-23 11:14:06 - INFO - 
+2025-04-23 11:14:06 - INFO - 
+Epoch 31/300
+2025-04-23 11:14:06 - INFO - Val Brier Score: 0.2237 | Val Balanced_accuracy: 0.5993 | Learning Rate: 0.000100
+2025-04-23 11:14:06 - INFO - Val Balanced_accuracy: 0.5993
+2025-04-23 11:14:06 - INFO - 
+2025-04-23 11:14:07 - INFO - 
+Epoch 32/300
+2025-04-23 11:14:07 - INFO - Val Brier Score: 0.2266 | Val Balanced_accuracy: 0.6162 | Learning Rate: 0.000100
+2025-04-23 11:14:07 - INFO - Val Balanced_accuracy: 0.6162
+2025-04-23 11:14:07 - INFO - 
+2025-04-23 11:14:08 - INFO - 
+Epoch 33/300
+2025-04-23 11:14:08 - INFO - Val Brier Score: 0.2217 | Val Balanced_accuracy: 0.6171 | Learning Rate: 0.000100
+2025-04-23 11:14:08 - INFO - Val Balanced_accuracy: 0.6171
+2025-04-23 11:14:08 - INFO - 
+2025-04-23 11:14:08 - INFO - 
+Epoch 34/300
+2025-04-23 11:14:08 - INFO - Val Brier Score: 0.2251 | Val Balanced_accuracy: 0.5935 | Learning Rate: 0.000080
+2025-04-23 11:14:08 - INFO - Val Balanced_accuracy: 0.5935
+2025-04-23 11:14:08 - INFO - 
+2025-04-23 11:14:09 - INFO - 
+Epoch 35/300
+2025-04-23 11:14:09 - INFO - Val Brier Score: 0.2207 | Val Balanced_accuracy: 0.5988 | Learning Rate: 0.000080
+2025-04-23 11:14:09 - INFO - Val Balanced_accuracy: 0.5988
+2025-04-23 11:14:09 - INFO - 
+2025-04-23 11:14:09 - INFO - 
+Epoch 36/300
+2025-04-23 11:14:09 - INFO - Val Brier Score: 0.2232 | Val Balanced_accuracy: 0.6209 | Learning Rate: 0.000080
+2025-04-23 11:14:09 - INFO - Val Balanced_accuracy: 0.6209
+2025-04-23 11:14:09 - INFO - 
+2025-04-23 11:14:10 - INFO - 
+Epoch 37/300
+2025-04-23 11:14:10 - INFO - Val Brier Score: 0.2198 | Val Balanced_accuracy: 0.6255 | Learning Rate: 0.000080
+2025-04-23 11:14:10 - INFO - Val Balanced_accuracy: 0.6255
+2025-04-23 11:14:10 - INFO - 
+2025-04-23 11:14:10 - INFO - Model saved with validation Balanced_accuracy: 0.6255
+2025-04-23 11:14:10 - INFO - 
+Epoch 38/300
+2025-04-23 11:14:10 - INFO - Val Brier Score: 0.2216 | Val Balanced_accuracy: 0.6261 | Learning Rate: 0.000080
+2025-04-23 11:14:10 - INFO - Val Balanced_accuracy: 0.6261
+2025-04-23 11:14:10 - INFO - 
+2025-04-23 11:14:11 - INFO - 
+Epoch 39/300
+2025-04-23 11:14:11 - INFO - Val Brier Score: 0.2233 | Val Balanced_accuracy: 0.6103 | Learning Rate: 0.000080
+2025-04-23 11:14:11 - INFO - Val Balanced_accuracy: 0.6103
+2025-04-23 11:14:11 - INFO - 
+2025-04-23 11:14:12 - INFO - 
+Epoch 40/300
+2025-04-23 11:14:12 - INFO - Val Brier Score: 0.2217 | Val Balanced_accuracy: 0.6046 | Learning Rate: 0.000080
+2025-04-23 11:14:12 - INFO - Val Balanced_accuracy: 0.6046
+2025-04-23 11:14:12 - INFO - 
+2025-04-23 11:14:12 - INFO - 
+Epoch 41/300
+2025-04-23 11:14:12 - INFO - Val Brier Score: 0.2227 | Val Balanced_accuracy: 0.6046 | Learning Rate: 0.000080
+2025-04-23 11:14:12 - INFO - Val Balanced_accuracy: 0.6046
+2025-04-23 11:14:12 - INFO - 
+2025-04-23 11:14:13 - INFO - 
+Epoch 42/300
+2025-04-23 11:14:13 - INFO - Val Brier Score: 0.2199 | Val Balanced_accuracy: 0.6252 | Learning Rate: 0.000080
+2025-04-23 11:14:13 - INFO - Val Balanced_accuracy: 0.6252
+2025-04-23 11:14:13 - INFO - 
+2025-04-23 11:14:13 - INFO - 
+Epoch 43/300
+2025-04-23 11:14:13 - INFO - Val Brier Score: 0.2222 | Val Balanced_accuracy: 0.6164 | Learning Rate: 0.000080
+2025-04-23 11:14:13 - INFO - Val Balanced_accuracy: 0.6164
+2025-04-23 11:14:13 - INFO - 
+2025-04-23 11:14:14 - INFO - 
+Epoch 44/300
+2025-04-23 11:14:14 - INFO - Val Brier Score: 0.2258 | Val Balanced_accuracy: 0.5863 | Learning Rate: 0.000080
+2025-04-23 11:14:14 - INFO - Val Balanced_accuracy: 0.5863
+2025-04-23 11:14:14 - INFO - 
+2025-04-23 11:14:14 - INFO - 
+Epoch 45/300
+2025-04-23 11:14:14 - INFO - Val Brier Score: 0.2200 | Val Balanced_accuracy: 0.6148 | Learning Rate: 0.000080
+2025-04-23 11:14:14 - INFO - Val Balanced_accuracy: 0.6148
+2025-04-23 11:14:14 - INFO - 
+2025-04-23 11:14:15 - INFO - 
+Epoch 46/300
+2025-04-23 11:14:15 - INFO - Val Brier Score: 0.2242 | Val Balanced_accuracy: 0.5897 | Learning Rate: 0.000080
+2025-04-23 11:14:15 - INFO - Val Balanced_accuracy: 0.5897
+2025-04-23 11:14:15 - INFO - 
+2025-04-23 11:14:16 - INFO - 
+Epoch 47/300
+2025-04-23 11:14:16 - INFO - Val Brier Score: 0.2226 | Val Balanced_accuracy: 0.5840 | Learning Rate: 0.000080
+2025-04-23 11:14:16 - INFO - Val Balanced_accuracy: 0.5840
+2025-04-23 11:14:16 - INFO - 
+2025-04-23 11:14:16 - INFO - 
+Epoch 48/300
+2025-04-23 11:14:16 - INFO - Val Brier Score: 0.2226 | Val Balanced_accuracy: 0.5957 | Learning Rate: 0.000064
+2025-04-23 11:14:16 - INFO - Val Balanced_accuracy: 0.5957
+2025-04-23 11:14:16 - INFO - 
+2025-04-23 11:14:17 - INFO - 
+Epoch 49/300
+2025-04-23 11:14:17 - INFO - Val Brier Score: 0.2196 | Val Balanced_accuracy: 0.6107 | Learning Rate: 0.000064
+2025-04-23 11:14:17 - INFO - Val Balanced_accuracy: 0.6107
+2025-04-23 11:14:17 - INFO - 
+2025-04-23 11:14:17 - INFO - 
+Epoch 50/300
+2025-04-23 11:14:17 - INFO - Val Brier Score: 0.2229 | Val Balanced_accuracy: 0.5964 | Learning Rate: 0.000064
+2025-04-23 11:14:17 - INFO - Val Balanced_accuracy: 0.5964
+2025-04-23 11:14:17 - INFO - 
+2025-04-23 11:14:18 - INFO - 
+Epoch 51/300
+2025-04-23 11:14:18 - INFO - Val Brier Score: 0.2196 | Val Balanced_accuracy: 0.6529 | Learning Rate: 0.000064
+2025-04-23 11:14:18 - INFO - Val Balanced_accuracy: 0.6529
+2025-04-23 11:14:18 - INFO - 
+2025-04-23 11:14:19 - INFO - 
+Epoch 52/300
+2025-04-23 11:14:19 - INFO - Val Brier Score: 0.2193 | Val Balanced_accuracy: 0.6159 | Learning Rate: 0.000064
+2025-04-23 11:14:19 - INFO - Val Balanced_accuracy: 0.6159
+2025-04-23 11:14:19 - INFO - 
+2025-04-23 11:14:19 - INFO - 
+Epoch 53/300
+2025-04-23 11:14:19 - INFO - Val Brier Score: 0.2208 | Val Balanced_accuracy: 0.5986 | Learning Rate: 0.000064
+2025-04-23 11:14:19 - INFO - Val Balanced_accuracy: 0.5986
+2025-04-23 11:14:19 - INFO - 
+2025-04-23 11:14:20 - INFO - 
+Epoch 54/300
+2025-04-23 11:14:20 - INFO - Val Brier Score: 0.2182 | Val Balanced_accuracy: 0.6178 | Learning Rate: 0.000064
+2025-04-23 11:14:20 - INFO - Val Balanced_accuracy: 0.6178
+2025-04-23 11:14:20 - INFO - 
+2025-04-23 11:14:20 - INFO - Model saved with validation Balanced_accuracy: 0.6178
+2025-04-23 11:14:20 - INFO - 
+Epoch 55/300
+2025-04-23 11:14:20 - INFO - Val Brier Score: 0.2209 | Val Balanced_accuracy: 0.6188 | Learning Rate: 0.000064
+2025-04-23 11:14:20 - INFO - Val Balanced_accuracy: 0.6188
+2025-04-23 11:14:20 - INFO - 
+2025-04-23 11:14:21 - INFO - 
+Epoch 56/300
+2025-04-23 11:14:21 - INFO - Val Brier Score: 0.2252 | Val Balanced_accuracy: 0.5941 | Learning Rate: 0.000064
+2025-04-23 11:14:21 - INFO - Val Balanced_accuracy: 0.5941
+2025-04-23 11:14:21 - INFO - 
+2025-04-23 11:14:21 - INFO - 
+Epoch 57/300
+2025-04-23 11:14:21 - INFO - Val Brier Score: 0.2239 | Val Balanced_accuracy: 0.5776 | Learning Rate: 0.000064
+2025-04-23 11:14:21 - INFO - Val Balanced_accuracy: 0.5776
+2025-04-23 11:14:21 - INFO - 
+2025-04-23 11:14:22 - INFO - 
+Epoch 58/300
+2025-04-23 11:14:22 - INFO - Val Brier Score: 0.2208 | Val Balanced_accuracy: 0.6181 | Learning Rate: 0.000064
+2025-04-23 11:14:22 - INFO - Val Balanced_accuracy: 0.6181
+2025-04-23 11:14:22 - INFO - 
+2025-04-23 11:14:23 - INFO - 
+Epoch 59/300
+2025-04-23 11:14:23 - INFO - Val Brier Score: 0.2200 | Val Balanced_accuracy: 0.6325 | Learning Rate: 0.000064
+2025-04-23 11:14:23 - INFO - Val Balanced_accuracy: 0.6325
+2025-04-23 11:14:23 - INFO - 
+2025-04-23 11:14:23 - INFO - 
+Epoch 60/300
+2025-04-23 11:14:23 - INFO - Val Brier Score: 0.2198 | Val Balanced_accuracy: 0.6242 | Learning Rate: 0.000064
+2025-04-23 11:14:23 - INFO - Val Balanced_accuracy: 0.6242
+2025-04-23 11:14:23 - INFO - 
+2025-04-23 11:14:24 - INFO - 
+Epoch 61/300
+2025-04-23 11:14:24 - INFO - Val Brier Score: 0.2199 | Val Balanced_accuracy: 0.6245 | Learning Rate: 0.000064
+2025-04-23 11:14:24 - INFO - Val Balanced_accuracy: 0.6245
+2025-04-23 11:14:24 - INFO - 
+2025-04-23 11:14:24 - INFO - 
+Epoch 62/300
+2025-04-23 11:14:24 - INFO - Val Brier Score: 0.2203 | Val Balanced_accuracy: 0.6127 | Learning Rate: 0.000064
+2025-04-23 11:14:24 - INFO - Val Balanced_accuracy: 0.6127
+2025-04-23 11:14:24 - INFO - 
+2025-04-23 11:14:25 - INFO - 
+Epoch 63/300
+2025-04-23 11:14:25 - INFO - Val Brier Score: 0.2202 | Val Balanced_accuracy: 0.6150 | Learning Rate: 0.000064
+2025-04-23 11:14:25 - INFO - Val Balanced_accuracy: 0.6150
+2025-04-23 11:14:25 - INFO - 
+2025-04-23 11:14:26 - INFO - 
+Epoch 64/300
+2025-04-23 11:14:26 - INFO - Val Brier Score: 0.2202 | Val Balanced_accuracy: 0.6298 | Learning Rate: 0.000064
+2025-04-23 11:14:26 - INFO - Val Balanced_accuracy: 0.6298
+2025-04-23 11:14:26 - INFO - 
+2025-04-23 11:14:26 - INFO - 
+Epoch 65/300
+2025-04-23 11:14:26 - INFO - Val Brier Score: 0.2207 | Val Balanced_accuracy: 0.6203 | Learning Rate: 0.000051
+2025-04-23 11:14:26 - INFO - Val Balanced_accuracy: 0.6203
+2025-04-23 11:14:26 - INFO - 
+2025-04-23 11:14:27 - INFO - 
+Epoch 66/300
+2025-04-23 11:14:27 - INFO - Val Brier Score: 0.2192 | Val Balanced_accuracy: 0.6122 | Learning Rate: 0.000051
+2025-04-23 11:14:27 - INFO - Val Balanced_accuracy: 0.6122
+2025-04-23 11:14:27 - INFO - 
+2025-04-23 11:14:27 - INFO - 
+Epoch 67/300
+2025-04-23 11:14:27 - INFO - Val Brier Score: 0.2208 | Val Balanced_accuracy: 0.6187 | Learning Rate: 0.000051
+2025-04-23 11:14:27 - INFO - Val Balanced_accuracy: 0.6187
+2025-04-23 11:14:27 - INFO - 
+2025-04-23 11:14:28 - INFO - 
+Epoch 68/300
+2025-04-23 11:14:28 - INFO - Val Brier Score: 0.2223 | Val Balanced_accuracy: 0.6029 | Learning Rate: 0.000051
+2025-04-23 11:14:28 - INFO - Val Balanced_accuracy: 0.6029
+2025-04-23 11:14:28 - INFO - 
+2025-04-23 11:14:28 - INFO - 
+Epoch 69/300
+2025-04-23 11:14:28 - INFO - Val Brier Score: 0.2182 | Val Balanced_accuracy: 0.6319 | Learning Rate: 0.000051
+2025-04-23 11:14:28 - INFO - Val Balanced_accuracy: 0.6319
+2025-04-23 11:14:28 - INFO - 
+2025-04-23 11:14:29 - INFO - 
+Epoch 70/300
+2025-04-23 11:14:29 - INFO - Val Brier Score: 0.2190 | Val Balanced_accuracy: 0.6292 | Learning Rate: 0.000051
+2025-04-23 11:14:29 - INFO - Val Balanced_accuracy: 0.6292
+2025-04-23 11:14:29 - INFO - 
+2025-04-23 11:14:30 - INFO - 
+Epoch 71/300
+2025-04-23 11:14:30 - INFO - Val Brier Score: 0.2194 | Val Balanced_accuracy: 0.6398 | Learning Rate: 0.000051
+2025-04-23 11:14:30 - INFO - Val Balanced_accuracy: 0.6398
+2025-04-23 11:14:30 - INFO - 
+2025-04-23 11:14:30 - INFO - 
+Epoch 72/300
+2025-04-23 11:14:30 - INFO - Val Brier Score: 0.2194 | Val Balanced_accuracy: 0.6309 | Learning Rate: 0.000051
+2025-04-23 11:14:30 - INFO - Val Balanced_accuracy: 0.6309
+2025-04-23 11:14:30 - INFO - 
+2025-04-23 11:14:31 - INFO - 
+Epoch 73/300
+2025-04-23 11:14:31 - INFO - Val Brier Score: 0.2188 | Val Balanced_accuracy: 0.6367 | Learning Rate: 0.000051
+2025-04-23 11:14:31 - INFO - Val Balanced_accuracy: 0.6367
+2025-04-23 11:14:31 - INFO - 
+2025-04-23 11:14:31 - INFO - 
+Epoch 74/300
+2025-04-23 11:14:31 - INFO - Val Brier Score: 0.2200 | Val Balanced_accuracy: 0.6413 | Learning Rate: 0.000051
+2025-04-23 11:14:31 - INFO - Val Balanced_accuracy: 0.6413
+2025-04-23 11:14:31 - INFO - 
+2025-04-23 11:14:32 - INFO - 
+Epoch 75/300
+2025-04-23 11:14:32 - INFO - Val Brier Score: 0.2177 | Val Balanced_accuracy: 0.6291 | Learning Rate: 0.000051
+2025-04-23 11:14:32 - INFO - Val Balanced_accuracy: 0.6291
+2025-04-23 11:14:32 - INFO - 
+2025-04-23 11:14:32 - INFO - 
+Epoch 76/300
+2025-04-23 11:14:32 - INFO - Val Brier Score: 0.2215 | Val Balanced_accuracy: 0.6171 | Learning Rate: 0.000051
+2025-04-23 11:14:32 - INFO - Val Balanced_accuracy: 0.6171
+2025-04-23 11:14:32 - INFO - 
+2025-04-23 11:14:33 - INFO - 
+Epoch 77/300
+2025-04-23 11:14:33 - INFO - Val Brier Score: 0.2178 | Val Balanced_accuracy: 0.6325 | Learning Rate: 0.000051
+2025-04-23 11:14:33 - INFO - Val Balanced_accuracy: 0.6325
+2025-04-23 11:14:33 - INFO - 
+2025-04-23 11:14:34 - INFO - 
+Epoch 78/300
+2025-04-23 11:14:34 - INFO - Val Brier Score: 0.2204 | Val Balanced_accuracy: 0.6256 | Learning Rate: 0.000051
+2025-04-23 11:14:34 - INFO - Val Balanced_accuracy: 0.6256
+2025-04-23 11:14:34 - INFO - 
+2025-04-23 11:14:34 - INFO - 
+Epoch 79/300
+2025-04-23 11:14:34 - INFO - Val Brier Score: 0.2210 | Val Balanced_accuracy: 0.6121 | Learning Rate: 0.000051
+2025-04-23 11:14:34 - INFO - Val Balanced_accuracy: 0.6121
+2025-04-23 11:14:34 - INFO - 
+2025-04-23 11:14:35 - INFO - 
+Epoch 80/300
+2025-04-23 11:14:35 - INFO - Val Brier Score: 0.2184 | Val Balanced_accuracy: 0.6420 | Learning Rate: 0.000051
+2025-04-23 11:14:35 - INFO - Val Balanced_accuracy: 0.6420
+2025-04-23 11:14:35 - INFO - 
+2025-04-23 11:14:35 - INFO - 
+Epoch 81/300
+2025-04-23 11:14:35 - INFO - Val Brier Score: 0.2197 | Val Balanced_accuracy: 0.6118 | Learning Rate: 0.000051
+2025-04-23 11:14:35 - INFO - Val Balanced_accuracy: 0.6118
+2025-04-23 11:14:35 - INFO - 
+2025-04-23 11:14:36 - INFO - 
+Epoch 82/300
+2025-04-23 11:14:36 - INFO - Val Brier Score: 0.2195 | Val Balanced_accuracy: 0.6107 | Learning Rate: 0.000051
+2025-04-23 11:14:36 - INFO - Val Balanced_accuracy: 0.6107
+2025-04-23 11:14:36 - INFO - 
+2025-04-23 11:14:36 - INFO - 
+Epoch 83/300
+2025-04-23 11:14:36 - INFO - Val Brier Score: 0.2192 | Val Balanced_accuracy: 0.6274 | Learning Rate: 0.000051
+2025-04-23 11:14:36 - INFO - Val Balanced_accuracy: 0.6274
+2025-04-23 11:14:36 - INFO - 
+2025-04-23 11:14:37 - INFO - 
+Epoch 84/300
+2025-04-23 11:14:37 - INFO - Val Brier Score: 0.2191 | Val Balanced_accuracy: 0.6145 | Learning Rate: 0.000051
+2025-04-23 11:14:37 - INFO - Val Balanced_accuracy: 0.6145
+2025-04-23 11:14:37 - INFO - 
+2025-04-23 11:14:37 - INFO - 
+Epoch 85/300
+2025-04-23 11:14:37 - INFO - Val Brier Score: 0.2180 | Val Balanced_accuracy: 0.6252 | Learning Rate: 0.000051
+2025-04-23 11:14:37 - INFO - Val Balanced_accuracy: 0.6252
+2025-04-23 11:14:37 - INFO - 
+2025-04-23 11:14:37 - INFO - Early stopping triggered at epoch 85
+2025-04-23 11:14:38 - INFO - 
+Best Threshold Found: 0.4400
+2025-04-23 11:14:38 - INFO - Final model saved to: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1Days.pth
+2025-04-23 11:14:38 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-04-23 11:14:38 - INFO - Accuracy: 0.6867
+2025-04-23 11:14:38 - INFO - Balanced_accuracy: 0.6758
+2025-04-23 11:14:38 - INFO - Roc_auc: 0.7170
+2025-04-23 11:14:38 - INFO - Precision: 0.5567
+2025-04-23 11:14:38 - INFO - Recall: 0.6369
+2025-04-23 11:14:38 - INFO - Mcc: 0.3429
+2025-04-23 11:14:38 - INFO - Kappa: 0.3409
+2025-04-23 11:14:38 - INFO - Brier: 0.2048
+2025-04-23 11:14:38 - INFO - F1: 0.5941
+2025-04-23 16:00:53 - INFO - 
+Epoch 1/300
+2025-04-23 16:00:53 - INFO - Val Brier Score: 0.2266 | Val Balanced_accuracy: 0.5979 | Learning Rate: 0.000100
+2025-04-23 16:00:53 - INFO - Val Balanced_accuracy: 0.5979
+2025-04-23 16:00:53 - INFO - 
+2025-04-23 16:00:53 - INFO - Model saved with validation Balanced_accuracy: 0.5979
+2025-04-23 16:00:54 - INFO - 
+Epoch 2/300
+2025-04-23 16:00:54 - INFO - Val Brier Score: 0.2189 | Val Balanced_accuracy: 0.5957 | Learning Rate: 0.000100
+2025-04-23 16:00:54 - INFO - Val Balanced_accuracy: 0.5957
+2025-04-23 16:00:54 - INFO - 
+2025-04-23 16:00:54 - INFO - Model saved with validation Balanced_accuracy: 0.5957
+2025-04-23 16:00:55 - INFO - 
+Epoch 3/300
+2025-04-23 16:00:55 - INFO - Val Brier Score: 0.2159 | Val Balanced_accuracy: 0.6350 | Learning Rate: 0.000100
+2025-04-23 16:00:55 - INFO - Val Balanced_accuracy: 0.6350
+2025-04-23 16:00:55 - INFO - 
+2025-04-23 16:00:55 - INFO - Model saved with validation Balanced_accuracy: 0.6350
+2025-04-23 16:00:55 - INFO - 
+Epoch 4/300
+2025-04-23 16:00:55 - INFO - Val Brier Score: 0.2223 | Val Balanced_accuracy: 0.6088 | Learning Rate: 0.000100
+2025-04-23 16:00:55 - INFO - Val Balanced_accuracy: 0.6088
+2025-04-23 16:00:55 - INFO - 
+2025-04-23 16:00:56 - INFO - 
+Epoch 5/300
+2025-04-23 16:00:56 - INFO - Val Brier Score: 0.2223 | Val Balanced_accuracy: 0.5735 | Learning Rate: 0.000100
+2025-04-23 16:00:56 - INFO - Val Balanced_accuracy: 0.5735
+2025-04-23 16:00:56 - INFO - 
+2025-04-23 16:00:56 - INFO - 
+Epoch 6/300
+2025-04-23 16:00:56 - INFO - Val Brier Score: 0.2148 | Val Balanced_accuracy: 0.6267 | Learning Rate: 0.000100
+2025-04-23 16:00:56 - INFO - Val Balanced_accuracy: 0.6267
+2025-04-23 16:00:56 - INFO - 
+2025-04-23 16:00:56 - INFO - Model saved with validation Balanced_accuracy: 0.6267
+2025-04-23 16:00:57 - INFO - 
+Epoch 7/300
+2025-04-23 16:00:57 - INFO - Val Brier Score: 0.2174 | Val Balanced_accuracy: 0.6120 | Learning Rate: 0.000100
+2025-04-23 16:00:57 - INFO - Val Balanced_accuracy: 0.6120
+2025-04-23 16:00:57 - INFO - 
+2025-04-23 16:00:57 - INFO - 
+Epoch 8/300
+2025-04-23 16:00:57 - INFO - Val Brier Score: 0.2237 | Val Balanced_accuracy: 0.5772 | Learning Rate: 0.000100
+2025-04-23 16:00:57 - INFO - Val Balanced_accuracy: 0.5772
+2025-04-23 16:00:57 - INFO - 
+2025-04-23 16:00:58 - INFO - 
+Epoch 9/300
+2025-04-23 16:00:58 - INFO - Val Brier Score: 0.2133 | Val Balanced_accuracy: 0.6233 | Learning Rate: 0.000100
+2025-04-23 16:00:58 - INFO - Val Balanced_accuracy: 0.6233
+2025-04-23 16:00:58 - INFO - 
+2025-04-23 16:00:58 - INFO - Model saved with validation Balanced_accuracy: 0.6233
+2025-04-23 16:00:58 - INFO - 
+Epoch 10/300
+2025-04-23 16:00:58 - INFO - Val Brier Score: 0.2133 | Val Balanced_accuracy: 0.6437 | Learning Rate: 0.000100
+2025-04-23 16:00:58 - INFO - Val Balanced_accuracy: 0.6437
+2025-04-23 16:00:58 - INFO - 
+2025-04-23 16:00:59 - INFO - 
+Epoch 11/300
+2025-04-23 16:00:59 - INFO - Val Brier Score: 0.2135 | Val Balanced_accuracy: 0.6309 | Learning Rate: 0.000100
+2025-04-23 16:00:59 - INFO - Val Balanced_accuracy: 0.6309
+2025-04-23 16:00:59 - INFO - 
+2025-04-23 16:00:59 - INFO - 
+Epoch 12/300
+2025-04-23 16:00:59 - INFO - Val Brier Score: 0.2138 | Val Balanced_accuracy: 0.6554 | Learning Rate: 0.000100
+2025-04-23 16:00:59 - INFO - Val Balanced_accuracy: 0.6554
+2025-04-23 16:00:59 - INFO - 
+2025-04-23 16:01:00 - INFO - 
+Epoch 13/300
+2025-04-23 16:01:00 - INFO - Val Brier Score: 0.2079 | Val Balanced_accuracy: 0.6616 | Learning Rate: 0.000100
+2025-04-23 16:01:00 - INFO - Val Balanced_accuracy: 0.6616
+2025-04-23 16:01:00 - INFO - 
+2025-04-23 16:01:00 - INFO - Model saved with validation Balanced_accuracy: 0.6616
+2025-04-23 16:01:01 - INFO - 
+Epoch 14/300
+2025-04-23 16:01:01 - INFO - Val Brier Score: 0.2114 | Val Balanced_accuracy: 0.6380 | Learning Rate: 0.000100
+2025-04-23 16:01:01 - INFO - Val Balanced_accuracy: 0.6380
+2025-04-23 16:01:01 - INFO - 
+2025-04-23 16:01:01 - INFO - 
+Epoch 15/300
+2025-04-23 16:01:01 - INFO - Val Brier Score: 0.2105 | Val Balanced_accuracy: 0.6614 | Learning Rate: 0.000100
+2025-04-23 16:01:01 - INFO - Val Balanced_accuracy: 0.6614
+2025-04-23 16:01:01 - INFO - 
+2025-04-23 16:01:02 - INFO - 
+Epoch 16/300
+2025-04-23 16:01:02 - INFO - Val Brier Score: 0.2103 | Val Balanced_accuracy: 0.6333 | Learning Rate: 0.000100
+2025-04-23 16:01:02 - INFO - Val Balanced_accuracy: 0.6333
+2025-04-23 16:01:02 - INFO - 
+2025-04-23 16:01:02 - INFO - 
+Epoch 17/300
+2025-04-23 16:01:02 - INFO - Val Brier Score: 0.2088 | Val Balanced_accuracy: 0.6485 | Learning Rate: 0.000100
+2025-04-23 16:01:02 - INFO - Val Balanced_accuracy: 0.6485
+2025-04-23 16:01:02 - INFO - 
+2025-04-23 16:01:03 - INFO - 
+Epoch 18/300
+2025-04-23 16:01:03 - INFO - Val Brier Score: 0.2113 | Val Balanced_accuracy: 0.6478 | Learning Rate: 0.000100
+2025-04-23 16:01:03 - INFO - Val Balanced_accuracy: 0.6478
+2025-04-23 16:01:03 - INFO - 
+2025-04-23 16:01:03 - INFO - 
+Epoch 19/300
+2025-04-23 16:01:03 - INFO - Val Brier Score: 0.2083 | Val Balanced_accuracy: 0.6586 | Learning Rate: 0.000100
+2025-04-23 16:01:03 - INFO - Val Balanced_accuracy: 0.6586
+2025-04-23 16:01:03 - INFO - 
+2025-04-23 16:01:04 - INFO - 
+Epoch 20/300
+2025-04-23 16:01:04 - INFO - Val Brier Score: 0.2151 | Val Balanced_accuracy: 0.6352 | Learning Rate: 0.000100
+2025-04-23 16:01:04 - INFO - Val Balanced_accuracy: 0.6352
+2025-04-23 16:01:04 - INFO - 
+2025-04-23 16:01:04 - INFO - 
+Epoch 21/300
+2025-04-23 16:01:04 - INFO - Val Brier Score: 0.2124 | Val Balanced_accuracy: 0.6358 | Learning Rate: 0.000100
+2025-04-23 16:01:04 - INFO - Val Balanced_accuracy: 0.6358
+2025-04-23 16:01:04 - INFO - 
+2025-04-23 16:01:05 - INFO - 
+Epoch 22/300
+2025-04-23 16:01:05 - INFO - Val Brier Score: 0.2071 | Val Balanced_accuracy: 0.6658 | Learning Rate: 0.000100
+2025-04-23 16:01:05 - INFO - Val Balanced_accuracy: 0.6658
+2025-04-23 16:01:05 - INFO - 
+2025-04-23 16:01:05 - INFO - 
+Epoch 23/300
+2025-04-23 16:01:05 - INFO - Val Brier Score: 0.2093 | Val Balanced_accuracy: 0.6637 | Learning Rate: 0.000100
+2025-04-23 16:01:05 - INFO - Val Balanced_accuracy: 0.6637
+2025-04-23 16:01:05 - INFO - 
+2025-04-23 16:01:06 - INFO - 
+Epoch 24/300
+2025-04-23 16:01:06 - INFO - Val Brier Score: 0.2130 | Val Balanced_accuracy: 0.6512 | Learning Rate: 0.000100
+2025-04-23 16:01:06 - INFO - Val Balanced_accuracy: 0.6512
+2025-04-23 16:01:06 - INFO - 
+2025-04-23 16:01:07 - INFO - 
+Epoch 25/300
+2025-04-23 16:01:07 - INFO - Val Brier Score: 0.2138 | Val Balanced_accuracy: 0.6487 | Learning Rate: 0.000100
+2025-04-23 16:01:07 - INFO - Val Balanced_accuracy: 0.6487
+2025-04-23 16:01:07 - INFO - 
+2025-04-23 16:01:07 - INFO - 
+Epoch 26/300
+2025-04-23 16:01:07 - INFO - Val Brier Score: 0.2089 | Val Balanced_accuracy: 0.6596 | Learning Rate: 0.000100
+2025-04-23 16:01:07 - INFO - Val Balanced_accuracy: 0.6596
+2025-04-23 16:01:07 - INFO - 
+2025-04-23 16:01:08 - INFO - 
+Epoch 27/300
+2025-04-23 16:01:08 - INFO - Val Brier Score: 0.2069 | Val Balanced_accuracy: 0.6421 | Learning Rate: 0.000100
+2025-04-23 16:01:08 - INFO - Val Balanced_accuracy: 0.6421
+2025-04-23 16:01:08 - INFO - 
+2025-04-23 16:01:08 - INFO - 
+Epoch 28/300
+2025-04-23 16:01:08 - INFO - Val Brier Score: 0.2076 | Val Balanced_accuracy: 0.6662 | Learning Rate: 0.000100
+2025-04-23 16:01:08 - INFO - Val Balanced_accuracy: 0.6662
+2025-04-23 16:01:08 - INFO - 
+2025-04-23 16:01:09 - INFO - 
+Epoch 29/300
+2025-04-23 16:01:09 - INFO - Val Brier Score: 0.2087 | Val Balanced_accuracy: 0.6478 | Learning Rate: 0.000100
+2025-04-23 16:01:09 - INFO - Val Balanced_accuracy: 0.6478
+2025-04-23 16:01:09 - INFO - 
+2025-04-23 16:01:09 - INFO - 
+Epoch 30/300
+2025-04-23 16:01:09 - INFO - Val Brier Score: 0.2048 | Val Balanced_accuracy: 0.6588 | Learning Rate: 0.000100
+2025-04-23 16:01:09 - INFO - Val Balanced_accuracy: 0.6588
+2025-04-23 16:01:09 - INFO - 
+2025-04-23 16:01:09 - INFO - Model saved with validation Balanced_accuracy: 0.6588
+2025-04-23 16:01:10 - INFO - 
+Epoch 31/300
+2025-04-23 16:01:10 - INFO - Val Brier Score: 0.2087 | Val Balanced_accuracy: 0.6599 | Learning Rate: 0.000100
+2025-04-23 16:01:10 - INFO - Val Balanced_accuracy: 0.6599
+2025-04-23 16:01:10 - INFO - 
+2025-04-23 16:01:10 - INFO - 
+Epoch 32/300
+2025-04-23 16:01:10 - INFO - Val Brier Score: 0.2109 | Val Balanced_accuracy: 0.6103 | Learning Rate: 0.000100
+2025-04-23 16:01:10 - INFO - Val Balanced_accuracy: 0.6103
+2025-04-23 16:01:10 - INFO - 
+2025-04-23 16:01:11 - INFO - 
+Epoch 33/300
+2025-04-23 16:01:11 - INFO - Val Brier Score: 0.2108 | Val Balanced_accuracy: 0.6663 | Learning Rate: 0.000100
+2025-04-23 16:01:11 - INFO - Val Balanced_accuracy: 0.6663
+2025-04-23 16:01:11 - INFO - 
+2025-04-23 16:01:11 - INFO - 
+Epoch 34/300
+2025-04-23 16:01:11 - INFO - Val Brier Score: 0.2082 | Val Balanced_accuracy: 0.6635 | Learning Rate: 0.000100
+2025-04-23 16:01:11 - INFO - Val Balanced_accuracy: 0.6635
+2025-04-23 16:01:11 - INFO - 
+2025-04-23 16:01:12 - INFO - 
+Epoch 35/300
+2025-04-23 16:01:12 - INFO - Val Brier Score: 0.2107 | Val Balanced_accuracy: 0.6376 | Learning Rate: 0.000100
+2025-04-23 16:01:12 - INFO - Val Balanced_accuracy: 0.6376
+2025-04-23 16:01:12 - INFO - 
+2025-04-23 16:01:13 - INFO - 
+Epoch 36/300
+2025-04-23 16:01:13 - INFO - Val Brier Score: 0.2063 | Val Balanced_accuracy: 0.6436 | Learning Rate: 0.000100
+2025-04-23 16:01:13 - INFO - Val Balanced_accuracy: 0.6436
+2025-04-23 16:01:13 - INFO - 
+2025-04-23 16:01:13 - INFO - 
+Epoch 37/300
+2025-04-23 16:01:13 - INFO - Val Brier Score: 0.2113 | Val Balanced_accuracy: 0.6681 | Learning Rate: 0.000100
+2025-04-23 16:01:13 - INFO - Val Balanced_accuracy: 0.6681
+2025-04-23 16:01:13 - INFO - 
+2025-04-23 16:01:14 - INFO - 
+Epoch 38/300
+2025-04-23 16:01:14 - INFO - Val Brier Score: 0.2113 | Val Balanced_accuracy: 0.6589 | Learning Rate: 0.000100
+2025-04-23 16:01:14 - INFO - Val Balanced_accuracy: 0.6589
+2025-04-23 16:01:14 - INFO - 
+2025-04-23 16:01:14 - INFO - 
+Epoch 39/300
+2025-04-23 16:01:14 - INFO - Val Brier Score: 0.2105 | Val Balanced_accuracy: 0.6595 | Learning Rate: 0.000100
+2025-04-23 16:01:14 - INFO - Val Balanced_accuracy: 0.6595
+2025-04-23 16:01:14 - INFO - 
+2025-04-23 16:01:15 - INFO - 
+Epoch 40/300
+2025-04-23 16:01:15 - INFO - Val Brier Score: 0.2076 | Val Balanced_accuracy: 0.6606 | Learning Rate: 0.000100
+2025-04-23 16:01:15 - INFO - Val Balanced_accuracy: 0.6606
+2025-04-23 16:01:15 - INFO - 
+2025-04-23 16:01:15 - INFO - 
+Epoch 41/300
+2025-04-23 16:01:15 - INFO - Val Brier Score: 0.2116 | Val Balanced_accuracy: 0.6666 | Learning Rate: 0.000080
+2025-04-23 16:01:15 - INFO - Val Balanced_accuracy: 0.6666
+2025-04-23 16:01:15 - INFO - 
+2025-04-23 16:01:16 - INFO - 
+Epoch 42/300
+2025-04-23 16:01:16 - INFO - Val Brier Score: 0.2063 | Val Balanced_accuracy: 0.6710 | Learning Rate: 0.000080
+2025-04-23 16:01:16 - INFO - Val Balanced_accuracy: 0.6710
+2025-04-23 16:01:16 - INFO - 
+2025-04-23 16:01:16 - INFO - 
+Epoch 43/300
+2025-04-23 16:01:16 - INFO - Val Brier Score: 0.2055 | Val Balanced_accuracy: 0.6837 | Learning Rate: 0.000080
+2025-04-23 16:01:16 - INFO - Val Balanced_accuracy: 0.6837
+2025-04-23 16:01:16 - INFO - 
+2025-04-23 16:01:17 - INFO - 
+Epoch 44/300
+2025-04-23 16:01:17 - INFO - Val Brier Score: 0.2069 | Val Balanced_accuracy: 0.6649 | Learning Rate: 0.000080
+2025-04-23 16:01:17 - INFO - Val Balanced_accuracy: 0.6649
+2025-04-23 16:01:17 - INFO - 
+2025-04-23 16:01:17 - INFO - 
+Epoch 45/300
+2025-04-23 16:01:17 - INFO - Val Brier Score: 0.2081 | Val Balanced_accuracy: 0.6616 | Learning Rate: 0.000080
+2025-04-23 16:01:17 - INFO - Val Balanced_accuracy: 0.6616
+2025-04-23 16:01:17 - INFO - 
+2025-04-23 16:01:18 - INFO - 
+Epoch 46/300
+2025-04-23 16:01:18 - INFO - Val Brier Score: 0.2063 | Val Balanced_accuracy: 0.6744 | Learning Rate: 0.000080
+2025-04-23 16:01:18 - INFO - Val Balanced_accuracy: 0.6744
+2025-04-23 16:01:18 - INFO - 
+2025-04-23 16:01:19 - INFO - 
+Epoch 47/300
+2025-04-23 16:01:19 - INFO - Val Brier Score: 0.2048 | Val Balanced_accuracy: 0.6484 | Learning Rate: 0.000080
+2025-04-23 16:01:19 - INFO - Val Balanced_accuracy: 0.6484
+2025-04-23 16:01:19 - INFO - 
+2025-04-23 16:01:19 - INFO - 
+Epoch 48/300
+2025-04-23 16:01:19 - INFO - Val Brier Score: 0.2083 | Val Balanced_accuracy: 0.6649 | Learning Rate: 0.000080
+2025-04-23 16:01:19 - INFO - Val Balanced_accuracy: 0.6649
+2025-04-23 16:01:19 - INFO - 
+2025-04-23 16:01:20 - INFO - 
+Epoch 49/300
+2025-04-23 16:01:20 - INFO - Val Brier Score: 0.2052 | Val Balanced_accuracy: 0.6766 | Learning Rate: 0.000080
+2025-04-23 16:01:20 - INFO - Val Balanced_accuracy: 0.6766
+2025-04-23 16:01:20 - INFO - 
+2025-04-23 16:01:20 - INFO - 
+Epoch 50/300
+2025-04-23 16:01:20 - INFO - Val Brier Score: 0.2085 | Val Balanced_accuracy: 0.6495 | Learning Rate: 0.000080
+2025-04-23 16:01:20 - INFO - Val Balanced_accuracy: 0.6495
+2025-04-23 16:01:20 - INFO - 
+2025-04-23 16:01:21 - INFO - 
+Epoch 51/300
+2025-04-23 16:01:21 - INFO - Val Brier Score: 0.2112 | Val Balanced_accuracy: 0.6429 | Learning Rate: 0.000080
+2025-04-23 16:01:21 - INFO - Val Balanced_accuracy: 0.6429
+2025-04-23 16:01:21 - INFO - 
+2025-04-23 16:01:21 - INFO - 
+Epoch 52/300
+2025-04-23 16:01:21 - INFO - Val Brier Score: 0.2071 | Val Balanced_accuracy: 0.6745 | Learning Rate: 0.000064
+2025-04-23 16:01:21 - INFO - Val Balanced_accuracy: 0.6745
+2025-04-23 16:01:21 - INFO - 
+2025-04-23 16:01:22 - INFO - 
+Epoch 53/300
+2025-04-23 16:01:22 - INFO - Val Brier Score: 0.2088 | Val Balanced_accuracy: 0.6516 | Learning Rate: 0.000064
+2025-04-23 16:01:22 - INFO - Val Balanced_accuracy: 0.6516
+2025-04-23 16:01:22 - INFO - 
+2025-04-23 16:01:23 - INFO - 
+Epoch 54/300
+2025-04-23 16:01:23 - INFO - Val Brier Score: 0.2068 | Val Balanced_accuracy: 0.6581 | Learning Rate: 0.000064
+2025-04-23 16:01:23 - INFO - Val Balanced_accuracy: 0.6581
+2025-04-23 16:01:23 - INFO - 
+2025-04-23 16:01:23 - INFO - 
+Epoch 55/300
+2025-04-23 16:01:23 - INFO - Val Brier Score: 0.2056 | Val Balanced_accuracy: 0.6643 | Learning Rate: 0.000064
+2025-04-23 16:01:23 - INFO - Val Balanced_accuracy: 0.6643
+2025-04-23 16:01:23 - INFO - 
+2025-04-23 16:01:24 - INFO - 
+Epoch 56/300
+2025-04-23 16:01:24 - INFO - Val Brier Score: 0.2051 | Val Balanced_accuracy: 0.6521 | Learning Rate: 0.000064
+2025-04-23 16:01:24 - INFO - Val Balanced_accuracy: 0.6521
+2025-04-23 16:01:24 - INFO - 
+2025-04-23 16:01:24 - INFO - 
+Epoch 57/300
+2025-04-23 16:01:24 - INFO - Val Brier Score: 0.2079 | Val Balanced_accuracy: 0.6644 | Learning Rate: 0.000064
+2025-04-23 16:01:24 - INFO - Val Balanced_accuracy: 0.6644
+2025-04-23 16:01:24 - INFO - 
+2025-04-23 16:01:25 - INFO - 
+Epoch 58/300
+2025-04-23 16:01:25 - INFO - Val Brier Score: 0.2041 | Val Balanced_accuracy: 0.6716 | Learning Rate: 0.000064
+2025-04-23 16:01:25 - INFO - Val Balanced_accuracy: 0.6716
+2025-04-23 16:01:25 - INFO - 
+2025-04-23 16:01:26 - INFO - 
+Epoch 59/300
+2025-04-23 16:01:26 - INFO - Val Brier Score: 0.2041 | Val Balanced_accuracy: 0.6678 | Learning Rate: 0.000064
+2025-04-23 16:01:26 - INFO - Val Balanced_accuracy: 0.6678
+2025-04-23 16:01:26 - INFO - 
+2025-04-23 16:01:26 - INFO - 
+Epoch 60/300
+2025-04-23 16:01:26 - INFO - Val Brier Score: 0.2047 | Val Balanced_accuracy: 0.6660 | Learning Rate: 0.000064
+2025-04-23 16:01:26 - INFO - Val Balanced_accuracy: 0.6660
+2025-04-23 16:01:26 - INFO - 
+2025-04-23 16:01:27 - INFO - 
+Epoch 61/300
+2025-04-23 16:01:27 - INFO - Val Brier Score: 0.2014 | Val Balanced_accuracy: 0.6759 | Learning Rate: 0.000064
+2025-04-23 16:01:27 - INFO - Val Balanced_accuracy: 0.6759
+2025-04-23 16:01:27 - INFO - 
+2025-04-23 16:01:27 - INFO - Model saved with validation Balanced_accuracy: 0.6759
+2025-04-23 16:01:27 - INFO - 
+Epoch 62/300
+2025-04-23 16:01:27 - INFO - Val Brier Score: 0.2055 | Val Balanced_accuracy: 0.6756 | Learning Rate: 0.000064
+2025-04-23 16:01:27 - INFO - Val Balanced_accuracy: 0.6756
+2025-04-23 16:01:27 - INFO - 
+2025-04-23 16:01:28 - INFO - 
+Epoch 63/300
+2025-04-23 16:01:28 - INFO - Val Brier Score: 0.2063 | Val Balanced_accuracy: 0.6806 | Learning Rate: 0.000064
+2025-04-23 16:01:28 - INFO - Val Balanced_accuracy: 0.6806
+2025-04-23 16:01:28 - INFO - 
+2025-04-23 16:01:28 - INFO - 
+Epoch 64/300
+2025-04-23 16:01:28 - INFO - Val Brier Score: 0.2066 | Val Balanced_accuracy: 0.6432 | Learning Rate: 0.000064
+2025-04-23 16:01:28 - INFO - Val Balanced_accuracy: 0.6432
+2025-04-23 16:01:28 - INFO - 
+2025-04-23 16:01:29 - INFO - 
+Epoch 65/300
+2025-04-23 16:01:29 - INFO - Val Brier Score: 0.2069 | Val Balanced_accuracy: 0.6626 | Learning Rate: 0.000064
+2025-04-23 16:01:29 - INFO - Val Balanced_accuracy: 0.6626
+2025-04-23 16:01:29 - INFO - 
+2025-04-23 16:01:29 - INFO - 
+Epoch 66/300
+2025-04-23 16:01:29 - INFO - Val Brier Score: 0.2065 | Val Balanced_accuracy: 0.6663 | Learning Rate: 0.000064
+2025-04-23 16:01:29 - INFO - Val Balanced_accuracy: 0.6663
+2025-04-23 16:01:29 - INFO - 
+2025-04-23 16:01:30 - INFO - 
+Epoch 67/300
+2025-04-23 16:01:30 - INFO - Val Brier Score: 0.2077 | Val Balanced_accuracy: 0.6745 | Learning Rate: 0.000064
+2025-04-23 16:01:30 - INFO - Val Balanced_accuracy: 0.6745
+2025-04-23 16:01:30 - INFO - 
+2025-04-23 16:01:31 - INFO - 
+Epoch 68/300
+2025-04-23 16:01:31 - INFO - Val Brier Score: 0.2052 | Val Balanced_accuracy: 0.6588 | Learning Rate: 0.000064
+2025-04-23 16:01:31 - INFO - Val Balanced_accuracy: 0.6588
+2025-04-23 16:01:31 - INFO - 
+2025-04-23 16:01:31 - INFO - 
+Epoch 69/300
+2025-04-23 16:01:31 - INFO - Val Brier Score: 0.2042 | Val Balanced_accuracy: 0.6654 | Learning Rate: 0.000064
+2025-04-23 16:01:31 - INFO - Val Balanced_accuracy: 0.6654
+2025-04-23 16:01:31 - INFO - 
+2025-04-23 16:01:32 - INFO - 
+Epoch 70/300
+2025-04-23 16:01:32 - INFO - Val Brier Score: 0.2034 | Val Balanced_accuracy: 0.6798 | Learning Rate: 0.000064
+2025-04-23 16:01:32 - INFO - Val Balanced_accuracy: 0.6798
+2025-04-23 16:01:32 - INFO - 
+2025-04-23 16:01:32 - INFO - 
+Epoch 71/300
+2025-04-23 16:01:32 - INFO - Val Brier Score: 0.2075 | Val Balanced_accuracy: 0.6742 | Learning Rate: 0.000064
+2025-04-23 16:01:32 - INFO - Val Balanced_accuracy: 0.6742
+2025-04-23 16:01:32 - INFO - 
+2025-04-23 16:01:33 - INFO - 
+Epoch 72/300
+2025-04-23 16:01:33 - INFO - Val Brier Score: 0.2062 | Val Balanced_accuracy: 0.6734 | Learning Rate: 0.000051
+2025-04-23 16:01:33 - INFO - Val Balanced_accuracy: 0.6734
+2025-04-23 16:01:33 - INFO - 
+2025-04-23 16:01:33 - INFO - 
+Epoch 73/300
+2025-04-23 16:01:33 - INFO - Val Brier Score: 0.2028 | Val Balanced_accuracy: 0.6683 | Learning Rate: 0.000051
+2025-04-23 16:01:33 - INFO - Val Balanced_accuracy: 0.6683
+2025-04-23 16:01:33 - INFO - 
+2025-04-23 16:01:34 - INFO - 
+Epoch 74/300
+2025-04-23 16:01:34 - INFO - Val Brier Score: 0.2073 | Val Balanced_accuracy: 0.6562 | Learning Rate: 0.000051
+2025-04-23 16:01:34 - INFO - Val Balanced_accuracy: 0.6562
+2025-04-23 16:01:34 - INFO - 
+2025-04-23 16:01:34 - INFO - 
+Epoch 75/300
+2025-04-23 16:01:34 - INFO - Val Brier Score: 0.2078 | Val Balanced_accuracy: 0.6592 | Learning Rate: 0.000051
+2025-04-23 16:01:34 - INFO - Val Balanced_accuracy: 0.6592
+2025-04-23 16:01:34 - INFO - 
+2025-04-23 16:01:35 - INFO - 
+Epoch 76/300
+2025-04-23 16:01:35 - INFO - Val Brier Score: 0.2050 | Val Balanced_accuracy: 0.6642 | Learning Rate: 0.000051
+2025-04-23 16:01:35 - INFO - Val Balanced_accuracy: 0.6642
+2025-04-23 16:01:35 - INFO - 
+2025-04-23 16:01:35 - INFO - 
+Epoch 77/300
+2025-04-23 16:01:35 - INFO - Val Brier Score: 0.2047 | Val Balanced_accuracy: 0.6716 | Learning Rate: 0.000051
+2025-04-23 16:01:35 - INFO - Val Balanced_accuracy: 0.6716
+2025-04-23 16:01:35 - INFO - 
+2025-04-23 16:01:36 - INFO - 
+Epoch 78/300
+2025-04-23 16:01:36 - INFO - Val Brier Score: 0.2046 | Val Balanced_accuracy: 0.6733 | Learning Rate: 0.000051
+2025-04-23 16:01:36 - INFO - Val Balanced_accuracy: 0.6733
+2025-04-23 16:01:36 - INFO - 
+2025-04-23 16:01:37 - INFO - 
+Epoch 79/300
+2025-04-23 16:01:37 - INFO - Val Brier Score: 0.2053 | Val Balanced_accuracy: 0.6681 | Learning Rate: 0.000051
+2025-04-23 16:01:37 - INFO - Val Balanced_accuracy: 0.6681
+2025-04-23 16:01:37 - INFO - 
+2025-04-23 16:01:37 - INFO - 
+Epoch 80/300
+2025-04-23 16:01:37 - INFO - Val Brier Score: 0.2038 | Val Balanced_accuracy: 0.6684 | Learning Rate: 0.000051
+2025-04-23 16:01:37 - INFO - Val Balanced_accuracy: 0.6684
+2025-04-23 16:01:37 - INFO - 
+2025-04-23 16:01:38 - INFO - 
+Epoch 81/300
+2025-04-23 16:01:38 - INFO - Val Brier Score: 0.2038 | Val Balanced_accuracy: 0.6813 | Learning Rate: 0.000051
+2025-04-23 16:01:38 - INFO - Val Balanced_accuracy: 0.6813
+2025-04-23 16:01:38 - INFO - 
+2025-04-23 16:01:38 - INFO - 
+Epoch 82/300
+2025-04-23 16:01:38 - INFO - Val Brier Score: 0.2029 | Val Balanced_accuracy: 0.6808 | Learning Rate: 0.000051
+2025-04-23 16:01:38 - INFO - Val Balanced_accuracy: 0.6808
+2025-04-23 16:01:38 - INFO - 
+2025-04-23 16:01:39 - INFO - 
+Epoch 83/300
+2025-04-23 16:01:39 - INFO - Val Brier Score: 0.2052 | Val Balanced_accuracy: 0.6796 | Learning Rate: 0.000041
+2025-04-23 16:01:39 - INFO - Val Balanced_accuracy: 0.6796
+2025-04-23 16:01:39 - INFO - 
+2025-04-23 16:01:39 - INFO - 
+Epoch 84/300
+2025-04-23 16:01:39 - INFO - Val Brier Score: 0.2027 | Val Balanced_accuracy: 0.6742 | Learning Rate: 0.000041
+2025-04-23 16:01:39 - INFO - Val Balanced_accuracy: 0.6742
+2025-04-23 16:01:39 - INFO - 
+2025-04-23 16:01:40 - INFO - 
+Epoch 85/300
+2025-04-23 16:01:40 - INFO - Val Brier Score: 0.2037 | Val Balanced_accuracy: 0.6780 | Learning Rate: 0.000041
+2025-04-23 16:01:40 - INFO - Val Balanced_accuracy: 0.6780
+2025-04-23 16:01:40 - INFO - 
+2025-04-23 16:01:40 - INFO - 
+Epoch 86/300
+2025-04-23 16:01:40 - INFO - Val Brier Score: 0.2060 | Val Balanced_accuracy: 0.6656 | Learning Rate: 0.000041
+2025-04-23 16:01:40 - INFO - Val Balanced_accuracy: 0.6656
+2025-04-23 16:01:40 - INFO - 
+2025-04-23 16:01:41 - INFO - 
+Epoch 87/300
+2025-04-23 16:01:41 - INFO - Val Brier Score: 0.2030 | Val Balanced_accuracy: 0.6778 | Learning Rate: 0.000041
+2025-04-23 16:01:41 - INFO - Val Balanced_accuracy: 0.6778
+2025-04-23 16:01:41 - INFO - 
+2025-04-23 16:01:42 - INFO - 
+Epoch 88/300
+2025-04-23 16:01:42 - INFO - Val Brier Score: 0.2033 | Val Balanced_accuracy: 0.6734 | Learning Rate: 0.000041
+2025-04-23 16:01:42 - INFO - Val Balanced_accuracy: 0.6734
+2025-04-23 16:01:42 - INFO - 
+2025-04-23 16:01:42 - INFO - 
+Epoch 89/300
+2025-04-23 16:01:42 - INFO - Val Brier Score: 0.2041 | Val Balanced_accuracy: 0.6700 | Learning Rate: 0.000041
+2025-04-23 16:01:42 - INFO - Val Balanced_accuracy: 0.6700
+2025-04-23 16:01:42 - INFO - 
+2025-04-23 16:01:43 - INFO - 
+Epoch 90/300
+2025-04-23 16:01:43 - INFO - Val Brier Score: 0.2045 | Val Balanced_accuracy: 0.6817 | Learning Rate: 0.000041
+2025-04-23 16:01:43 - INFO - Val Balanced_accuracy: 0.6817
+2025-04-23 16:01:43 - INFO - 
+2025-04-23 16:01:43 - INFO - 
+Epoch 91/300
+2025-04-23 16:01:43 - INFO - Val Brier Score: 0.2025 | Val Balanced_accuracy: 0.6787 | Learning Rate: 0.000041
+2025-04-23 16:01:43 - INFO - Val Balanced_accuracy: 0.6787
+2025-04-23 16:01:43 - INFO - 
+2025-04-23 16:01:44 - INFO - 
+Epoch 92/300
+2025-04-23 16:01:44 - INFO - Val Brier Score: 0.2036 | Val Balanced_accuracy: 0.6735 | Learning Rate: 0.000041
+2025-04-23 16:01:44 - INFO - Val Balanced_accuracy: 0.6735
+2025-04-23 16:01:44 - INFO - 
+2025-04-23 16:01:44 - INFO - Early stopping triggered at epoch 92
+2025-04-23 16:01:44 - INFO - 
+Best Threshold Found: 0.3400
+2025-04-23 16:01:44 - INFO - Final model saved to: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1Days.pth
+2025-04-23 16:01:44 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-04-23 16:01:44 - INFO - Accuracy: 0.6618
+2025-04-23 16:01:44 - INFO - Balanced_accuracy: 0.6961
+2025-04-23 16:01:44 - INFO - Roc_auc: 0.7483
+2025-04-23 16:01:44 - INFO - Precision: 0.5192
+2025-04-23 16:01:44 - INFO - Recall: 0.8184
+2025-04-23 16:01:44 - INFO - Mcc: 0.3800
+2025-04-23 16:01:44 - INFO - Kappa: 0.3483
+2025-04-23 16:01:44 - INFO - Brier: 0.1956
+2025-04-23 16:01:44 - INFO - F1: 0.6353
