@@ -30,7 +30,6 @@ def main(do_test_all=False,
          method_optical_flow = conf.method_optical_flow
          ):
     
-
     # Test different models for different days
     if do_test_all:
         base_plot_path = os.path.join(current_dir, "plots_and_metrics_test", method_optical_flow)
@@ -77,7 +76,6 @@ def main(do_test_all=False,
             )
 
 
-
 if __name__ == "__main__":
     start_time = time.time()
     main(do_test_all=True, 
@@ -85,7 +83,7 @@ if __name__ == "__main__":
          do_bootstrap=False, 
          do_stratified_evaluation=True,
          models = ['ROCKET', 'LSTMFCN', 'ConvTran'],
-         days_for_analysis = [1,3],
+         days_for_analysis = [1],
          days_mcNemar = [1,3],
          base_models_path = conf.output_model_base_dir,
          base_test_csv_path = user_paths.dataset,

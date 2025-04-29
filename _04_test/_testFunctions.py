@@ -102,10 +102,15 @@ def plot_summary_roc_curves(model_name, roc_data, day, output_dir):
 
 # Richiamo questa così da essere coerente nei vari script
 def instantiate_LSTMFCN(checkpoint, device):
-    model = LSTMFCN(**{k: checkpoint[k] 
-                       for k in ['lstm_size', 'filter_sizes',
-                                 'kernel_sizes', 'dropout', 'num_layers']}
-                                 ).to(device)
+    params = checkpoint.get('params', {})
+
+    model = LSTMFCN(
+        lstm_size=params.get('lstm_size'),
+        filter_sizes=tuple(map(int, params.get('filter_sizes', '').split(','))),
+        kernel_sizes=tuple(map(int, params.get('kernel_sizes', '').split(','))),
+        dropout=params.get('dropout'),
+        num_layers=params.get('num_layers')
+        ).to(device)
     return model
 
 
@@ -196,7 +201,7 @@ def load_model_by_type(model_type: str, days: int, base_models_path: str, device
         return {
             "model": model,
             "threshold": lstm_checkpoint.get('best_threshold', 0.5),
-            "batch_size": lstm_checkpoint.get('batch_size', conf.batch_size)
+            "batch_size": lstm_checkpoint['params']['batch_size']
             }
     
     elif model_type == "ConvTran":

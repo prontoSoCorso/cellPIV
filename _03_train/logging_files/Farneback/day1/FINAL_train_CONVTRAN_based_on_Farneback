@@ -1,0 +1,64 @@
+2025-04-29 17:56:07 - INFO - Validation Metric - Epoch [15/150]: 0.6721
+2025-04-29 17:56:12 - INFO - Validation Metric - Epoch [30/150]: 0.6787
+2025-04-29 17:56:16 - INFO - Validation Metric - Epoch [45/150]: 0.6918
+2025-04-29 18:00:05 - INFO - Validation Metric - Epoch [10/150]: 0.6787
+2025-04-29 18:00:08 - INFO - Validation Metric - Epoch [20/150]: 0.6765
+2025-04-29 18:00:11 - INFO - Validation Metric - Epoch [30/150]: 0.6798
+2025-04-29 18:00:14 - INFO - Validation Metric - Epoch [40/150]: 0.6809
+2025-04-29 18:00:18 - INFO - Validation Metric - Epoch [50/150]: 0.6809
+2025-04-29 18:03:34 - INFO - Validation Metric - Epoch [10/150]: 0.6481
+2025-04-29 18:03:41 - INFO - Validation Metric - Epoch [20/150]: 0.6645
+2025-04-29 18:03:47 - INFO - Validation Metric - Epoch [30/150]: 0.6689
+2025-04-29 18:03:53 - INFO - Validation Metric - Epoch [40/150]: 0.6995
+2025-04-29 18:03:59 - INFO - Validation Metric - Epoch [50/150]: 0.6984
+2025-04-29 18:04:05 - INFO - Validation Metric - Epoch [60/150]: 0.7049
+2025-04-29 18:04:11 - INFO - Validation Metric - Epoch [70/150]: 0.7016
+2025-04-29 18:04:17 - INFO - Validation Metric - Epoch [80/150]: 0.6973
+2025-04-29 18:04:24 - INFO - Validation Metric - Epoch [90/150]: 0.6984
+2025-04-29 18:04:30 - INFO - Validation Metric - Epoch [100/150]: 0.7071
+2025-04-29 18:04:36 - INFO - Validation Metric - Epoch [110/150]: 0.6973
+2025-04-29 18:04:42 - INFO - Validation Metric - Epoch [120/150]: 0.6962
+2025-04-29 18:04:48 - INFO - Validation Metric - Epoch [130/150]: 0.6929
+2025-04-29 18:07:30 - INFO - Validation Metric - Epoch [10/150]: 0.6481
+2025-04-29 18:07:36 - INFO - Validation Metric - Epoch [20/150]: 0.6645
+2025-04-29 18:07:42 - INFO - Validation Metric - Epoch [30/150]: 0.6689
+2025-04-29 18:07:48 - INFO - Validation Metric - Epoch [40/150]: 0.6995
+2025-04-29 18:07:54 - INFO - Validation Metric - Epoch [50/150]: 0.6984
+2025-04-29 18:08:01 - INFO - Validation Metric - Epoch [60/150]: 0.7049
+2025-04-29 18:08:07 - INFO - Validation Metric - Epoch [70/150]: 0.7016
+2025-04-29 18:08:13 - INFO - Validation Metric - Epoch [80/150]: 0.6973
+2025-04-29 18:08:19 - INFO - Validation Metric - Epoch [90/150]: 0.6984
+2025-04-29 18:08:26 - INFO - Validation Metric - Epoch [100/150]: 0.7071
+2025-04-29 18:08:32 - INFO - Validation Metric - Epoch [110/150]: 0.6973
+2025-04-29 18:08:38 - INFO - Validation Metric - Epoch [120/150]: 0.6962
+2025-04-29 18:08:45 - INFO - Validation Metric - Epoch [130/150]: 0.6929
+2025-04-29 18:08:50 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-04-29 18:08:50 - INFO - Accuracy: 0.6639
+2025-04-29 18:08:50 - INFO - Balanced_accuracy: 0.7128
+2025-04-29 18:08:50 - INFO - Roc_auc: 0.7687
+2025-04-29 18:08:50 - INFO - Precision: 0.5194
+2025-04-29 18:08:50 - INFO - Recall: 0.8876
+2025-04-29 18:08:50 - INFO - Mcc: 0.4199
+2025-04-29 18:08:50 - INFO - Kappa: 0.3685
+2025-04-29 18:08:50 - INFO - Brier: 0.1928
+2025-04-29 18:08:50 - INFO - F1: 0.6553
+2025-04-29 19:16:36 - INFO - Validation Metric - Epoch [10/150]: 0.7037
+2025-04-29 19:16:39 - INFO - Validation Metric - Epoch [20/150]: 0.6974
+2025-04-29 19:16:41 - INFO - Validation Metric - Epoch [30/150]: 0.6903
+2025-04-29 19:16:43 - INFO - Validation Metric - Epoch [40/150]: 0.6974
+2025-04-29 19:16:45 - INFO - Validation Metric - Epoch [50/150]: 0.6972
+2025-04-29 19:19:27 - INFO - Validation Metric - Epoch [10/150]: 0.6994
+2025-04-29 19:19:29 - INFO - Validation Metric - Epoch [20/150]: 0.6916
+2025-04-29 19:19:31 - INFO - Validation Metric - Epoch [30/150]: 0.6966
+2025-04-29 19:19:33 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-04-29 19:19:33 - INFO - Accuracy: 0.6680
+2025-04-29 19:19:33 - INFO - Balanced_accuracy: 0.6940
+2025-04-29 19:19:33 - INFO - Roc_auc: 0.7702
+2025-04-29 19:19:33 - INFO - Precision: 0.5260
+2025-04-29 19:19:33 - INFO - Recall: 0.7867
+2025-04-29 19:19:33 - INFO - Mcc: 0.3736
+2025-04-29 19:19:33 - INFO - Kappa: 0.3501
+2025-04-29 19:19:33 - INFO - Brier: 0.2059
+2025-04-29 19:19:33 - INFO - F1: 0.6305

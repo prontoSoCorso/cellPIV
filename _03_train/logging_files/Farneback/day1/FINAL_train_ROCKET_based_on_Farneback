@@ -1,0 +1,23 @@
+2025-04-29 10:47:26 - INFO - ===== ROCKET - 1 DAYS =====
+2025-04-29 10:47:26 - INFO - ===== RESULTS WITH 7500 KERNELS, BEST THRESHOLD 0.485 =====
+2025-04-29 10:47:26 - INFO - Validation Accuracy: 0.6995
+2025-04-29 10:47:26 - INFO - Validation Balanced_accuracy: 0.7096
+2025-04-29 10:47:26 - INFO - Validation Roc_auc: 0.7575
+2025-04-29 10:47:26 - INFO - Validation Precision: 0.6233
+2025-04-29 10:47:26 - INFO - Validation Recall: 0.7900
+2025-04-29 10:47:26 - INFO - Validation Mcc: 0.4183
+2025-04-29 10:47:26 - INFO - Validation Kappa: 0.4070
+2025-04-29 10:47:26 - INFO - Validation Brier: 0.1958
+2025-04-29 10:47:26 - INFO - Validation F1: 0.6968
+2025-04-29 10:47:30 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-04-29 10:47:30 - INFO - Accuracy: 0.6805
+2025-04-29 10:47:30 - INFO - Balanced_accuracy: 0.7031
+2025-04-29 10:47:30 - INFO - Roc_auc: 0.7591
+2025-04-29 10:47:30 - INFO - Precision: 0.5386
+2025-04-29 10:47:30 - INFO - Recall: 0.7839
+2025-04-29 10:47:30 - INFO - Mcc: 0.3904
+2025-04-29 10:47:30 - INFO - Kappa: 0.3694
+2025-04-29 10:47:30 - INFO - Brier: 0.1992
+2025-04-29 10:47:30 - INFO - F1: 0.6385
+2025-04-29 10:47:30 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_1Days.joblib

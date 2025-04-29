@@ -28,7 +28,7 @@ def main(models_to_train = ["ROCKET", "ConvTran", "LSTMFCN"],
             if model.lower() == "rocket":
                 rocket_main(days_to_consider=day, 
                             train_path="", val_path="", test_path="", default_path=True, 
-                            kernels=conf.kernels_set, 
+                            kernels=conf.kernel_number_ROCKET, 
                             seed=conf.seed,
                             save_plots=conf.save_plots, 
                             output_dir_plots=conf.output_dir_plots, 

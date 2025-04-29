@@ -87,8 +87,7 @@ class Config_00_preprocessing:
 
 
 class Config_01_OpticalFlow:
-    #method_optical_flow = "LucasKanade"
-    method_optical_flow = "LucasKanade"
+    method_optical_flow = "Farneback"   # "LucasKanade/Farneback"
 
     # Settings
     save_metrics = False
@@ -255,7 +254,7 @@ class Config_03_train:
     
 
     # ROCKET
-    kernels_set     = [50,100,200,300,500,1000,2500,5000,10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernel_number_ROCKET     = [7500] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     type_model_classification = "RF"    #or "LR" or "XGB"
     most_important_metric = "balanced_accuracy"
     
@@ -289,7 +288,7 @@ class Config_03_train:
     Fix_pos_encode  = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
     Rel_pos_encode  = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
     # ConvTran - Training Parameters/Hyper-Parameters
-    epochs          = 100        # Number of training epochs
+    epochs          = 150        # Number of training epochs
     batch_size      = 16     # Training batch size
     lr              = 1e-3           # Learning rate
     dropout         = 0.2       # Dropout regularization ratio
@@ -313,22 +312,31 @@ class Config_03_train_with_optimization(Config_03_train):
     
     # Optuna optimization control
     optimize_with_optuna = True
-    optuna_n_trials = 50
     
-    # ROCKET search space
-    rocket_kernels_options = [50,100,200,300,500,1000,2500,5000,10000]
-    rocket_classifier_options = ["RF", "XGB"]
+    # --- ROCKET search space ---
+    rocket_kernels_options = [5000, 7500, 10000, 12500]
+    rocket_classifier_options = ["RF"]
+    optuna_n_trials_ROCKET = 20
     
-    # LSTM-FCN search space (to be added when we modify that script)
-    # ConvTran search space (to be added when we modify that script)
+    # --- LSTM-FCN search space ---
+    lstm_size_options = [4, 8, 16, 32]
+    filter_sizes_options = ["64,128,64", "128,256,128", "256,512,256"]
+    kernel_sizes_options = ["5,3,2", "8,5,3", "10,7,5"]
+    dropout_range = (0.1, 0.5)
+    num_layers_range = (1, 4)
+    batch_size_options = [16, 32, 64]
+    learning_rate_range = (1e-5, 1e-3)
+    early_stopping_patience = 60
+    optuna_num_epochs = 150
+    optuna_n_trials_LSTMFCN = 300
 
-
-
-
-
-
-
-
-
-
-
+    # --- ConvTran search space ---
+    convtran_emb_size_options   = [64, 128, 256]
+    convtran_dim_ff_options     = [32, 64, 128, 256]
+    convtran_num_heads_options  = [4, 8, 16]
+    convtran_dropout_range      = (0.1, 0.5)
+    convtran_learning_rate_range= (1e-5, 1e-2)
+    convtran_batch_size_options = [16, 32, 64]
+    convtran_patience           = 30
+    convtran_epochs_options     = 100
+    optuna_n_trials_ConvTran    = 1

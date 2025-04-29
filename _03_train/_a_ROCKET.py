@@ -59,7 +59,7 @@ def classification_model(head_type="RF"):
 
     return model
 
-def find_best_threshold(model, X_val, y_val, thresholds=np.linspace(0.0, 1.0, 101)):
+def find_best_threshold(model, X_val, y_val, thresholds=np.linspace(0.0, 0.5, 101)):
     """ Trova la migliore soglia basata sulla balanced accuracy sul validation set. """
     y_prob = model.predict_proba(X_val)[:, 1]  # Probabilità della classe positiva
     best_threshold = 0.5
@@ -87,7 +87,8 @@ def evaluate_model(model, X, y_true, threshold=0.5):
 
 def train_evaluate_rocket(X_train, y_train, X_val, y_val, 
                          num_kernels, classifier_type, 
-                         temporal_columns, trial=False):
+                         temporal_columns, trial=False, 
+                         day=None):
     rocket = Rocket(num_kernels=num_kernels,
                     random_state=conf.seed, 
                     n_jobs=-1)
@@ -102,8 +103,8 @@ def train_evaluate_rocket(X_train, y_train, X_val, y_val,
     val_metrics = evaluate_model(model, X_val_features, y_val, threshold=best_threshold)
 
     if not trial:
-        logging.info(f'===== ROCKET - {conf.days_to_consider} DAYS =====')
-        logging.info(f'===== RESULTS WITH {num_kernels} KERNELS =====')
+        logging.info(f'===== ROCKET - {day} DAYS =====')
+        logging.info(f'===== RESULTS WITH {num_kernels} KERNELS, BEST THRESHOLD {best_threshold} =====')
         for metric, value in val_metrics.items():
             if metric not in ("conf_matrix", "fpr", "tpr"):
                 logging.info(f"Validation {metric.capitalize()}: {value:.4f}")
@@ -119,19 +120,19 @@ def train_final_model(df_train, df_val, df_test, best_kernel, classifier_type,
     X_all = X_all[:, np.newaxis, :]
     
     final_rocket = Rocket(num_kernels=best_kernel,
-                         random_state=conf.seed_everything(conf.seed),
+                         random_state=conf.seed,
                          n_jobs=-1)
     
     X_all_features = final_rocket.fit_transform(X_all)
     final_model = classification_model(classifier_type)
     final_model.fit(X_all_features, y_all)
+    best_threshold = find_best_threshold(final_model, X_all_features, y_all)
 
     # Test evaluation
     if df_test is not None:
         X_test, y_test = df_test[temporal_columns].values, df_test['BLASTO NY'].values
         X_test = X_test[:, np.newaxis, :]
         X_test_features = final_rocket.transform(X_test)
-        best_threshold = find_best_threshold(final_model, X_test_features, y_test)
         test_metrics = evaluate_model(final_model, X_test_features, y_test, threshold=best_threshold)
 
         logging.info("\n===== FINAL TEST RESULTS =====")
@@ -166,8 +167,7 @@ def train_final_model(df_train, df_val, df_test, best_kernel, classifier_type,
 
 
 def main(train_path="", val_path="", test_path="", default_path=True, 
-         kernels=conf.kernels_set, 
-         seed=conf.seed,
+         kernels=conf.kernel_number_ROCKET,
          save_plots=conf.save_plots,
          output_dir_plots=conf.output_dir_plots,
          output_model_base_dir=conf.output_model_base_dir, 
@@ -221,7 +221,7 @@ def main(train_path="", val_path="", test_path="", default_path=True,
             val_metric = train_evaluate_rocket(
                 X_train, y_train, X_val, y_val,
                 kernel, type_model_classification,
-                temporal_columns
+                temporal_columns, days_to_consider
             )
             best_metric_dict[kernel] = val_metric
 
@@ -248,7 +248,7 @@ if __name__ == "__main__":
     if conf.optimize_with_optuna:
         study = optuna.create_study(direction="maximize")
         study.optimize(lambda trial: main(trial=trial, run_test_evaluation=False), 
-                      n_trials=conf.optuna_n_trials)
+                      n_trials=conf.optuna_n_trials_ROCKET)
         print("Best trial:")
         trial = study.best_trial
         print(f"  Value: {trial.value}")

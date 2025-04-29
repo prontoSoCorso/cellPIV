@@ -2,6 +2,7 @@ import torch
 from sklearn.metrics import balanced_accuracy_score
 import numpy as np
 import logging
+import optuna
 
 import _utils_._utils as utils
 
@@ -49,7 +50,7 @@ class SupervisedTrainer:
                 logging.info(f'Train Step: {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}')
             """
 
-    def evaluate(self, epoch=None, keep_all=False):
+    def evaluate(self, epoch=None, keep_all=True):
         self.model.eval()
         all_metrics = []
         self.total_correct = 0
@@ -121,38 +122,37 @@ class SupervisedTrainer:
         return metrics
     
 
-def find_best_threshold(model, val_loader, device, thresholds=np.linspace(0.0, 1.0, 101)):
+def find_best_threshold(model, val_loader=None, y_true=None, y_probs=None):
     """ Trova la soglia ottimale sul validation set """
-    model.eval()
-    y_true, y_prob = [], []
+    if model:
+        model.eval()
+        y_true, y_prob = [], []
+        
+        with torch.no_grad():
+            for X, y in val_loader:
+                outputs = model(X)
+                probs = torch.softmax(outputs, dim=1)[:, 1]
+                y_prob.extend(probs.cpu().numpy())
+                y_true.extend(y.cpu().numpy())
     
-    with torch.no_grad():
-        for X, y in val_loader:
-            X, y = X.to(device), y.to(device)
-            outputs = model(X)
-            probs = torch.softmax(outputs, dim=1)[:, 1]
-            y_prob.extend(probs.cpu().numpy())
-            y_true.extend(y.cpu().numpy())
-    
+    thresholds = np.linspace(0.0, 1.0, 101)
     best_threshold = 0.5
     best_metric = 0.0
-
-    for threshold in thresholds:
-        y_pred = (np.array(y_prob) >= threshold).astype(int)
-        current_metric = balanced_accuracy_score(y_true, y_pred)
+    for th in thresholds:
+        current_metric = balanced_accuracy_score(y_true, (np.array(y_probs) >= th))
         
         if current_metric > best_metric:
             best_metric = current_metric
-            best_threshold = threshold
+            best_threshold = th
 
     return best_threshold
 
 
-def train_runner(config, model, trainer, val_evaluator, save_path):
-    best_val_loss = float('inf')
+def train_runner(config, model, trainer, val_evaluator, save_path, trial=None):
+    best_val_metric = float('-inf')
     epochs_no_improve = 0
-    early_stopping_patience = 31
     early_stopping_delta = 0.001
+    best_threshold = 0.5
 
     # Learning Rate Scheduler
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(trainer.optimizer, mode='min', factor=config.scheduler_factor, patience=config.scheduler_patience)
@@ -162,22 +162,40 @@ def train_runner(config, model, trainer, val_evaluator, save_path):
         trainer.train_epoch(epoch)
 
         # Validation phase
-        val_loss, val_acc = val_evaluator.evaluate(epoch, keep_all=True)
-        scheduler.step(val_loss)
-
-        # Log epoch results
-        logging.info(f"Epoch {epoch+1}/{config.epochs}")
-        logging.info(f"Validation Loss: {val_loss:.4f} | Accuracy: {val_acc:.4f}")
-        logging.info(f"Learning Rate: {scheduler.optimizer.param_groups[0]['lr']:.6f}")
+        val_true, val_probs = [], []
+        with torch.no_grad():
+            for X, y in val_evaluator.data_loader:
+                X, y = X.to(config.device), y.to(config.device)
+                outputs = model(X)
+                probs = torch.softmax(outputs, dim=1)[:, 1]
+                val_probs.extend(probs.cpu().numpy())
+                val_true.extend(y.cpu().numpy())
         
-        # Early stopping
-        if val_loss < (best_val_loss-early_stopping_delta):
-            best_val_loss = val_loss
+        # Find best threshold for current epoch
+        current_threshold = find_best_threshold(model=None, y_true=val_true, y_probs=val_probs)
+        current_metric = balanced_accuracy_score(val_true, (np.array(val_probs) >= current_threshold))
+        scheduler.step(current_metric)
+        if (epoch + 1) % 10 == 0:
+            logging.info(f"Validation Metric - Epoch [{epoch+1}/{config.epochs}]: {current_metric:.4f}")
+        
+        # Report intermediate results for pruning
+        if trial:
+            trial.report(best_val_metric, epoch)
+            if trial.should_prune():
+                raise optuna.exceptions.TrialPruned()
+
+        # Early stopping logic and Update best metric and threshold
+        if current_metric > (best_val_metric+ early_stopping_delta):
+            best_val_metric = current_metric
+            best_threshold = current_threshold
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'best_threshold': best_threshold
+            }, save_path)
             epochs_no_improve = 0
-            torch.save(model.state_dict(), save_path)
-            logging.info("New best model saved")
         else:
             epochs_no_improve += 1
-            if epochs_no_improve >= early_stopping_patience:
-                logging.info(f"Early stopping triggered after {epoch+1} epochs")
+            if epochs_no_improve >= config.convtran_patience:
                 break
+
+    return best_val_metric, best_threshold

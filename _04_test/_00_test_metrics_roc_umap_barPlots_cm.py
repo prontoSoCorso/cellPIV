@@ -79,15 +79,15 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
                 checkpoint = torch.load(model_path, map_location=device, weights_only=False)
 
                 model = LSTMFCN(
-                    lstm_size=checkpoint['lstm_size'],
-                    filter_sizes=checkpoint['filter_sizes'],
-                    kernel_sizes=checkpoint['kernel_sizes'],
-                    dropout=checkpoint['dropout'],
-                    num_layers=checkpoint['num_layers']
+                    lstm_size=checkpoint['params']['lstm_size'],
+                    filter_sizes=tuple(map(int, checkpoint['params']['filter_sizes'].split(','))),
+                    kernel_sizes=tuple(map(int, checkpoint['params']['kernel_sizes'].split(','))),
+                    dropout=checkpoint['params']['dropout'],
+                    num_layers=checkpoint['params']['num_layers']
                 ).to(device)
                 model.load_state_dict(checkpoint['model_state_dict'])
                 threshold = checkpoint.get('best_threshold', 0.5)
-                batch_size = checkpoint['batch_size']
+                batch_size = checkpoint['params']['batch_size']
 
                 X_tensor = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)
                 dataset = TensorDataset(X_tensor, torch.tensor(y_true))
