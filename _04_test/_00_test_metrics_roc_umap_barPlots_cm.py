@@ -108,8 +108,13 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
             elif model_name == 'ConvTran':
                 model_path = os.path.join(base_models_path, f"best_convtran_model_{day}Days.pkl")
                 checkpoint = torch.load(model_path, map_location=device, weights_only=False)
-                conf.num_labels = 2
-                conf.Data_shape = (1, X.shape[1])
+
+                # Restore config from checkpoint
+                saved_config = checkpoint['config']
+                for key, value in saved_config.items():
+                    setattr(conf, key, value)
+    
+                # Rebuild model with correct config and load best threshold
                 model = model_factory(conf).to(device)
                 model.load_state_dict(checkpoint['model_state_dict'])
                 threshold = checkpoint.get('best_threshold', 0.5)

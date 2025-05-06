@@ -21,3 +21,51 @@
 2025-04-29 10:48:50 - INFO - Brier: 0.1750
 2025-04-29 10:48:50 - INFO - F1: 0.6813
 2025-04-29 10:48:50 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib
+2025-05-06 12:33:56 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-05-06 12:33:56 - INFO - Accuracy: 0.6994
+2025-05-06 12:33:56 - INFO - Balanced_accuracy: 0.7184
+2025-05-06 12:33:56 - INFO - Roc_auc: 0.7913
+2025-05-06 12:33:56 - INFO - Precision: 0.6042
+2025-05-06 12:33:56 - INFO - Recall: 0.8427
+2025-05-06 12:33:56 - INFO - Mcc: 0.4390
+2025-05-06 12:33:56 - INFO - Kappa: 0.4151
+2025-05-06 12:33:56 - INFO - Brier: 0.1872
+2025-05-06 12:33:56 - INFO - F1: 0.7038
+2025-05-06 12:33:56 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib
+2025-05-06 12:49:06 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-05-06 12:49:06 - INFO - Accuracy: 0.7017
+2025-05-06 12:49:06 - INFO - Balanced_accuracy: 0.7204
+2025-05-06 12:49:06 - INFO - Roc_auc: 0.7907
+2025-05-06 12:49:06 - INFO - Precision: 0.6065
+2025-05-06 12:49:06 - INFO - Recall: 0.8427
+2025-05-06 12:49:06 - INFO - Mcc: 0.4426
+2025-05-06 12:49:06 - INFO - Kappa: 0.4191
+2025-05-06 12:49:06 - INFO - Brier: 0.1869
+2025-05-06 12:49:06 - INFO - F1: 0.7054
+2025-05-06 12:49:06 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib
+2025-05-06 12:51:26 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-05-06 12:51:26 - INFO - Accuracy: 0.6870
+2025-05-06 12:51:26 - INFO - Balanced_accuracy: 0.7030
+2025-05-06 12:51:26 - INFO - Roc_auc: 0.7737
+2025-05-06 12:51:26 - INFO - Precision: 0.5965
+2025-05-06 12:51:26 - INFO - Recall: 0.8080
+2025-05-06 12:51:26 - INFO - Mcc: 0.4058
+2025-05-06 12:51:26 - INFO - Kappa: 0.3878
+2025-05-06 12:51:26 - INFO - Brier: 0.1921
+2025-05-06 12:51:26 - INFO - F1: 0.6863
+2025-05-06 12:51:26 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib
+2025-05-06 12:53:11 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-05-06 12:53:11 - INFO - Accuracy: 0.7241
+2025-05-06 12:53:11 - INFO - Balanced_accuracy: 0.7435
+2025-05-06 12:53:11 - INFO - Roc_auc: 0.8184
+2025-05-06 12:53:11 - INFO - Precision: 0.5839
+2025-05-06 12:53:11 - INFO - Recall: 0.8127
+2025-05-06 12:53:11 - INFO - Mcc: 0.4674
+2025-05-06 12:53:11 - INFO - Kappa: 0.4485
+2025-05-06 12:53:11 - INFO - Brier: 0.1748
+2025-05-06 12:53:11 - INFO - F1: 0.6795
+2025-05-06 12:53:12 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib

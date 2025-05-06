@@ -15,8 +15,8 @@ sys.path.append(parent_dir)
 from config import Config_03_train_with_optimization as conf
 import _utils_._utils as utils
 from _c_ConvTranUtils import load_my_data
-from _c_ConvTranTraining import SupervisedTrainer, train_runner, find_best_threshold
-from _99_ConvTranModel.model import model_factory, count_parameters
+from _c_ConvTranTraining import SupervisedTrainer, train_runner
+from _99_ConvTranModel.model import model_factory
 from _99_ConvTranModel.optimizers import get_optimizer
 from _99_ConvTranModel.loss import get_loss_module
 from _99_ConvTranModel.utils import load_model
@@ -40,7 +40,7 @@ def main(days_to_consider=conf.days_to_consider,
     
     utils.config_logging(log_dir=log_dir, log_filename=log_filename)
     Initialization()
-
+    
     if default_path:
         train_path, val_path, test_path = conf.get_paths(days_to_consider)
 
@@ -96,7 +96,7 @@ def train_convtran(params, days_to_consider, train_path, val_path, trial=None):
     # print_interval=conf.print_interval, is_training=False ?????
     trainer = SupervisedTrainer(model, train_loader, conf.device, loss_module, optimizer)
     val_evaluator = SupervisedTrainer(model, val_loader, conf.device, loss_module)
-    save_path_tmp=os.path.join(conf.output_model_base_dir, f"temp_convtran_{days_to_consider}.pkl")
+    save_path_tmp=os.path.join(conf.output_model_base_dir, f"best_convtran_model_{days_to_consider}Days.pkl")
 
     best_metric, best_threshold = train_runner(
         config=conf, model=model, trainer=trainer, val_evaluator=val_evaluator, 
@@ -109,6 +109,13 @@ def train_convtran(params, days_to_consider, train_path, val_path, trial=None):
 def evaluate_final_model(save_path, test_path, batch_size):
     # Load model AND threshold
     checkpoint = torch.load(save_path, map_location=conf.device, weights_only=False)
+
+    # Restore parameters to config
+    saved_config = checkpoint['config']
+    for key, value in saved_config.items():
+        setattr(conf, key, value)
+
+    # Rebuild model with original config and save best threshold
     model = model_factory(conf).to(conf.device)
     model.load_state_dict(checkpoint['model_state_dict'])
     best_threshold = checkpoint['best_threshold']
@@ -131,7 +138,7 @@ def save_results(metrics, output_dir, days):
         utils.save_confusion_matrix(conf_matrix=metrics['conf_matrix'], 
                                     filename=conf_matrix_filename, 
                                     model_name="ConvTran")
-        utils.plot_roc_curve(fpr=metrics['fpr'], tpr=metrics['tpr'], 
+        utils.plot_roc_curve(fpr=metrics['fpr'], tpr=metrics['tpr'],
                              roc_auc=metrics['roc_auc'], 
                              filename=conf_matrix_filename.replace('confusion_matrix', 'roc'))
 

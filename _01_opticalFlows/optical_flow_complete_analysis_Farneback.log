@@ -12131,3 +12131,91 @@ NO_BLASTO Class:
 Saving metrics data to: /home/phd2/Scrivania/CorsoRepo/cellPIV/_02_temporalData/files_all_days_Farneback
 2025-04-23 04:51:28 - INFO - 
 Analysis completed successfully
+2025-05-06 17:01:55 - INFO - Starting optical flow analysis using method: FARNEBACK
+2025-05-06 17:01:55 - INFO - Configuration parameters:
+- Image size: 500
+- Minimum frames: 300
+- Initial frames to cut: 4
+- Forward frames: 4
+2025-05-06 17:01:55 - INFO - 
+Processing BLASTO class with 3 samples
+2025-05-06 17:01:55 - INFO - [1/3] Processing blasto: D2013.02.19_S0675_I141_2
+2025-05-06 17:02:05 - INFO - Processed frames D2013.02.19_S0675_I141_2 saved successfully
+2025-05-06 17:02:06 - INFO - [2/3] Processing blasto: D2013.02.19_S0675_I141_1
+2025-05-06 17:02:15 - INFO - Processed frames D2013.02.19_S0675_I141_1 saved successfully
+2025-05-06 17:02:15 - INFO - [3/3] Processing blasto: D2013.02.19_S0675_I141_5
+2025-05-06 17:02:24 - INFO - Processed frames D2013.02.19_S0675_I141_5 saved successfully
+2025-05-06 17:02:25 - INFO - 
+Processing NO_BLASTO class with 1 samples
+2025-05-06 17:02:25 - INFO - [1/1] Processing no_blasto: D2013.02.19_S0675_I141_3
+2025-05-06 17:02:34 - INFO - Processed frames D2013.02.19_S0675_I141_3 saved successfully
+2025-05-06 17:02:35 - INFO - 
+==================================================
+2025-05-06 17:02:35 - INFO - Processing Summary:
+2025-05-06 17:02:35 - INFO - Total videos processed: 4
+2025-05-06 17:02:35 - INFO - 
+BLASTO Class:
+2025-05-06 17:02:35 - INFO - - Total samples: 3
+2025-05-06 17:02:35 - INFO - - Successful processing: 3
+2025-05-06 17:02:35 - INFO - - Failed processing: 0
+2025-05-06 17:02:35 - INFO - 
+NO_BLASTO Class:
+2025-05-06 17:02:35 - INFO - - Total samples: 1
+2025-05-06 17:02:35 - INFO - - Successful processing: 1
+2025-05-06 17:02:35 - INFO - - Failed processing: 0
+2025-05-06 17:02:35 - INFO - 
+Analysis completed successfully
+2025-05-06 17:54:45 - INFO - Starting optical flow analysis using method: FARNEBACK
+2025-05-06 17:54:45 - INFO - Configuration parameters:
+- Image size: 500
+- Minimum frames: 300
+- Initial frames to cut: 4
+- Forward frames: 4
+2025-05-06 17:54:45 - INFO - 
+Processing BLASTO class with 3 samples
+2025-05-06 17:54:45 - INFO - [1/3] Processing blasto: D2013.02.19_S0675_I141_2
+2025-05-06 17:54:50 - INFO - Processed frames D2013.02.19_S0675_I141_2 saved successfully
+2025-05-06 17:57:25 - INFO - Starting optical flow analysis using method: FARNEBACK
+2025-05-06 17:57:25 - INFO - Configuration parameters:
+- Image size: 500
+- Minimum frames: 300
+- Initial frames to cut: 4
+- Forward frames: 4
+2025-05-06 17:57:25 - INFO - 
+Processing BLASTO class with 3 samples
+2025-05-06 17:57:25 - INFO - [1/3] Processing blasto: D2013.02.19_S0675_I141_2
+2025-05-06 17:57:29 - INFO - Processed frames D2013.02.19_S0675_I141_2 saved successfully
+2025-05-06 17:58:46 - INFO - Starting optical flow analysis using method: FARNEBACK
+2025-05-06 17:58:46 - INFO - Configuration parameters:
+- Image size: 500
+- Minimum frames: 300
+- Initial frames to cut: 4
+- Forward frames: 4
+2025-05-06 17:58:46 - INFO - 
+Processing BLASTO class with 3 samples
+2025-05-06 17:58:46 - INFO - [1/3] Processing blasto: D2013.02.19_S0675_I141_2
+2025-05-06 17:58:51 - INFO - Processed frames D2013.02.19_S0675_I141_2 saved successfully
+2025-05-06 17:58:52 - INFO - [2/3] Processing blasto: D2013.02.19_S0675_I141_1
+2025-05-06 17:58:56 - INFO - Processed frames D2013.02.19_S0675_I141_1 saved successfully
+2025-05-06 17:58:57 - INFO - [3/3] Processing blasto: D2013.02.19_S0675_I141_5
+2025-05-06 17:59:02 - INFO - Processed frames D2013.02.19_S0675_I141_5 saved successfully
+2025-05-06 17:59:02 - INFO - 
+Processing NO_BLASTO class with 1 samples
+2025-05-06 17:59:02 - INFO - [1/1] Processing no_blasto: D2013.02.19_S0675_I141_3
+2025-05-06 17:59:07 - INFO - Processed frames D2013.02.19_S0675_I141_3 saved successfully
+2025-05-06 17:59:08 - INFO - 
+==================================================
+2025-05-06 17:59:08 - INFO - Processing Summary:
+2025-05-06 17:59:08 - INFO - Total videos processed: 4
+2025-05-06 17:59:08 - INFO - 
+BLASTO Class:
+2025-05-06 17:59:08 - INFO - - Total samples: 3
+2025-05-06 17:59:08 - INFO - - Successful processing: 3
+2025-05-06 17:59:08 - INFO - - Failed processing: 0
+2025-05-06 17:59:08 - INFO - 
+NO_BLASTO Class:
+2025-05-06 17:59:08 - INFO - - Total samples: 1
+2025-05-06 17:59:08 - INFO - - Successful processing: 1
+2025-05-06 17:59:08 - INFO - - Failed processing: 0
+2025-05-06 17:59:08 - INFO - 
+Analysis completed successfully

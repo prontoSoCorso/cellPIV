@@ -188,10 +188,27 @@ def train_runner(config, model, trainer, val_evaluator, save_path, trial=None):
         if current_metric > (best_val_metric+ early_stopping_delta):
             best_val_metric = current_metric
             best_threshold = current_threshold
+            # Create a serializable config dictionary
+            config_dict = {
+                'emb_size': config.emb_size,
+                'num_heads': config.num_heads,
+                'dropout': config.dropout,
+                'batch_size': config.batch_size,
+                'lr': config.lr,
+                'Data_shape': config.Data_shape,
+                'Fix_pos_encode': config.Fix_pos_encode,
+                'Rel_pos_encode': config.Rel_pos_encode,
+                'Net_Type': config.Net_Type,
+                'dim_ff': config.dim_ff,
+                'num_labels': config.num_labels
+            }
+
             torch.save({
                 'model_state_dict': model.state_dict(),
-                'best_threshold': best_threshold
+                'best_threshold': best_threshold,
+                'config': config_dict
             }, save_path)
+            
             epochs_no_improve = 0
         else:
             epochs_no_improve += 1

@@ -31,7 +31,7 @@ class user_paths:
         #Per computer fisso nuovo
         dataset = os.path.join(PROJECT_ROOT, "datasets")
         path_original_excel = os.path.join(dataset, "DB morpheus UniPV.xlsx")
-        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti"
+        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti_small_batch"
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
@@ -61,7 +61,7 @@ class utils:
     start_frame                 = framePerHour*hours2cut
 
     # Seed everything
-    seed = 2024
+    seed = 2025
 
 
 class Config_00_preprocessing:
@@ -90,9 +90,9 @@ class Config_01_OpticalFlow:
     method_optical_flow = "Farneback"   # "LucasKanade/Farneback"
 
     # Settings
-    save_metrics = False
+    save_metrics = True
     save_overlay_optical_flow = False
-    save_final_data = True
+    save_final_data = False
 
     # Var
     img_size                    = utils.img_size
@@ -129,7 +129,7 @@ class Config_01_OpticalFlow:
 
 
 class Config_02_temporalData:
-    dict                        = "sum_mean_mag"
+    dict                        = "mean_magnitude"
     method_optical_flow         = "Farneback"
     type_files                  = f"files_all_days_{method_optical_flow}"
     dict_in                     = dict + "_" + method_optical_flow + ".pkl"
@@ -144,9 +144,9 @@ class Config_02_temporalData:
     # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
     final_csv_path              = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
 
-    embedding_type = "UMAP"
+    embedding_type = "umap"
     use_plotly_lib = True
-    path_output_dim_reduction_files = os.path.join("dim_reduction_files", method_optical_flow)
+    path_output_dim_reduction_files = os.path.join("dim_reduction_files", method_optical_flow, dict)
     num_max_days = 7
     days_to_consider_for_dim_reduction = [1,3,5,7]    # array perché fa ciclo per poter svolgere umap su più giorni
 
@@ -159,14 +159,14 @@ class Config_02b_normalization:
     temporalDataType = Config_02_temporalData.dict
     train_size = 0.7
     embedding_type=""   # "umap" OR "tsne"
-    save_normalization_example_single_pt=False
-    mean_data_visualization=False
-    specific_patient_to_analyse=0
+    save_normalization_example_single_pt=True
+    mean_data_visualization=True
+    specific_patient_to_analyse=42
     mean_data_visualization_stratified=False
     path_original_excel = user_paths.path_original_excel
 
     # Per gestire dati a N giorni a partire dalla i-esima ora con limiti normalizzazione
-    days_to_consider = [1,3,5,7]        # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
+    days_to_consider = [1,3]        # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
     inf_quantile = 0.05
     sup_quantile = 0.95
     initial_hours_to_cut = 3    # Remember that I already cut the first hour
@@ -212,6 +212,8 @@ class Config_02b_normalization:
 
 
 class Config_03_train:
+    method_optical_flow = "Farneback"
+    days_to_consider = 3
     project_name = utils.project_name
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
@@ -219,9 +221,7 @@ class Config_03_train:
     img_size = utils.img_size
     seed = utils.seed
     num_labels = 2
-    Data_shape = (1,93) #variabile di base, verrà aggiornata in ConvTran
-    days_to_consider = 3
-    method_optical_flow = "Farneback"
+    Data_shape = (1,96) #variabile di base, verrà aggiornata in ConvTran
     output_model_base_dir = os.path.join(PROJECT_ROOT, "_04_test", "best_models", method_optical_flow)
     save_plots = True
     output_dir_plots = os.path.join(PROJECT_ROOT, "_03_train", "test_results_after_training", method_optical_flow)
@@ -316,7 +316,7 @@ class Config_03_train_with_optimization(Config_03_train):
     # --- ROCKET search space ---
     rocket_kernels_options = [5000, 7500, 10000, 12500]
     rocket_classifier_options = ["RF"]
-    optuna_n_trials_ROCKET = 20
+    optuna_n_trials_ROCKET = 10
     
     # --- LSTM-FCN search space ---
     lstm_size_options = [4, 8, 16, 32]
@@ -328,7 +328,7 @@ class Config_03_train_with_optimization(Config_03_train):
     learning_rate_range = (1e-5, 1e-3)
     early_stopping_patience = 60
     optuna_num_epochs = 150
-    optuna_n_trials_LSTMFCN = 300
+    optuna_n_trials_LSTMFCN = 10
 
     # --- ConvTran search space ---
     convtran_emb_size_options   = [64, 128, 256]
@@ -337,6 +337,6 @@ class Config_03_train_with_optimization(Config_03_train):
     convtran_dropout_range      = (0.1, 0.5)
     convtran_learning_rate_range= (1e-5, 1e-2)
     convtran_batch_size_options = [16, 32, 64]
-    convtran_patience           = 30
-    convtran_epochs_options     = 100
-    optuna_n_trials_ConvTran    = 1
+    convtran_patience           = 60
+    convtran_epochs_options     = 150
+    optuna_n_trials_ConvTran    = 5

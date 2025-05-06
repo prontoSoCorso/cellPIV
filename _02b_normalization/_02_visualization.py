@@ -5,7 +5,7 @@ import random
 import time
 
 
-def visualize_normalized_data_single_pt(original_data, normalized_data, output_base, specific_patient_id=None):
+def visualize_normalized_data_single_pt(original_data, normalized_data, output_base, specific_patient_id=None, shift_x=0):
     """
     Visualizza e confronta i dati originali e normalizzati per un paziente selezionato casualmente.
 
@@ -23,6 +23,7 @@ def visualize_normalized_data_single_pt(original_data, normalized_data, output_b
             return
         
         patient_id_example = random.choice(valid_patients)
+        print(f"Randomly Selected ID: {patient_id_example}")
     
     else:
         if specific_patient_id not in normalized_data["patient_id"]:
@@ -83,7 +84,7 @@ def visualize_normalized_data_single_pt(original_data, normalized_data, output_b
     print(f"Plot saved at the path: {output_file_path}")
 
 
-def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output_base, seed, temporal_data_type, days_to_consider):
+def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output_base, seed, temporal_data_type, days_to_consider, shift_x=0):
     """
     Carica i dati, separa i gruppi Blasto e No Blasto, e crea i grafici per train, validation e test.
     
@@ -105,7 +106,7 @@ def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output
     def create_plot(blasto, no_blasto, title, filename, output_folder):
         """Genera e salva il grafico delle medie e deviazioni standard per Blasto e No Blasto."""
         temporal_columns = [col for col in blasto.columns if col.startswith("value_")]
-        x = np.arange(1, len(temporal_columns) + 1)
+        x = np.arange(shift_x, shift_x + len(temporal_columns))
 
         blasto_mean = blasto[temporal_columns].mean()
         blasto_std = blasto[temporal_columns].std()
@@ -142,7 +143,7 @@ def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output
     print(f"Grafici salvati nella cartella '{output_base}' con seed {seed} e tipo dati '{temporal_data_type}'")
 
 
-def create_and_save_stratified_plots_mean_temp_data(train_merged, val_merged, test_merged, output_base, seed, temporal_data_type, days_to_consider):
+def create_and_save_stratified_plots_mean_temp_data(train_merged, val_merged, test_merged, output_base, seed, temporal_data_type, days_to_consider, shift_x=0):
     """
     Creates stratified mean temporal plots for each PN category across datasets,
     with the first subplot showing the entire dataset.
@@ -152,7 +153,7 @@ def create_and_save_stratified_plots_mean_temp_data(train_merged, val_merged, te
 
     def create_stratified_plot(data, title, filename):
         temporal_columns = [col for col in data.columns if col.startswith("value_")]
-        x = np.arange(1, len(temporal_columns) + 1)
+        x = np.arange(shift_x, shift_x + len(temporal_columns))
         
         # Get unique PN categories
         pn_groups = ["Overall"] + sorted(data['merged_PN'].unique(), key=lambda x: str(x))

@@ -39,7 +39,7 @@ def load_my_data(train_path, val_path, test_path, val_ratio=0.2, batch_size=16):
     return train_loader, val_loader, test_loader
 
 
-def load_model_with_threshold(model, path, device):
+def load_model(model, path, device):
     checkpoint = torch.load(path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     return model, checkpoint.get('best_threshold', 0.5)

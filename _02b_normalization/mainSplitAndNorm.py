@@ -16,7 +16,7 @@ sys.path.append(parent_dir)
 from config import Config_02b_normalization as conf
 from config import utils
 from _02b_normalization._01_split_normalization import load_data, normalize_data, save_data, stratified_split
-from _02b_normalization._02_visualization import (visualize_normalized_data_single_pt, 
+from _02b_normalization._02_visualization import (visualize_normalized_data_single_pt,
                                                   create_and_save_plots_mean_temp_data, 
                                                   create_and_save_stratified_plots_mean_temp_data)
 from _utils_.dimReduction import compute_UMAP, compute_tSNE, compute_UMAP_with_plotly
@@ -24,7 +24,7 @@ from _utils_.dimReduction import compute_UMAP, compute_tSNE, compute_UMAP_with_p
 
 def import_original_db_and_merge_data(data, original_db_path):
     # Merge PN data with original and normalized data
-    df_db = pd.read_excel(original_db_path)[['slide_well', 'PN']]
+    df_db = pd.read_excel(original_db_path)[['slide_well']]
 
     def merge_pn_data(df):
             merged = pd.merge(df, df_db, 
@@ -40,11 +40,12 @@ def import_original_db_and_merge_data(data, original_db_path):
     return data_merged
 
 
-def main(days_to_consider=conf.days_to_consider, 
-         train_size=conf.train_size, 
-         seed=conf.seed, 
-         temporalDataType = conf.temporalDataType, 
-         csv_file_path = conf.csv_file_path, 
+def main(days_to_consider=conf.days_to_consider,
+         train_size=conf.train_size,
+         seed=conf.seed,
+         temporalDataType = conf.temporalDataType,
+         csv_file_path = conf.csv_file_path,
+         method_optical_flow = conf.method_optical_flow,
          embedding_type=conf.embedding_type, 
          original_db_path=conf.path_original_excel,
          save_normalization_example_single_pt=conf.save_normalization_example_single_pt, 
@@ -73,7 +74,7 @@ def main(days_to_consider=conf.days_to_consider,
         if embedding_type:
             # Visualizzo embedding di un subset a scelta --> ottengo il percorso, ad esempio, del train (numero maggiore di dati)
             train_path, val_path, test_path = conf.get_paths(day)
-            output_path_base = os.path.join(current_dir, "dim_reduction_files")
+            output_path_base = os.path.join(current_dir, method_optical_flow, "dim_reduction_files")
             os.makedirs(output_path_base, exist_ok=True)
             max_frames = utils.num_frames_by_days(day)
 
@@ -92,8 +93,9 @@ def main(days_to_consider=conf.days_to_consider,
             visualize_normalized_data_single_pt(
                 original_data=train_data_merged,  # Use merged data
                 normalized_data=train_data_norm_merged,  # Use merged data
-                output_base=current_dir,
-                specific_patient_id=specific_patient_to_analyse
+                output_base=os.path.join(current_dir, method_optical_flow),
+                specific_patient_id=specific_patient_to_analyse if specific_patient_to_analyse is not 0 else None,
+                shift_x=initial_frames_to_cut
             )
         
         if mean_data_visualization:
@@ -101,10 +103,11 @@ def main(days_to_consider=conf.days_to_consider,
             train_data=train_data,
             val_data=val_data,
             test_data=test_data,
-            output_base=current_dir,
+            output_base=os.path.join(current_dir, method_optical_flow),
             seed=seed,
             temporal_data_type=temporalDataType,
-            days_to_consider=day
+            days_to_consider=day,
+            shift_x=initial_frames_to_cut
             )
 
         if mean_data_visualization_stratified:
@@ -117,10 +120,11 @@ def main(days_to_consider=conf.days_to_consider,
                 train_merged=train_merged,
                 val_merged=val_merged,
                 test_merged=test_merged,
-                output_base=current_dir,
+                output_base=os.path.join(current_dir, method_optical_flow),
                 seed=seed,
                 temporal_data_type=temporalDataType,
-                days_to_consider=day
+                days_to_consider=day,
+                shift_x = initial_frames_to_cut
                 )
 
 

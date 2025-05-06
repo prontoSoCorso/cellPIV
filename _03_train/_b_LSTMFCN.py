@@ -156,7 +156,9 @@ def objective(trial, days_to_consider, train_data, val_data):
     # 2) build DataLoaders with the suggested batch_size
     train_loader = DataLoader(train_data,
                               batch_size=params['batch_size'],
-                              shuffle=True)
+                              shuffle=True,
+                              pin_memory=True,
+                              num_workers=16)
     val_loader   = DataLoader(val_data,
                               batch_size=params['batch_size'])
 

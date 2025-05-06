@@ -70,9 +70,9 @@ def save_plot_temporal_metrics(output_base, dish_well, metrics, start_frame):
         'sum_mean_mag': '#9467bd'       # Purple
         }
     
-    fig, axes = plt.subplots(5, 1, figsize=(16, 14))
+    fig, axes = plt.subplots(len(metrics), 1, figsize=(16, 14))
     peak_config = {
-        'distance': 15
+        'distance': 12
         }
 
     for ax, (metric_name, values) in zip(axes, metrics.items()):
@@ -99,7 +99,7 @@ def save_plot_temporal_metrics(output_base, dish_well, metrics, start_frame):
 
             # Plot peaks with annotations
             for idx, peak in enumerate(top_peaks):
-                frame_num = peak + 16  # Adjust for initial cut
+                frame_num = peak + start_frame
                 value = values[peak]
                 color = '#d62728' if value > 0 else '#1f77b4'  # Red/Blue
                 marker = '^' if value > 0 else 'v'  # Triangle up/down

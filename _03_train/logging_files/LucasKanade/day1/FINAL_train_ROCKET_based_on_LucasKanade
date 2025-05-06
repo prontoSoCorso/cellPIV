@@ -1,0 +1,24 @@
+2025-05-06 11:31:55 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-05-06 11:31:55 - INFO - Accuracy: 0.6674
+2025-05-06 11:31:55 - INFO - Balanced_accuracy: 0.6765
+2025-05-06 11:31:55 - INFO - Roc_auc: 0.7265
+2025-05-06 11:31:55 - INFO - Precision: 0.5851
+2025-05-06 11:31:55 - INFO - Recall: 0.7353
+2025-05-06 11:31:55 - INFO - Mcc: 0.3494
+2025-05-06 11:31:55 - INFO - Kappa: 0.3413
+2025-05-06 11:31:55 - INFO - Brier: 0.2098
+2025-05-06 11:31:55 - INFO - F1: 0.6517
+2025-05-06 11:31:55 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/LucasKanade/best_rocket_model_1Days.joblib
+2025-05-06 12:55:11 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-05-06 12:55:11 - INFO - Accuracy: 0.6524
+2025-05-06 12:55:11 - INFO - Balanced_accuracy: 0.6728
+2025-05-06 12:55:11 - INFO - Roc_auc: 0.7494
+2025-05-06 12:55:11 - INFO - Precision: 0.5109
+2025-05-06 12:55:11 - INFO - Recall: 0.7449
+2025-05-06 12:55:11 - INFO - Mcc: 0.3319
+2025-05-06 12:55:11 - INFO - Kappa: 0.3139
+2025-05-06 12:55:11 - INFO - Brier: 0.2032
+2025-05-06 12:55:11 - INFO - F1: 0.6061
+2025-05-06 12:55:11 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/LucasKanade/best_rocket_model_1Days.joblib
