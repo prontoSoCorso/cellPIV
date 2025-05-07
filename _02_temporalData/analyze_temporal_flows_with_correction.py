@@ -47,12 +47,12 @@ def create_plot(blasto, no_blasto, output_path, temporal_data_type):
 
 # === Step 3: Statistical Testing ===
 def statistical_tests_with_correction(blasto, no_blasto, 
+                                      time_cols,
                                       alpha=0.05,
                                       method='fdr_bh',   # bonferroni (più rigido) o fdr_bh 
                                       test_type="mannwhitney"):
-    cols = [c for c in blasto.columns if c.startswith("time_")]
     pvals = []
-    for c in cols:
+    for c in time_cols:
         x1 = blasto[c].dropna()
         x2 = no_blasto[c].dropna()
         if test_type=='mannwhitney':
@@ -73,7 +73,7 @@ def statistical_tests_with_correction(blasto, no_blasto,
                 intervals.append((start, sig_idxs[i-1]))
                 start = sig_idxs[i]
         intervals.append((start, sig_idxs[-1]))
-    return cols, pvals, pvals_corr, reject, intervals
+    return time_cols, pvals, pvals_corr, reject, intervals
 
 # === Step 4: Plot with shaded significant zones ===
 def create_plot_with_significance(blasto, no_blasto, cols, intervals,
@@ -106,10 +106,13 @@ def create_plot_with_significance(blasto, no_blasto, cols, intervals,
 
 # === MAIN WORKFLOW ===
 def main():
-    temporal_data_path = "/home/phd2/Scrivania/CorsoRepo/cellPIV/_02_temporalData/final_series_csv/mean_magnitude_Farneback.csv"
+    data_type = "sum_mean_magnitude"
+    method_optical_flow = "Farneback"
+    start_shift = 0
+    end_frame = 96
+    temporal_data_path = f"/home/phd2/Scrivania/CorsoRepo/cellPIV/_02_temporalData/final_series_csv/{data_type}_{method_optical_flow}.csv"
     original_db_path = "/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/DB_Morpheus_withID.csv"  # <-- update with real path
-    output_folder = "/home/phd2/Scrivania/CorsoRepo/cellPIV/_02_temporalData/final_series_csv/output_plots"
-    temporal_data_type = "Farneback"
+    output_folder = os.path.join("/home/phd2/Scrivania/CorsoRepo/cellPIV/_02_temporalData/final_series_csv/output_plots", data_type)
     os.makedirs(output_folder, exist_ok=True)
 
     # load & merge
@@ -118,13 +121,20 @@ def main():
     blasto, no_blasto = separate_data(df)
 
     # Plotting
-    plot_path = os.path.join(output_folder, f"plot_mean_{temporal_data_type}.jpg")
-    create_plot(blasto, no_blasto, plot_path, temporal_data_type)
+    plot_path = os.path.join(output_folder, f"plot_mean_{method_optical_flow}.jpg")
+    create_plot(blasto, no_blasto, plot_path, method_optical_flow)
+
+    # Apply time-step filtering based on start_shift and end_frame
+    all_time_cols = [c for c in blasto.columns if c.startswith("time_")]
+    selected_time_cols = all_time_cols[start_shift:end_frame]
+    blasto = blasto[['dish_well', 'BLASTO NY'] + selected_time_cols]
+    no_blasto = no_blasto[['dish_well', 'BLASTO NY'] + selected_time_cols]
 
     # statistics + correction
     cols, pvals, pvals_corr, reject, intervals = statistical_tests_with_correction(
         blasto, no_blasto,
-        alpha=0.05,
+        time_cols=selected_time_cols,
+        alpha=0.01,
         method='bonferroni',         # 'bonferroni' for stricter control
         test_type='mannwhitney'  # or 'ttest'
         )

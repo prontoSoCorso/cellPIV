@@ -129,7 +129,7 @@ class Config_01_OpticalFlow:
 
 
 class Config_02_temporalData:
-    dict                        = "mean_magnitude"
+    dict                        = "sum_mean_magnitude"  # mean_magnitude / sum_mean_mag / vorticity
     method_optical_flow         = "Farneback"
     type_files                  = f"files_all_days_{method_optical_flow}"
     dict_in                     = dict + "_" + method_optical_flow + ".pkl"
@@ -315,28 +315,28 @@ class Config_03_train_with_optimization(Config_03_train):
     
     # --- ROCKET search space ---
     rocket_kernels_options = [5000, 7500, 10000, 12500]
-    rocket_classifier_options = ["RF"]
-    optuna_n_trials_ROCKET = 10
+    rocket_classifier_options = ["RF", "xgb"]
+    optuna_n_trials_ROCKET = 20
     
     # --- LSTM-FCN search space ---
     lstm_size_options = [4, 8, 16, 32]
     filter_sizes_options = ["64,128,64", "128,256,128", "256,512,256"]
     kernel_sizes_options = ["5,3,2", "8,5,3", "10,7,5"]
-    dropout_range = (0.1, 0.5)
-    num_layers_range = (1, 4)
+    dropout_range = (0.1, 0.4)
+    num_layers_range = (1, 6)
     batch_size_options = [16, 32, 64]
     learning_rate_range = (1e-5, 1e-3)
     early_stopping_patience = 60
     optuna_num_epochs = 150
-    optuna_n_trials_LSTMFCN = 10
+    optuna_n_trials_LSTMFCN = 300
 
     # --- ConvTran search space ---
     convtran_emb_size_options   = [64, 128, 256]
     convtran_dim_ff_options     = [32, 64, 128, 256]
     convtran_num_heads_options  = [4, 8, 16]
     convtran_dropout_range      = (0.1, 0.5)
-    convtran_learning_rate_range= (1e-5, 1e-2)
+    convtran_learning_rate_range= (1e-5, 1e-3)
     convtran_batch_size_options = [16, 32, 64]
     convtran_patience           = 60
     convtran_epochs_options     = 150
-    optuna_n_trials_ConvTran    = 5
+    optuna_n_trials_ConvTran    = 300

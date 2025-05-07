@@ -1,0 +1,4 @@
+Significant intervals (corrected alpha=0.05):
+  steps 0 → 12
+  steps 30 → 60
+  steps 75 → 95
