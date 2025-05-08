@@ -1,0 +1,4 @@
+Significant intervals (ALL_PN, alpha=0.05):
+  steps 0 → 13
+  steps 30 → 60
+  steps 74 → 127

@@ -129,7 +129,7 @@ class Config_01_OpticalFlow:
 
 
 class Config_02_temporalData:
-    dict                        = "sum_mean_magnitude"  # mean_magnitude / sum_mean_mag / vorticity
+    dict                        = "sum_mean_mag"  # mean_magnitude / sum_mean_mag / vorticity
     method_optical_flow         = "Farneback"
     type_files                  = f"files_all_days_{method_optical_flow}"
     dict_in                     = dict + "_" + method_optical_flow + ".pkl"
@@ -254,7 +254,7 @@ class Config_03_train:
     
 
     # ROCKET
-    kernel_number_ROCKET     = [7500] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernel_number_ROCKET     = [10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     type_model_classification = "RF"    #or "LR" or "XGB"
     most_important_metric = "balanced_accuracy"
     

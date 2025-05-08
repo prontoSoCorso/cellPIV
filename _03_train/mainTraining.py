@@ -39,8 +39,8 @@ def create_study(model_name, day, method_optical_flow):
         sampler=optuna.samplers.TPESampler(seed=conf.seed)
     )
 
-def main(models_to_train=["ConvTran"],
-         days=[1],
+def main(models_to_train=["ROCKET", "LSTMFCN", "ConvTran"],
+         days=[3],
          optimize=conf.optimize_with_optuna,
          method_optical_flow=conf.method_optical_flow):
     

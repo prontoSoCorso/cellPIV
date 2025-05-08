@@ -1,0 +1,18 @@
+2025-05-08 07:18:37 - INFO - Validation Metric - Epoch [10/150]: 0.7559
+2025-05-08 07:18:49 - INFO - Validation Metric - Epoch [20/150]: 0.7702
+2025-05-08 07:19:01 - INFO - Validation Metric - Epoch [30/150]: 0.7727
+2025-05-08 07:19:13 - INFO - Validation Metric - Epoch [40/150]: 0.7728
+2025-05-08 07:19:25 - INFO - Validation Metric - Epoch [50/150]: 0.7748
+2025-05-08 07:19:37 - INFO - Validation Metric - Epoch [60/150]: 0.7675
+2025-05-08 07:19:49 - INFO - Validation Metric - Epoch [70/150]: 0.7675
+2025-05-08 07:19:55 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-05-08 07:19:55 - INFO - Accuracy: 0.7344
+2025-05-08 07:19:55 - INFO - Balanced_accuracy: 0.7616
+2025-05-08 07:19:55 - INFO - Roc_auc: 0.8419
+2025-05-08 07:19:55 - INFO - Precision: 0.5901
+2025-05-08 07:19:55 - INFO - Recall: 0.8588
+2025-05-08 07:19:55 - INFO - Mcc: 0.5029
+2025-05-08 07:19:55 - INFO - Kappa: 0.4759
+2025-05-08 07:19:55 - INFO - Brier: 0.1645
+2025-05-08 07:19:55 - INFO - F1: 0.6995

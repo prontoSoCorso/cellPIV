@@ -206,8 +206,12 @@ def load_model_by_type(model_type: str, days: int, base_models_path: str, device
     
     elif model_type == "ConvTran":
         conv_checkpoint = torch.load(model_path, map_location=device, weights_only=False)
-        # Create confi instance with proper settings
-        conf.num_labels, conf.Data_shape = value_for_config_convTran(data[0])["num_labels"], value_for_config_convTran(data[0])["data_shape"] 
+        # Restore parameters to config
+        saved_config = conv_checkpoint['config']
+        for key, value in saved_config.items():
+            setattr(conf, key, value)
+
+        # Rebuild model with original config and save best threshold
         model = model_factory(conf).to(device)
         model.load_state_dict(conv_checkpoint['model_state_dict'])
         return {

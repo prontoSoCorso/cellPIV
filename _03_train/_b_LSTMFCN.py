@@ -9,6 +9,9 @@ import numpy as np
 import math
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.metrics import balanced_accuracy_score
+import multiprocessing as mp
+
+mp.set_start_method("forkserver", force=True)
 
 # Configurazione dei percorsi
 current_file_path = os.path.abspath(__file__)
@@ -158,7 +161,9 @@ def objective(trial, days_to_consider, train_data, val_data):
                               batch_size=params['batch_size'],
                               shuffle=True,
                               pin_memory=True,
-                              num_workers=16)
+                              num_workers=16,
+                              persistent_workers=True,  # keep workers alive across epochs
+                              multiprocessing_context='forkserver')
     val_loader   = DataLoader(val_data,
                               batch_size=params['batch_size'])
 

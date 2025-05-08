@@ -1,0 +1,3 @@
+Significant intervals (ALL_PN_noDeg, alpha=0.05):
+  steps 78 → 101
+  steps 110 → 123
