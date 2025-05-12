@@ -24,7 +24,6 @@ from _03_train._b_LSTMFCN import LSTMFCN
 from _03_train._c_ConvTranUtils import CustomDataset
 import _04_test._testFunctions as _testFunctions
 from _99_ConvTranModel.model import model_factory
-import _04_test._testFunctions as _testFunctions
 import _utils_._utils as utils
 
 # Set device

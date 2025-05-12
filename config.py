@@ -262,8 +262,8 @@ class Config_03_train:
     num_epochs_FCN      = 300
     batch_size_FCN      = 16
     dropout_FCN         = 0.3
-    kernel_sizes_FCN    = (8,5,3) #def: 8,5,3
-    filter_sizes_FCN    = (128,256,128)
+    kernel_sizes_FCN    = "8,5,3"           # def: 8,5,3
+    filter_sizes_FCN    = "128,256,128"
     lstm_size_FCN       = 4
     attention_FCN       = False
     verbose_FCN         = 2

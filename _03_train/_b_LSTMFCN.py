@@ -52,9 +52,20 @@ class LSTMFCN(nn.Module):
         self.fc = nn.Linear(lstm_size + filter_sizes[-1], 2)
 
     def forward(self, x):
-        lstm_out, _ = self.lstm(x)
+        # x may be either [N, L, C] (quello che facevo prima) or [N, C, L] (what Grad-CAM passes in)
+        if x.shape[2] == self.lstm.input_size:
+            # it’s already [N, L, C]
+            lstm_in = x
+            conv_in = x.permute(0, 2, 1)    # → [N, C, L]
+        else:
+            # it must be [N, C, L]
+            lstm_in = x.permute(0, 2, 1)    # → [N, L, C]
+            conv_in = x                     # already [N, C, L]
+ 
+        lstm_out, _ = self.lstm(lstm_in)
         lstm_out = lstm_out[:, -1, :]
-        x = torch.transpose(x, 1, 2)
+        x = conv_in
+
         conv_out = self.conv1(x)
         conv_out = self.conv2(conv_out)
         conv_out = self.conv3(conv_out)
@@ -201,7 +212,8 @@ def main(days_to_consider=1,
          trial=None,
          run_test_evaluation=conf.run_test_evaluation, **kwargs):
     
-    if trial is None:
+    log_filename = kwargs.get('log_filename')
+    if (trial is None) and (log_filename!="" and log_filename is not None):
         config_logging(log_dir=kwargs.get('log_dir'), log_filename=kwargs.get('log_filename'))
     
     if default_path:
@@ -277,12 +289,25 @@ def main(days_to_consider=1,
 if __name__ == "__main__":
     import time
     start_time = time.time()
+    day=3
     
-    if conf.optimize_with_optuna:
-        study = optuna.create_study(direction="maximize")
-        study.optimize(lambda trial: main(trial=trial, run_test_evaluation=False), n_trials=conf.optuna_n_trials_LSTMFCN)
-        print(f"Best params: {study.best_params}")
-    else:
-        main(days_to_consider=1)
+    main(
+        days_to_consider=day,
+        train_path="", val_path="", test_path="",
+        default_path=True,
+        run_test_evaluation=False,
+        log_dir="",
+        log_filename="",
+        # default hyperparameters from config.py
+        batch_size=conf.batch_size_FCN,
+        dropout=conf.dropout_FCN,
+        filter_sizes=conf.filter_sizes_FCN,
+        kernel_sizes=conf.kernel_sizes_FCN,
+        lstm_size=conf.lstm_size_FCN,
+        num_layers=conf.num_layers_FCN,
+        attention=conf.attention_FCN,
+        learning_rate=conf.learning_rate_FCN,
+        final_epochs=conf.final_epochs_FCN
+    )
     
     logging.info(f"Total execution time: {time.time() - start_time:.2f}s")

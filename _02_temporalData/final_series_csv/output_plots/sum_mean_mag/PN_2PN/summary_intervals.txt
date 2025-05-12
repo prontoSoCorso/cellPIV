@@ -1,3 +1,0 @@
-Significant intervals (PN=2PN, alpha=0.05):
-  steps 77 → 100
-  steps 108 → 124
