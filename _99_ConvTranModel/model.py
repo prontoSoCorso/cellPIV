@@ -11,9 +11,6 @@ sys.path.append(parent_dir)
 from _99_ConvTranModel.AbsolutePositionalEncoding import tAPE, AbsolutePositionalEncoding, LearnablePositionalEncoding
 from _99_ConvTranModel.Attention import Attention, Attention_Rel_Scl, Attention_Rel_Vec
 
-def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
 def model_factory(config):
     return ConvTran(config, num_classes=config.num_labels)
 
@@ -66,7 +63,7 @@ class ConvTran(nn.Module):
         self.out = nn.Linear(emb_size, num_classes)
 
     def forward(self, x):
-        x = x.float()  # Converti in float32 se necessario
+        x = x.float()
         x = x.unsqueeze(1)
         x_src = self.embed_layer(x).squeeze(2).permute(0, 2, 1)
         if self.Fix_pos_encode != 'None':

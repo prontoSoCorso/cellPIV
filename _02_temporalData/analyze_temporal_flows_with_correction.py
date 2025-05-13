@@ -91,7 +91,7 @@ def plot_with_significance(ax, df_bl, df_nb, cols, intervals, label1, label2):
 
 def main():
     # parameters
-    data_type           = 'mean_magnitude'    # sum_mean_mag / mean_magnitude
+    data_type           = 'sum_mean_mag'    # sum_mean_mag / mean_magnitude / vorticity
     method_optical_flow = 'Farneback'
     start_shift         = 0
     end_frame           = 128
@@ -130,15 +130,19 @@ def main():
         plot_stratified(axes1[0], blasto[meta_cols + cols_to_consider], f'Stratified Blasto – {method_optical_flow} (all_PN)')
         plot_stratified(axes1[1], no_blasto[meta_cols + cols_to_consider], f'Stratified No Blasto – {method_optical_flow} (all_PN)')
         # y-limit per stratified_all_PN
-        for ax in axes1:
-            ax.set_ylim(0, 3.5) if max_frame>150 else ax.set_ylim(0, 2)
+        if data_type!="vorticity":
+            for ax in axes1:
+                ax.set_ylim(0, 3.5) if max_frame>150 else ax.set_ylim(0, 2)
+        else:
+            for ax in axes1:
+                ax.set_ylim(-0.0050, 0.0050) if max_frame<150 else ax.set_ylim(-0.1, 0.1)
         fig1.tight_layout()
         fig1.savefig(os.path.join(output_root, f'stratified_all_PN_{max_frame}frames.png'), dpi=150)
         plt.close(fig1)
 
     # 2) Pairwise comparison '2PN' vs others, in single figura con subplots per gruppo
     target = '2PN'
-    # --- Blasto ---
+    # --- Blasto vs Blasto ---
     others = [pn for pn in sorted(blasto['PN'].dropna().unique()) if pn != target]
     fig2b, axes2b = plt.subplots(1, len(others), figsize=(5*len(others), 5), sharey=True)
     for ax, other in zip(axes2b, others):
@@ -149,12 +153,15 @@ def main():
         )
         plot_with_significance(ax, df1, df2, cols_all, intervals, f'{target}', f'{other}')
         ax.set_title(f'Blasto: {target} vs {other}', pad=20)
-        ax.set_ylim(0, 2)
+        if data_type!="vorticity":
+            ax.set_ylim(0, 2)
+        else:
+            ax.set_ylim(-0.0050, 0.0050)
     fig2b.tight_layout()
     fig2b.savefig(os.path.join(output_root, 'pairwise_2PN_blasto.png'), dpi=150)
     plt.close(fig2b)
 
-    # --- No Blasto ---
+    # --- No Blasto vs No Blasto---
     others_nb = [pn for pn in sorted(no_blasto['PN'].dropna().unique()) if pn != target]
     fig2n, axes2n = plt.subplots(1, len(others_nb), figsize=(5*len(others_nb), 5), sharey=True)
     for ax, other in zip(axes2n, others_nb):
@@ -165,15 +172,38 @@ def main():
         )
         plot_with_significance(ax, df1, df2, cols_all, intervals, f'{target}', f'{other}')
         ax.set_title(f'NoBlasto: {target} vs {other}', pad=20)
-        ax.set_ylim(0, 2)
+        if data_type!="vorticity":
+            ax.set_ylim(0, 2)
+        else:
+            ax.set_ylim(-0.0050, 0.0050)
     fig2n.tight_layout()
     fig2n.savefig(os.path.join(output_root, 'pairwise_2PN_noblasto.png'), dpi=150)
     plt.close(fig2n)
 
+    # --- 2PN Blasto vs Others No Blasto---
+    others_nb = [pn for pn in sorted(no_blasto['PN'].dropna().unique()) if pn != target]
+    fig3, axes3 = plt.subplots(1, len(others_nb), figsize=(5*len(others_nb), 5), sharey=True)
+    for ax, other in zip(axes3, others_nb):
+        df_bl2pn = blasto[blasto['PN'] == target]
+        df_nbX  = no_blasto[no_blasto['PN'] == other]
+        _, _, _, intervals = statistical_tests_with_correction(
+            df_bl2pn[cols_all], df_nbX[cols_all], cols_all,
+            alpha=0.05, method=correction_method, test_type=test_method
+        )
+        ax.set_title(f'2PN Blasto vs {other} NoB', pad=20)
+        plot_with_significance(ax, df_bl2pn, df_nbX, cols_all, intervals, '2PN Blasto', f'{other} NoB')
+        if data_type!="vorticity":
+            ax.set_ylim(0, 2)
+        else:
+            ax.set_ylim(-0.0050, 0.0050)
+    fig3.tight_layout()
+    fig3.savefig(os.path.join(output_root, 'pairwise_2PN_bl_vs_nb.png'), dpi=150)
+    plt.close(fig3)
+
     # 3) Figura unica: per ogni PN type, subplot con blasto vs no_blasto
     pn_types = sorted(df_clean['PN'].dropna().unique())
-    fig3, axes3 = plt.subplots(1, len(pn_types), figsize=(5*len(pn_types), 5), sharey=True)
-    for ax, pn in zip(axes3, pn_types):
+    fig4, axes4 = plt.subplots(1, len(pn_types), figsize=(5*len(pn_types), 5), sharey=True)
+    for ax, pn in zip(axes4, pn_types):
         df_pn = df_clean[df_clean['PN'] == pn]
         df_b, df_nb = separate_data(df_pn)
         pvals, p_corr, reject, intervals = statistical_tests_with_correction(
@@ -181,10 +211,92 @@ def main():
         )
         plot_with_significance(ax, df_b, df_nb, cols_all, intervals, 'Blasto', 'No Blasto')
         ax.set_title(f'PN = {pn}', pad=20)
-        ax.set_ylim(0, 2)
-    fig3.tight_layout()
-    fig3.savefig(os.path.join(output_root, 'blasto_vs_noblasto_per_PN.png'), dpi=150)
-    plt.close(fig3)
+        if data_type!="vorticity":
+            ax.set_ylim(0, 2)
+        else:
+            ax.set_ylim(-0.0050, 0.0050)
+    fig4.tight_layout()
+    fig4.savefig(os.path.join(output_root, 'blasto_vs_noblasto_per_PN.png'), dpi=150)
+    plt.close(fig4)
+
+
+    # ===Similarity-based subgroups per anomalie blasto ===
+
+    # 1) Curva di riferimento: media 2PN-blasto
+    df_ref = blasto[blasto['PN'] == '2PN']
+    ref_mean = df_ref[cols_all].mean().values
+    x = np.arange(len(cols_all))
+
+    # 2) Lista di tipologie anomale
+    anomalous_pns = [pn for pn in sorted(blasto['PN'].dropna().unique()) if pn != '2PN']
+    n = len(anomalous_pns)
+
+    # 3) Prepara figure Nx3 subplot
+    fig, axes = plt.subplots(n, 3, figsize=(15, 5*n), sharex=False)
+    if n == 1:
+        axes = axes.reshape(1,3)
+
+    for i, pn in enumerate(anomalous_pns):
+        df_anomal = blasto[blasto['PN'] == pn].copy()
+        # calcola distanze euclidee
+        distances = df_anomal[cols_all].apply(lambda row: np.linalg.norm(row.values - ref_mean), axis=1).values
+
+        # 4) Definisci due soglie (ad es. 33° e 66° percentile)
+        thr_low, thr_high = np.percentile(distances, [33, 66])
+
+        # 5) Assegna categorie: 0=molto simile,1=abbastanza simile,2=poco simile
+        labels = ['molto simili','abbastanza simili','poco simili']
+        cats = np.digitize(distances, bins=[thr_low, thr_high])
+        df_anomal['distance'] = distances
+        df_anomal['cat'] = cats
+
+        # calcola percentuali
+        pct = [(cats == k).mean()*100 for k in [0,1,2]]
+
+        # --- Subplot 1: Istogramma ---
+        ax0 = axes[i,0]
+        ax0.hist(distances, bins=20, alpha=0.7)
+        ax0.axvline(thr_low, color='red', linestyle='--', label=f'low={thr_low:.1f}')
+        ax0.axvline(thr_high, color='red', linestyle='-.', label=f'high={thr_high:.1f}')
+        ax0.set_title(f'{pn} blasto: distanze')
+        ax0.set_xlabel('Euclidean Distance')
+        ax0.set_ylabel('Count')
+        ax0.legend(fontsize=8)
+
+        # --- Subplot 2: Boxplot ---
+        ax1 = axes[i,1]
+        data_for_box = [distances[cats==k] for k in [0,1,2]]
+        ax1.boxplot(data_for_box, tick_labels=labels)
+        ax1.set_title(f'{pn} blasto: boxplot')
+        ax1.set_ylabel('Euclidean Distance Value')
+        # annota percentuali
+        for k, p in enumerate(pct):
+            ax1.text(k+1, np.max(distances)*0.9, f'{p:.1f}%', 
+                     ha='center', fontsize=8)
+
+        # --- Subplot 3: Serie medie sovrapposte ---
+        ax2 = axes[i,2]
+        # curva di riferimento
+        ax2.plot(x, ref_mean, label='2PN-blasto (ref)', color='black', linewidth=2)
+        # medie sottogruppi
+        colors = ['C0','C1','C2']
+        for k in [0,1,2]:
+            grp = df_anomal[df_anomal['cat']==k]
+            if len(grp):
+                m = grp[cols_all].mean()
+                s = grp[cols_all].std()
+                ax2.plot(x, m, label=f'{labels[k]} ({pct[k]:.1f}%)', color=colors[k])
+                ax2.fill_between(x, m-s, m+s, alpha=0.2)
+        ax2.set_title(f'{pn} blasto: medie sottogruppi')
+        ax2.set_xlabel('Frame')
+        ax2.set_ylabel('Optical Flow')
+        ax2.legend(fontsize=8)
+        ax2.grid(True)
+
+    fig.tight_layout(rect=[0,0,1,0.96])
+    fig.suptitle('Similarity to 2PN-blasto per tipologia anomalia', fontsize=16)
+    fig.savefig(os.path.join(output_root, 'anomalous_similarity_analysis.png'), dpi=150)
+    plt.close(fig)
 
     print('Done. Tutti i plot sono stati salvati in:', output_root)
 
