@@ -87,6 +87,13 @@ def plot_with_significance(ax, df_bl, df_nb, cols, intervals, label1, label2):
     ax.legend()
     ax.set_title(ax.get_title(), pad=20)
 
+def mean_std_x_calc(df_ref, cols_all):
+    ref_mean    = df_ref[cols_all].mean().values
+    ref_std     = df_ref[cols_all].std().values
+    x           = np.arange(len(cols_all))
+    return ref_mean, ref_std, x
+
+
 # === MAIN WORKFLOW ===
 
 def main():
@@ -220,13 +227,13 @@ def main():
     plt.close(fig4)
 
 
-    # ===Similarity-based subgroups per anomalie blasto ===
+
 
     # 1) Curva di riferimento: media 2PN-blasto
     df_ref = blasto[blasto['PN'] == '2PN']
-    ref_mean = df_ref[cols_all].mean().values
-    x = np.arange(len(cols_all))
+    ref_mean, ref_std, x = mean_std_x_calc(df_ref=df_ref, cols_all=cols_all)
 
+    # === PRIMA ANALISI: Similarity-based subgroups per anomalie blasto ===
     # 2) Lista di tipologie anomale
     anomalous_pns = [pn for pn in sorted(blasto['PN'].dropna().unique()) if pn != '2PN']
     n = len(anomalous_pns)
@@ -239,7 +246,7 @@ def main():
     for i, pn in enumerate(anomalous_pns):
         df_anomal = blasto[blasto['PN'] == pn].copy()
         # calcola distanze euclidee
-        distances = df_anomal[cols_all].apply(lambda row: np.linalg.norm(row.values - ref_mean), axis=1).values
+        distances   = df_anomal[cols_all].apply(lambda row: np.linalg.norm(row.values - ref_mean), axis=1).values
 
         # 4) Definisci due soglie (ad es. 33° e 66° percentile)
         thr_low, thr_high = np.percentile(distances, [33, 66])
@@ -293,10 +300,95 @@ def main():
         ax2.legend(fontsize=8)
         ax2.grid(True)
 
-    fig.tight_layout(rect=[0,0,1,0.96])
     fig.suptitle('Similarity to 2PN-blasto per tipologia anomalia', fontsize=16)
+    fig.tight_layout(rect=[0,0,1,0.96])
     fig.savefig(os.path.join(output_root, 'anomalous_similarity_analysis.png'), dpi=150)
     plt.close(fig)
+
+
+    # === SECONDA ANALISI PER DIFFERENZA CON 2PN: categorizzazione basata sulla deviazione standard di 2PN-blasto ===
+    # 2) Lista delle tipologie anomale (blasto)
+    anomalous_pns = [pn for pn in sorted(blasto['PN'].dropna().unique()) if pn != '2PN']
+    n = len(anomalous_pns)
+
+    # 3) Prepara figure n×3 subplot
+    fig2, axes2 = plt.subplots(n, 3, figsize=(15, 5*n), sharex=False)
+    # Normalizzo sempre a shape (n,3)
+    axes2 = axes2.reshape(n, 3)
+
+    for i, pn in enumerate(anomalous_pns):
+        df_ano = blasto[blasto['PN'] == pn].copy()
+
+        # 4) Per ogni embrione calcolo "RMS_z":
+        def rms_z(row):
+            z = (row.values - ref_mean) / ref_std
+            return np.sqrt(np.nanmean(z**2))
+        RMS_z = df_ano[cols_all].apply(rms_z, axis=1).values
+
+        # 5) Categorie basate su z_max:
+        #    RMS_z ≤ 1 → “molto simili”
+        #    1 < RMS_z ≤ 2 → “abbastanza simili”
+        #    RMS_z > 2 → “poco simili”
+        bins = [1.0, 2.0]
+        labels = ['molto simili','abbastanza simili','poco simili']
+        cats = np.digitize(RMS_z, bins=bins)  # 0,1,2
+        df_ano['RMS_z'] = RMS_z
+        df_ano['cat']   = cats
+        pct = [(cats == k).mean()*100 for k in [0,1,2]]
+
+        # --- Subplot 1: Istogramma di z_max ---
+        ax0 = axes2[i,0]
+        # Use automatic binning
+        use_automatic_binning = False
+        if use_automatic_binning:
+            iqr = np.percentile(RMS_z, 75) - np.percentile(RMS_z, 25)
+            bin_width = 2 * iqr / (len(RMS_z) ** (1/3))
+            num_bins = int((np.max(RMS_z) - np.min(RMS_z)) / bin_width)
+        else:
+            num_bins = 20
+        # Plot hist
+        counts, bins, _ = ax0.hist(RMS_z, bins=num_bins, alpha=0.7)
+        max_count = np.max(counts)
+        ax0.set_ylim(0, max_count * 1.1)  # padding
+        ax0.axvline(1, color='red', linestyle='--', label='1 std')
+        ax0.axvline(2, color='red', linestyle='-.', label='2 std')
+        ax0.set_title(f'{pn} blasto – RMS_z dist.', pad=10)
+        ax0.set_xlabel('RMS-z')
+        ax0.set_ylabel('Count')
+        ax0.legend(fontsize=8)
+
+        # --- Subplot 2: Boxplot delle tre categorie ---
+        ax1 = axes2[i,1]
+        data_box = [RMS_z[cats==k] for k in [0,1,2]]
+        ax1.boxplot(data_box, tick_labels=labels)
+        ax1.set_title(f'{pn} – boxplot RMS_z', pad=10)
+        ax1.set_ylabel('RMS-z')
+        ymax = np.nanmax(RMS_z) * 1.25 # 1.n = top padding of n% 
+        ax1.set_ylim(0, ymax)
+        for k,p in enumerate(pct):
+            ax1.text(k+1, ymax*0.9, f'{p:.1f}%', ha='center', fontsize=8)
+
+        # --- Subplot 3: Andamento medio dei sottogruppi vs ref_mean ---
+        ax2 = axes2[i,2]
+        ax2.plot(x, ref_mean, color='black', lw=2, label='2PN-ref')
+        for k in [0,1,2]:
+            grp = df_ano[df_ano['cat']==k]
+            if len(grp):
+                m = grp[cols_all].mean()
+                s = grp[cols_all].std()
+                ax2.plot(x, m, label=f'{labels[k]} ({pct[k]:.1f}%)')
+                ax2.fill_between(x, m-s, m+s, alpha=0.2)
+        ax2.set_title(f'{pn} blasto: medie per categoria')
+        ax2.set_xlabel('Frame')
+        ax2.set_ylabel('Optical Flow')
+        ax2.grid(True)
+        ax2.legend(fontsize=8)
+
+    fig2.suptitle('STD-based similarity vs 2PN-blasto', fontsize=16)
+    fig2.tight_layout(rect=[0,0,1,0.96])
+    fig2.savefig(os.path.join(output_root, 'anomalous_std_similarity.png'), dpi=150)
+    plt.close(fig2)
+
 
     print('Done. Tutti i plot sono stati salvati in:', output_root)
 
