@@ -216,9 +216,6 @@ def main(days_to_consider=1,
     if (trial is None) and (log_filename!="" and log_filename is not None):
         config_logging(log_dir=kwargs.get('log_dir'), log_filename=kwargs.get('log_filename'))
     
-    if default_path:
-        train_path, val_path, test_path = conf.get_paths(days_to_consider)
-
     os.makedirs(output_model_base_dir, exist_ok=True)
     if default_path:
         # Ottieni i percorsi dal config
