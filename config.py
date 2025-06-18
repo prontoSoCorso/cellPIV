@@ -112,12 +112,24 @@ class Config_01_OpticalFlow:
 
     # FARNEBACK
     # Farneback parameters
+
+    # General analysis
     pyr_scale = 0.5
     levels = 4
     winSize_Farneback = 13
     iterations = 5
     poly_n = 5
     poly_sigma = 1.1
+
+    # Singolo video
+    single_video = False
+    if single_video:
+        pyr_scale        = 0.4
+        levels           = 4
+        winSize_Farneback= 21      # più grande
+        iterations       = 7       # più iterazioni
+        poly_n           = 7       # vicinato maggiore
+        poly_sigma       = 1.3     # filtro gaussiano più largo
 
     base_out_example = f"/home/phd2/Scrivania/CorsoData/opticalFlowExamples{method_optical_flow}" 
     if method_optical_flow == "Farneback":

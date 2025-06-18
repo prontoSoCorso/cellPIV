@@ -48,16 +48,24 @@ def overlay_arrows(frame, magnitude, angle_degrees, prev_pts):
     return frame
 """
 
-def overlay_arrows(image, flow, step=10):
-    """Sovrappone le frecce del flusso ottico sui frame"""
+def overlay_arrows(image, flow, step=10, blur_ksize=25, blur_sigma=4.0):
+    """Sovrappone le frecce del flusso ottico sui frame, dopo aver sfocato il campo.
+    N.B.: blur_sigma linked to blur_ksize (ksize ≈ 6 × sigma + 1  (arrotondato a dispari))"""
+
+    # Sfoco il campo di flusso per smussare gli outlier
+    fx = cv2.GaussianBlur(flow[...,0], (blur_ksize, blur_ksize), blur_sigma)
+    fy = cv2.GaussianBlur(flow[...,1], (blur_ksize, blur_ksize), blur_sigma)
+
     h, w = image.shape[:2]
     y, x = np.mgrid[step//2:h:step, step//2:w:step].reshape(2, -1).astype(int)
-    fx, fy = flow[y, x].T
-    
-    for (xi, yi, fxi, fyi) in zip(x, y, fx, fy):
+    # campiono dai campi blurati
+    sampled_fx = fx[y, x]
+    sampled_fy = fy[y, x]
+
+    for (xi, yi, fxi, fyi) in zip(x, y, sampled_fx, sampled_fy):
         cv2.arrowedLine(image, (xi, yi),
                         (int(xi + fxi), int(yi + fyi)),
-                        (0, 255, 0), 1, tipLength=0.3)
+                        (0, 255, 0), 1, tipLength=0.2)
     return image
 
 def save_plot_temporal_metrics(output_base, dish_well, metrics, start_frame):
