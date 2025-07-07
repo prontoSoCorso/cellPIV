@@ -66,12 +66,15 @@ class utils:
 
 class Config_00_preprocessing:
     # dataPreparation
-    input_dir_pdb_files = "/home/phd2/Scrivania/CorsoData/ScopeData"
+    input_dir_pdb_files = "/media/phd2/My Passport/ScopeData"
     output_dir_extracted_pdb_files = "/home/phd2/Scrivania/CorsoData/ScopeData_extracted"
     log_file_pdb_extraction = "/home/phd2/Scrivania/CorsoData/estrazione_log.txt"
 
     src_dir_extracted_pdb = output_dir_extracted_pdb_files
     dest_dir_extracted_equator = "/home/phd2/Scrivania/CorsoData/ScopeData_equator"
+
+    src_dir_extracted_equator = dest_dir_extracted_equator
+    dest_dir_time_conversion = "/home/phd2/Scrivania/CorsoData/ScopeData_time_conversion"
     
     # Percorso della directory con i video equatoriali
     path_main_folder = dest_dir_extracted_equator

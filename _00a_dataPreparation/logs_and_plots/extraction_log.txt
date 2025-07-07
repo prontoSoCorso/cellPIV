@@ -1,0 +1,34 @@
+Anno: 2013
+  Video estratti: 427
+  Errori: 0
+
+Anno: 2014
+  Video estratti: 1055
+  Errori: 0
+
+Anno: 2015
+  Video estratti: 926
+  Errori: 0
+
+Anno: 2016
+  Video estratti: 936
+  Errori: 0
+
+Anno: 2017
+  Video estratti: 950
+  Errori: 0
+
+Anno: 2018
+  Video estratti: 943
+  Errori: 0
+
+Anno: 2019
+  Video estratti: 946
+  Errori: 0
+
+Anno: 2020
+  Video estratti: 1070
+  Errori: 1
+  'D2020.11.03_S02668_I0141_D.pdb'
+
+Numero totale di sottocartelle: 7253

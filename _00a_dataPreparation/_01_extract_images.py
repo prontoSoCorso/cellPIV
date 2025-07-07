@@ -22,7 +22,7 @@ def extract_frames(input_dir, output_dir, log_file, first_year:int=1900, last_ye
     sep = "_"
     
     try:
-        for year in os.listdir(input_dir):
+        for year in sorted(os.listdir(input_dir)):
             year_path = os.path.join(input_dir, year)
             print(year)
             if (first_year<=int(year)<=last_year and os.path.isdir(year_path)):
@@ -33,30 +33,32 @@ def extract_frames(input_dir, output_dir, log_file, first_year:int=1900, last_ye
 
                 for subfolder in os.listdir(year_path):
                     subfolder_path = os.path.join(year_path, subfolder)
+                    if not os.path.isdir(subfolder_path):
+                        continue
                     
-                    if os.path.isdir(subfolder_path):
-                        for file in os.listdir(subfolder_path):
-                            print(file)
-                            if file.endswith('.pdb'):
-                                pdb_file = os.path.join(subfolder_path, file)
-                                pdb_name = os.path.splitext(file)[0]
+                    for file in sorted(os.listdir(subfolder_path)):
+                        print(file)
+                        if file.endswith('.pdb'):
+                            pdb_file = os.path.join(subfolder_path, file)
+                            pdb_name = os.path.splitext(file)[0]
 
-                                try:
-                                    # Calculate total space needed for this PDB
-                                    with sqlite3.connect(pdb_file) as con:
-                                        cur = con.cursor()
-                                        res = cur.execute("SELECT SUM(LENGTH(image_data)) FROM IMAGES")
-                                        total_size = res.fetchone()[0] or 0
-                                    
-                                    # Check disk space
-                                    disk_stat = shutil.disk_usage(output_dir)
-                                    if disk_stat.free < total_size:
-                                        print(f"Space insufficient for {pdb_file}. Skipping.")
-                                        metrics[year]["errors"] += 1
-                                        break
-                                    
-                                    # If there is enough space, continue extracting
-                                    con = sqlite3.connect(pdb_file)
+                            try:
+                                # Calculate total space needed for this PDB
+                                with sqlite3.connect(pdb_file) as temp_con:
+                                    cur = temp_con.cursor()
+                                    res = cur.execute('SELECT SUM(LENGTH(Image)) FROM IMAGES')
+                                    total_size = res.fetchone()[0] or 0
+                                
+                                # Check disk space
+                                disk_stat = shutil.disk_usage(output_dir)
+                                if disk_stat.free < total_size*1.05:
+                                    print(f"Space insufficient for {pdb_file}. Skipping.")
+                                    metrics[year]["errors"] += 1
+                                    break
+                                
+                                # If there is enough space, continue extracting
+                                # Estrazione immagini
+                                with sqlite3.connect(pdb_file) as con:
                                     cur = con.cursor()
                                     res = cur.execute("SELECT * FROM IMAGES")
                                     images = res.fetchall()
@@ -78,10 +80,9 @@ def extract_frames(input_dir, output_dir, log_file, first_year:int=1900, last_ye
 
                                         write_to_file(image_data, image_path)
 
-                                    cur.close()
-                                except Exception as e:
-                                    print(f"========== Errore con il file {pdb_file}: {e} ==========")
-                                    metrics[year]["errors"] += 1  # Incrementa il conteggio errori
+                            except Exception as e:
+                                print(f"========== Errore con il file {pdb_file}: {str(e)} ==========")
+                                metrics[year]["errors"] += 1  # Incrementa il conteggio errori
             else:
                 print(f"{year_path} non è una directory.")
     except Exception as e:
@@ -89,7 +90,7 @@ def extract_frames(input_dir, output_dir, log_file, first_year:int=1900, last_ye
 
     # Salva i risultati in un file di log
     try:
-        with open(log_file, "w") as log:
+        with open(log_file, "a") as log:
             for year, data in metrics.items():
                 log.write(f"Anno: {year}\n")
                 log.write(f"  Video estratti: {data['videos_extracted']}\n")
