@@ -3,6 +3,8 @@ import shutil
 import statistics
 import matplotlib.pyplot as plt
 import random
+import numpy as np
+from matplotlib.ticker import FuncFormatter
 
 
 def parse_equator_filename(fname):
@@ -63,43 +65,85 @@ def collect_data(input_dir):
     
 
 
-def compute_statistics(per_well, per_run):
+def compute_statistics(per_well, per_run, min_frames=250, max_gap_minutes=90, ideal_frame_gap=15, hours_to_consider=30):
+    """
+    Compute per-well and per-run statistics.
+    Exclude wells with fewer than `min_frames` or with any gap > `max_gap_minutes` within first 30h.
+    Returns also a set of `corrupted_wells` that were removed due to large gaps.
+    """
     initial_wells = len(per_well)
-    # Filtra out wells con meno di 250 frame
-    per_well_filtered = {k:v for k,v in per_well.items() if len(v) >= 250}
-    removed_frame = initial_wells - len(per_well_filtered)
+    # Filter wells by frame count
+    per_well_filtered = {k:v for k,v in per_well.items() if len(v) >= min_frames}
+    removed_wells = initial_wells - len(per_well_filtered)
 
     # Compute deltas per well
     per_well_deltas = {}
-    for key, times in per_well_filtered.items():
-        ts = sorted(times)
-        deltas = [(t2 - t1) * 24 * 60 for t1, t2 in zip(ts, ts[1:])]
-        per_well_deltas[key] = deltas
-
-    # Compute avg, min, max, std, outlier count per well
-    avg_interval_per_well = {}
-    avg_interval_per_well = {k: statistics.mean(v) for k, v in per_well_deltas.items()}
     per_well_stats = {}
-    for k, deltas in per_well_deltas.items():
-        m = min(deltas)
-        mi = deltas.index(m)
-        M = max(deltas)
-        Mi = deltas.index(M)
-        sd = statistics.pstdev(deltas)
-        out_count = sum(1 for d in deltas if abs(d - statistics.mean(deltas)) > sd)
-        per_well_stats[k] = {'avg': statistics.mean(deltas), 'min': (m, mi), 'max': (M, Mi), 'std': sd, 'out_count': out_count}
+    # Process each well and drop if blackout gap detected
+    corrupted_wells = set()
+    corrupted_stats = {}
+    for key, times in list(per_well_filtered.items()):
+        ts = sorted(times)
+        t0 = ts[0]
+        
+        # cutoff based on ideal number of frame for the first n hours
+        num_ideal_frames = int(hours_to_consider*(np.ceil(60/ideal_frame_gap)))
+        ts_frames = ts[:num_ideal_frames]
 
-    # outlier: avg_int fuori mean ± std
+        # compute deltas in minutes
+        raw_deltas = [(t2 - t1) * 24 * 60 for t1, t2 in zip(ts_frames, ts_frames[1:])]
+        # identify blackout gap --> it must not have significant gap in the first n frames (based on ideal acquisition gap)
+        for idx, gap in enumerate(raw_deltas):
+            if gap > max_gap_minutes:
+                corrupted_wells.add(key)
+                corrupted_stats[key] = statistics.mean(raw_deltas)
+                per_well_filtered.pop(key)
+                break
+        if key in corrupted_wells:
+            continue
+
+        # now deltas and statistics on clean segment
+        # compute stats on full 30h
+        cutoff = t0 + (hours_to_consider/24)
+        ts30 = [t for t in ts if t <= cutoff]
+        deltas = [(t2 - t1) * 24 * 60 for t1, t2 in zip(ts30, ts30[1:])]
+        per_well_deltas[key] = deltas
+        avg = statistics.mean(deltas)
+        m, mi = min(deltas), deltas.index(min(deltas))
+        M, Mi = max(deltas), deltas.index(max(deltas))
+        sd = statistics.pstdev(deltas)
+        per_well_stats[key] = {
+            'avg': avg,
+            'min': (m, mi),
+            'max': (M, Mi),
+            'std': sd,
+            'frame_count_30h': len(ts30)
+        }
+
+    # globals
     vals = [s['avg'] for s in per_well_stats.values()]
-    mu = statistics.mean(vals)
-    sd_glob = statistics.pstdev(vals)
-    valid_wells = {k: per_well_filtered[k] 
-                   for k, stats in per_well_stats.items()
-                   if mu-sd <= stats['avg'] <= mu+sd}
+    mu, sd_glob = statistics.mean(vals), statistics.pstdev(vals)
+
+    # outlier detection
+    for key, times in per_well_filtered.items():
+        deltas = per_well_deltas[key]
+        avg = statistics.mean(deltas)
+        out_count = sum(1 for d in deltas if abs(d - avg) > 2*sd_glob)
+        per_well_stats[key]['out_count'] = out_count
+
+    outliers = {}
+    expected_frames_for_well = np.ceil(hours_to_consider * 60/mu)
+    tolerance_perc = 0.05 # percentuale missing values tollerabile
+    tolerance = int(np.ceil(tolerance_perc*expected_frames_for_well))
+    for key, stats in per_well_stats.items():
+        is_avg_outlier = stats['avg'] >= mu + 2*sd_glob
+        is_frame_count_outlier = int(expected_frames_for_well - stats['frame_count_30h']) > tolerance
+        if is_avg_outlier and is_frame_count_outlier:
+            outliers[key] = stats['avg']
+
+    # Build valid wells (inliers)
+    valid_wells = {k: per_well_filtered[k] for k in per_well_stats if k not in outliers}
     removed_outlier = len(per_well_filtered) - len(valid_wells)
-    outliers = {k: per_well_stats[k]['avg'] 
-                for k in per_well_stats 
-                if k not in valid_wells}
 
     # Filtra per run
     # Aggiorna per_run_wells: rimuove riferimenti a well filtrati
@@ -107,24 +151,42 @@ def compute_statistics(per_well, per_run):
                         for run_key, wells in per_run.items()
                         }
 
-    # 2) conteggi 0-24h e 0-30h
-    counts_0_24 = {}
-    counts_0_30 = {}
-    for key, times in valid_wells.items():
-        t0 = min(times)
-        rel_h = [(t - t0)*24 for t in times]
-        counts_0_24[key] = sum(1 for h in rel_h if h <= 24)
-        counts_0_30[key] = sum(1 for h in rel_h if h <= 30)
+    # counts
+    def get_counts(keys):
+        c24, c30 = {}, {}
+        for k in keys:
+            ts = sorted(per_well[k])
+            t0 = ts[0]
+            rel = [(t - t0)*24 for t in ts if t <= t0 + hours_to_consider/24]
+            c24[k] = sum(h <= 24 for h in rel)
+            c30[k] = len(rel)
+        return c24, c30
+    
+
+    # compute counts for all three groups and entire initial set
+    all_keys = set(per_well.keys())
+    c24_all, c30_all = get_counts(all_keys)
+    c24_valid, c30_valid = get_counts(valid_wells)
+    c24_out, c30_out     = get_counts(outliers)
+    c24_corr, c30_corr   = get_counts(corrupted_wells)
+
 
     def summarize(counts):
+        if not counts: return {}
         vals = list(counts.values())
         return {'media': statistics.mean(vals), 
                 'min': min(vals), 
                 'max': max(vals), 
                 'mediana': statistics.median(vals)}
 
-    stats_0_24 = summarize(counts_0_24)
-    stats_0_30 = summarize(counts_0_30)
+    stats_24h_all = summarize(c24_all)
+    stats_30h_all = summarize(c30_all)
+    stats_24h_valid = summarize(c24_valid)
+    stats_30h_valid = summarize(c30_valid)
+    stats_24h_out = summarize(c24_out)
+    stats_30h_out = summarize(c30_out)
+    stats_24h_corr = summarize(c24_corr)
+    stats_30h_corr = summarize(c30_corr)
 
     # 3) intervallo medio tra well consecutivi per run
     run_deltas = []
@@ -134,28 +196,80 @@ def compute_statistics(per_well, per_run):
         run_deltas.extend((t2 - t1)*24*60 for t1, t2 in zip(ts_sorted, ts_sorted[1:]))
     avg_interval_between_wells = statistics.mean(run_deltas) if run_deltas else None
 
-    return (initial_wells, removed_frame, removed_outlier,
-            valid_wells, avg_interval_per_well, 
-            counts_0_24, counts_0_30, stats_0_24, stats_0_30, 
-            avg_interval_between_wells, run_deltas,
-            outliers, mu, sd_glob, per_well_stats)
+    return (initial_wells, removed_wells, removed_outlier, corrupted_wells, outliers,
+            valid_wells, mu, sd_glob, 
+            c24_all, c30_all, stats_24h_all, stats_30h_all,
+            c24_valid, c30_valid, stats_24h_valid, stats_30h_valid,
+            c24_out, c30_out, stats_24h_out, stats_30h_out, 
+            c24_corr, c30_corr, stats_24h_corr, stats_30h_corr, corrupted_stats, 
+            avg_interval_between_wells, run_deltas, per_well_stats)
 
 
-def copy_and_rename(file_index, output_base, valid_wells):
-    t0_well = {}
-    for _, _, _, pdb, well, _, t in file_index:
-        key = (pdb, well)
-        if key not in valid_wells: continue
-        t0_well[key] = min(t0_well.get(key, t), t)
+# Istogramma con conteggi e tick ottimizzati
+def plot_hist(data, title, filename, bin_width=None, bin_count=15):
+    if not data: 
+        print("Zero outliers well")
+        return
+    min_val, max_val = min(data), max(data)
+    if bin_width is not None:
+        # crea bins ad intervalli fissi
+        bins = np.arange(min_val, max_val + bin_width, bin_width)
+    else:
+        # crea un numero di bins per maggiore risoluzione visiva
+        bins = bin_count
+    counts, edges, patches = plt.hist(data, bins=bins, edgecolor='black')
+    plt.title(title)
+    plt.xlabel(title)
+    plt.ylabel('Count')
+    plt.grid(axis='y', alpha=0.75)
+    # Annotate
+    for count, edge in zip(counts, edges):
+        if count > 0:
+            # posizione centrale del bin
+            mid = edge + ((edges[1]-edges[0]) if isinstance(edges, np.ndarray) else (max_val-min_val)/len(counts))/2
+            plt.text(mid, count, int(count), ha='center', va='bottom')
+    if isinstance(edges, np.ndarray):
+        # reduce xticks to max 10 for readability
+        max_ticks = 15
+        step = max(1, len(edges)//max_ticks)
+        plt.xticks(edges[::step])
+        plt.xticks(rotation=45, ha='right') # Ruota di 45 gradi e allinea a destra
+        # --- Inizio formattazione dinamica ---
+        
+        # Determina il range e la grandezza media dei bin
+        # Controlla che 'edges' abbia almeno due elementi per evitare IndexError
+        if len(edges) > 1:
+            bin_size = edges[1] - edges[0]
+        else:
+            bin_size = 0 # O gestisci come errore/caso limite
 
-    for src, year, vf, pdb, well, run, t in file_index:
-        key = (pdb, well)
-        if key not in valid_wells: continue
-        rel_min = (t - t0_well[key]) * 24 * 60
-        dest_dir = os.path.join(output_base, year, vf)
-        os.makedirs(dest_dir, exist_ok=True)
-        new = f"{pdb}_{well}_{run}_{rel_min:.1f}min.jpg"
-        shutil.copy2(src, os.path.join(dest_dir, new))
+        # Funzione personalizzata per la formattazione dei tick
+        def custom_formatter(x, pos):
+            # Condizione 1: Valore intero (o molto vicino a un intero)
+            # Usiamo un piccolo epsilon per tollerare errori di floating-point
+            if abs(x - round(x)) < 1e-9: # Se la differenza dall'intero più vicino è minima
+                return f"{int(x)}"
+            
+            # Condizione 2: La distanza tra i bin è molto piccola
+            # Qui il tuo criterio: se la distanza tra bin è < 0.1 (o un altro valore che decidi tu)
+            # mostriamo 2 cifre decimali. Puoi regolare il 0.1.
+            elif bin_size > 0 and bin_size < 0.5: # Se il passo è piccolo, usa più precisione
+                 return f"{x:.2f}" # Due cifre decimali
+            
+            # Condizione 3: Tutti gli altri casi (una cifra decimale)
+            else:
+                return f"{x:.1f}"
+
+        # Applica il formattatore personalizzato
+        plt.gca().xaxis.set_major_formatter(FuncFormatter(custom_formatter))
+        
+    else:
+        # for integer bins use default
+        pass
+
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
 
 
 def main(input_dir, output_dir, log_file):
@@ -168,11 +282,22 @@ def main(input_dir, output_dir, log_file):
      subfolder_wells) = collect_data(input_dir)
 
     print("----- Computing Stats -----")
-    (initial_wells, removed_frame, removed_outlier,
-     valid_wells, avg_interval_per_well, 
-     counts_0_24, counts_0_30, stats_0_24, stats_0_30, 
-     avg_interval_between_wells, run_deltas,
-     outliers, mu, sd_glob, per_well_stats) = compute_statistics(per_well, per_run)
+    min_frames=250
+    max_gap_minutes=61
+    ideal_frame_gap=15
+    hours_to_consider=30
+    (initial_wells, removed_wells, removed_outlier, corrupted_wells, outliers,
+     valid_wells, mu, sd_glob, 
+     c24_all, c30_all, stats_24h_all, stats_30h_all,
+     c24_valid, c30_valid, stats_24h_valid, stats_30h_valid,
+     c24_out, c30_out, stats_24h_out, stats_30h_out, 
+     c24_corr, c30_corr, stats_24h_corr, stats_30h_corr, corrupted_stats,
+     avg_interval_between_wells, run_deltas, per_well_stats) = compute_statistics(per_well, 
+                                                                                  per_run, 
+                                                                                  min_frames=min_frames, 
+                                                                                  max_gap_minutes=max_gap_minutes, 
+                                                                                  ideal_frame_gap=ideal_frame_gap,
+                                                                                  hours_to_consider=hours_to_consider)
     
     num_subfolders = sum(
         1 for year in os.listdir(input_dir)
@@ -183,6 +308,7 @@ def main(input_dir, output_dir, log_file):
     print("----- Log writing -----")
     # Scrivi log
     with open(log_file, 'w') as f:
+        # --- General stats ---
         f.write(f"Numero sottocartelle totali: {num_subfolders}\n")
         f.write(f"Sottocartelle vuote: {num_subfolders-skip_year-skip_video-skip_frame-initial_wells}\n")
         f.write(f"Skipped (not directories - years): {skip_year}\n")
@@ -190,21 +316,28 @@ def main(input_dir, output_dir, log_file):
         f.write(f"Skipped frames (_0_ filter): {skip_frame}\n")
 
         f.write(f"Wells unfiltered (unique keys): {initial_wells}\n")
-        f.write(f"Removed: {removed_frame} wells (fewer than 250 frames)\n")
+        f.write(f"Removed: {removed_wells} wells (fewer than 250 frames)\n")
         f.write(f"Removed: {removed_outlier} wells (outliers avg interval)\n")
-
         f.write(f"Valid wells: {len(valid_wells)}\n\n")
-        f.write("-- Per-well detailed stats --\n")
 
-        # --- Outlier wells ---
-        f.write("Outliers (avg interval):\n")
+        # --- Detailed per-wells stats ---
+        f.write("-- Detailed per-well stats (first 30h) --\n")
+        
+        # Corrupted wells ---
+        f.write(f"\n\nFound {len(corrupted_wells)} Corrupted wells (large gap > {max_gap_minutes} min) in the firsts 30h:\n")
+        for k in sorted(corrupted_wells):
+            f.write(f"{k}\n")
+
+        # Outlier wells ---
+        f.write(f"\n\nOutliers (avg interval), n={removed_outlier}:\n")
         for k in sorted(outliers.keys()):
             stats = per_well_stats[k]
             f.write(f"{k}: avg={stats['avg']:.1f}, min={stats['min'][0]:.1f}@{stats['min'][1]}, "
                     f"max={stats['max'][0]:.1f}@{stats['max'][1]}, sd={stats['std']:.1f}, "
                     f"outliers={stats['out_count']}\n")
 
-        f.write("\n\n\nValid wells (inlier) stats:\n")
+        # Valid wells ---
+        f.write(f"\n\n\nValid wells (inlier) stats, n={len(valid_wells)}:\n")
         for k in sorted(valid_wells.keys()):
             stats = per_well_stats[k]
             f.write(f"{k}: avg={stats['avg']:.1f}, min={stats['min'][0]:.1f}@{stats['min'][1]}, "
@@ -212,38 +345,46 @@ def main(input_dir, output_dir, log_file):
                     f"outliers={stats['out_count']}\n")
 
         f.write(f"\nGlobal avg interval: {mu:.1f} ± {sd_glob:.1f} min\n\n")
-        f.write("\n-- Aggregate stats 0-24h --\n"); f.write(f"Stats: {stats_0_24}\n")
-        f.write("-- Aggregate stats 0-30h --\n"); f.write(f"Stats: {stats_0_30}\n")
+        f.write(f"ALL 0-24h stats: {stats_24h_all}\n")
+        f.write(f"Valid 0-24h stats: {stats_24h_valid}\n")
+        f.write(f"Outliers 0-24h stats: {stats_24h_out}\n")
+        f.write(f"Corrupted 0-24h stats: {stats_24h_corr}\n")
+
+        f.write(f"ALL 0-24h stats: {stats_30h_all}\n")
+        f.write(f"Valid 0-24h stats: {stats_30h_valid}\n")
+        f.write(f"Outliers 0-24h stats: {stats_30h_out}\n")
+        f.write(f"Corrupted 0-24h stats: {stats_30h_corr}\n")
+        
         if avg_interval_between_wells: f.write(f"Intervallo medio tra well (min): {avg_interval_between_wells:.1f}\n")
 
+
+    # Histograms
     print("----- Computing histograms -----")
-    # Istogramma con conteggi e tick ottimizzati
-    def plot_hist(data, title, filename, bin_width=None):
-        min_val, max_val = min(data), max(data)
-        if not bin_width:
-            bin_width = max((max_val - min_val) / 20, 1)
-        bins = list(range(int(min_val), int(max_val) + int(bin_width) + 1, int(bin_width)))
-        counts, edges, patches = plt.hist(data, bins=bins, edgecolor='black')
-        plt.title(title)
-        plt.xlabel(title)
-        plt.ylabel('Count')
-        plt.grid(axis='y', alpha=0.75)
-        # Annotate
-        for count, edge in zip(counts, edges):
-            if count > 0:
-                plt.text(edge + bin_width/2, count, int(count), ha='center', va='bottom')
-        plt.xticks(edges)
-        plt.xlim(min_val - bin_width, max_val + bin_width)
-        plt.tight_layout()
-        plt.savefig(os.path.join(os.path.dirname(log_file), filename))
-        plt.close()
-    plot_hist(list(avg_interval_per_well.values()), 'Avg interval per well (min)', 'hist_avg_interval.png')
-    plot_hist(list(counts_0_24.values()), 'Frames 0-24h per well', 'hist_0_24h.png', bin_width=1)
-    plot_hist(list(counts_0_30.values()), 'Frames 0-30h per well', 'hist_0_30h.png', bin_width=1)
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    
+    # Mean intervals
+    n_ideal_frames = int(hours_to_consider*(np.ceil(60/ideal_frame_gap)))
+    plot_hist([per_well_stats[k]['avg'] for k in valid_wells],  'Avg delta Valid',                          os.path.join(os.path.dirname(log_file), 'hist_avg_interval_valid.png'))
+    plot_hist([per_well_stats[k]['avg'] for k in outliers],     'Avg delta Outliers',                       os.path.join(os.path.dirname(log_file), 'hist_avg_interval_outliers.png'))
+    plot_hist([corrupted_stats[k] for k in corrupted_wells],    f'Avg delta Corrupted for {n_ideal_frames}',os.path.join(os.path.dirname(log_file), 'hist_avg_interval_corrupted.png'))
+
+    plot_hist(list(c24_all.values()),   'Frames 0-24h All',       os.path.join(os.path.dirname(log_file),'hist_24_all.png'), bin_width=1)
+    plot_hist(list(c30_all.values()),   'Frames 0-30h All',       os.path.join(os.path.dirname(log_file),'hist_30_all.png'), bin_width=1)
+    plot_hist(list(c24_valid.values()), 'Frames 0-24h Valid',     os.path.join(os.path.dirname(log_file),'hist_24_valid.png'), bin_width=1)
+    plot_hist(list(c30_valid.values()), 'Frames 0-30h Valid',     os.path.join(os.path.dirname(log_file),'hist_30_valid.png'), bin_width=1)
+    plot_hist(list(c24_out.values()),   'Frames 0-24h Outliers',  os.path.join(os.path.dirname(log_file),'hist_24_outliers.png'), bin_width=1)
+    plot_hist(list(c30_out.values()),   'Frames 0-30h Outliers',  os.path.join(os.path.dirname(log_file),'hist_30_outliers.png'), bin_width=1)
+    plot_hist(list(c24_corr.values()),  'Frames 0-24h Corrupted', os.path.join(os.path.dirname(log_file),'hist_24_corrupted.png'), bin_width=1)
+    plot_hist(list(c30_corr.values()),  'Frames 0-30h Corrupted', os.path.join(os.path.dirname(log_file),'hist_30_corrupted.png'), bin_width=1)
+    
     if run_deltas:
-        plot_hist(run_deltas, 'Interval between wells (min)', 'hist_run_deltas.png')
+        plot_hist(run_deltas, 
+                  'Interval between wells (min)', 
+                  os.path.join(os.path.dirname(log_file), 'hist_run_deltas.png'))
     print(f"Log and histograms saved in {os.path.dirname(log_file)}")
 
+
+    """
     print("----- Computing 3 random trend (with std) -----")
     # Esempio andamento tempo per singola well (3 wells casuali)
     sample = random.sample(list(valid_wells.keys()), min(3,len(valid_wells)))
@@ -284,3 +425,9 @@ def main(input_dir, output_dir, log_file):
     plt.grid()
     plt.savefig(os.path.join(log_dir,'mean_std_errorbar.png'))
     plt.close()
+    """
+
+
+
+if __name__ == '__main__':
+    print("===== ATTENZIONE: FARE IL RUN DEL FILE DA _mainDataPreparation =====")
