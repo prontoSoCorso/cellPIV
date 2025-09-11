@@ -10,3 +10,7 @@
 # Python cache directories
 __pycache__/
 *.egg-info/
+
+# Environment variables
+# This file is used to store environment variables that should not be committed to the repository.
+.env

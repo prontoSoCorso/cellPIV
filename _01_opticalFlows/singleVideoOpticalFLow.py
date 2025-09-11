@@ -74,7 +74,7 @@ def main(input_path,
             iterations          = conf.iterations,
             poly_n              = conf.poly_n,
             poly_sigma          = conf.poly_sigma,
-            flags               = cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+            flags               = conf.flags,
 
             winSize_LK      = conf.winSize_LK,
             maxLevelPyramid = conf.maxLevelPyramid,

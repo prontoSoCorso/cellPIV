@@ -272,7 +272,7 @@ def plot_hist(data, title, filename, bin_width=None, bin_count=15):
     plt.close()
 
 
-def main(input_dir, output_dir, log_file):
+def main(input_dir, output_file, log_file):
     log_dir = os.path.dirname(log_file)
     os.makedirs(log_dir, exist_ok=True)
 
@@ -305,8 +305,21 @@ def main(input_dir, output_dir, log_file):
         if os.path.isdir(os.path.join(input_dir, year, vf))
         )
     
+    # --- Save valid wells acquisition times (in hours relative to first frame) ---
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    with open(output_file, 'w') as vf:
+        vf.write('dish_well,acquisition_hours\n') # Modificato il nome delle colonne
+        for (pdb, well), times in sorted(valid_wells.items()):
+            ts_sorted = sorted(times)
+            t0 = ts_sorted[0]
+            hours = [(t - t0) * 24 for t in ts_sorted]
+            hours_str = ';'.join(f"{h:.4f}" for h in hours)
+            vf.write(f"{pdb}_{well},{hours_str}\n") # Combinato pdb e well per dish_well
+
+    print(f"Valid wells acquisition times saved to {output_file}")
+
+    # --- Scrittura log ---
     print("----- Log writing -----")
-    # Scrivi log
     with open(log_file, 'w') as f:
         # --- General stats ---
         f.write(f"Numero sottocartelle totali: {num_subfolders}\n")
@@ -382,51 +395,6 @@ def main(input_dir, output_dir, log_file):
                   'Interval between wells (min)', 
                   os.path.join(os.path.dirname(log_file), 'hist_run_deltas.png'))
     print(f"Log and histograms saved in {os.path.dirname(log_file)}")
-
-
-    """
-    print("----- Computing 3 random trend (with std) -----")
-    # Esempio andamento tempo per singola well (3 wells casuali)
-    sample = random.sample(list(valid_wells.keys()), min(3,len(valid_wells)))
-    fig, axs = plt.subplots(2, 3, sharey=True, figsize=(12, 8))
-    for i, key in enumerate(sample):
-        ts_sorted = sorted(valid_wells[key])
-        rel_min = [(t-ts_sorted[0])*24*60 for t in ts_sorted]
-        axs[0, i].scatter(range(len(rel_min)), rel_min, s=10)
-        axs[0, i].set_title(f"{key} full")
-        axs[0, i].grid(True)
-        axs[1, i].scatter(range(min(150, len(rel_min))), rel_min[:150], s=10)
-        axs[1, i].set_title(f"{key} first 150")
-        axs[1, i].grid(True)
-        if i == 0:
-            axs[0, i].set_ylabel("Minuti")
-            axs[1, i].set_ylabel("Minuti")
-        for j in [0, 1]:
-            axs[j, i].set_xlabel("Frame index")
-    fig.tight_layout()
-    fig.savefig(os.path.join(log_dir,'well_scatter_subplot.png'))
-    plt.close(fig)
-
-    # Plot medio + std per frame across wells
-    # costruisci serie per ogni well rel_min list
-    all_series = [[(t - min(times)) * 24 for t in sorted(times)]
-                  for times in valid_wells.values()]
-    max_len = max(len(s) for s in all_series)
-    means, stds = [], []
-    for i in range(max_len):
-        vals = [s[i] for s in all_series if len(s)>i]
-        means.append(statistics.mean(vals))
-        stds.append(statistics.pstdev(vals))
-    x = list(range(len(means)))
-    plt.figure()
-    plt.errorbar(x, means, yerr=stds, fmt='o', ecolor='grey', capsize=2)
-    plt.xlabel("Frame index"); plt.ylabel("Ore dal t0")
-    plt.title("Mean ± std per frame across wells")
-    plt.grid()
-    plt.savefig(os.path.join(log_dir,'mean_std_errorbar.png'))
-    plt.close()
-    """
-
 
 
 if __name__ == '__main__':

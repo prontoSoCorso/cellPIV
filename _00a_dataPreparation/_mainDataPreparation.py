@@ -13,7 +13,7 @@ from _01_extract_images import extract_frames
 from _02_extract_equatore import copy_equatorial_frames
 from _03_check_empty_subfolders import check_empty_subfolders
 from _04_stats_timing import main as compute_stats_timing
-from _05_copy_and_rename_with_hpi import main as copy_and_rename_hpi
+from _05_copy_and_rename_with_hpi import copy_and_rename_hpi
 
 def count_folders(path_main_folder):
     # Contatore per le sottocartelle
@@ -32,11 +32,12 @@ def count_folders(path_main_folder):
     print(f"Numero totale di sottocartelle: {total_subfolders}")
 
 
-def main(extract_pdb=False, extract_equator=False, count_final_folders=False, check_empty=False, stats_timing=True, copy_and_rename=False,
+def main(extract_pdb=False, extract_equator=False, count_final_folders=False, check_empty=False, stats_timing=False, copy_and_rename=True,
          input_dir=conf.input_dir_pdb_files, output_dir_extracted_pdb_files=conf.output_dir_extracted_pdb_files, log_extraction_file=conf.log_file_pdb_extraction, 
          src_dir=conf.src_dir_extracted_pdb, dest_dir=conf.dest_dir_extracted_equator,
          log_empty_file = None,
          scope_eq_dir=conf.src_dir_extracted_equator, scope_final_dir=conf.dest_dir_time_conversion, log_stats_file=None, 
+         output_file_valid_wells_dir=conf.valid_wells_file,
          path_main_folder=conf.path_main_folder):
     ##############################
     # Extraction from pdb files
@@ -68,13 +69,16 @@ def main(extract_pdb=False, extract_equator=False, count_final_folders=False, ch
     # Stats
     ##############################
     if stats_timing:
-        compute_stats_timing(input_dir=scope_eq_dir, output_dir=scope_final_dir, log_file=log_stats_file)
+        compute_stats_timing(input_dir=scope_eq_dir, output_file=output_file_valid_wells_dir, log_file=log_stats_file)
 
     ##############################
     # Copy all eligible videos and rename each frame with the time conversion in hours post insemination
     ##############################
     if copy_and_rename:
-        copy_and_rename_hpi(input_dir=scope_eq_dir, output_dir=scope_final_dir)
+        copy_and_rename_hpi(
+            input_dir=scope_eq_dir,
+            output_dir=scope_final_dir,
+            csv_file=output_file_valid_wells_dir)
 
 
 if __name__ == "__main__":

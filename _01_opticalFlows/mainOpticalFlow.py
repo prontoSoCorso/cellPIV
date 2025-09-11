@@ -95,7 +95,7 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
                     iterations          = conf.iterations,
                     poly_n              = conf.poly_n,
                     poly_sigma          = conf.poly_sigma,
-                    flags               = cv2.OPTFLOW_FARNEBACK_GAUSSIAN,
+                    flags               = conf.flags,
 
                     winSize_LK      = conf.winSize_LK,
                     maxLevelPyramid = conf.maxLevelPyramid,

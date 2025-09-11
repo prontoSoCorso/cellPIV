@@ -66,7 +66,7 @@ def process_frames(folder_path,
     prev_frame = cv2.imread(os.path.join(folder_path, frame_files[0]), cv2.IMREAD_GRAYSCALE)
     if prev_frame.shape[:2] != target_size:
         prev_frame = cv2.resize(prev_frame, target_size)
-    prev_frame = preprocess_frame(prev_frame)
+    prev_frame = preprocess_frame(prev_frame, use_clahe=False, sigma_blur=0)  # No CLAHE on first frame
 
     # METRICHE
     # media della magnitudine in ogni frame (1 valore per frame)
@@ -89,7 +89,7 @@ def process_frames(folder_path,
             current_frame = cv2.imread(current_frame_path, cv2.IMREAD_GRAYSCALE)
             if current_frame.shape[:2] != target_size:
                 current_frame = cv2.resize(current_frame, target_size)
-            current_frame = preprocess_frame(current_frame)
+            current_frame = preprocess_frame(current_frame, use_clahe=False, sigma_blur=0)  # No CLAHE on subsequent frames
 
             # Scelgo il metodo di Optical Flow
             if method_optical_flow == "LucasKanade":
@@ -145,18 +145,11 @@ def process_frames(folder_path,
     metrics['hybrid'] = ((norm_mag + (1 - norm_std)) / 2).tolist()  # Inverted std relationship
     
     # Calcolo sum_mean_mag
-    sum_mean_mag = [np.mean(mean_mag[i:i + num_forward_frame]) 
-                    for i in range(len(mean_mag) - num_forward_frame + 1)]
-    
-    # Padding per mantenere la lunghezza uguale
-    sum_mean_mag = [np.mean(mean_mag[i:i+num_forward_frame]) 
-                   for i in range(len(mean_mag) - num_forward_frame + 1)]
-    padding_length = len(mean_mag) - len(sum_mean_mag)
-    metrics['sum_mean_mag'] = np.pad(sum_mean_mag, 
-                                     ((0, padding_length)), 
-                                     'constant', 
-                                     constant_values=(0))
-
+    sum_mean = np.array([mean_mag[i:i+num_forward_frame].mean() 
+                         for i in range(len(mean_mag)-num_forward_frame+1)])
+    padding = len(mean_mag) - len(sum_mean)
+    sum_mean_padded = np.concatenate([sum_mean, np.zeros(padding)])
+    metrics['sum_mean_mag'] = sum_mean_padded.tolist()
     logging.info(f"Processed frames {dish_well} saved successfully")
 
     if save_metrics:

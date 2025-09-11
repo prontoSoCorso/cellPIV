@@ -15,6 +15,14 @@ sys.path.append(parent_dir)
 from config import utils as utils
 
 def sort_files_by_slice_number(file_list):
+    # Two possible filename formats:
+
+    # D2013.02.19_S0675_I141_5_7_0_1.5h.jpg
+    # DYear.Month.Day_DishNumber_DishNumber_Well_Frame_equatPlane_XXh.jpg
+    
+    # D2013.02.19_S0675_I141_D_5_7_0_1.5h.jpg
+    # DYear.Month.Day_DishNumber_DishNumber_D__Well_D0_Frame_XXh.jpg
+
     # Define a custom sorting key function
     def get_slice_number(filename):
         if '_D_' in filename:
@@ -142,16 +150,21 @@ def save_plot_temporal_metrics(output_base, dish_well, metrics, start_frame):
                bbox_inches='tight')
     plt.close()
 
-def preprocess_frame(frame):
+def preprocess_frame(frame, use_clahe=True, clahe_clip=2.0, sigma_blur=1.5):
     """Fixed preprocessing with correct CLAHE application"""
+    processed = frame.copy()
+
     # Ensure input is uint8 (original image format)
-    if frame.dtype != np.uint8:
-        frame = frame.astype(np.uint8)
+    if processed.dtype != np.uint8:
+        processed = processed.astype(np.uint8)
 
     # CLAHE and Gaussian Blur (common steps)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    processed = clahe.apply(frame)
-    processed = cv2.GaussianBlur(processed, (5,5), 1.5)
+    if use_clahe:
+        clahe = cv2.createCLAHE(clipLimit=clahe_clip, tileGridSize=(8,8))
+        processed = clahe.apply(processed)
+    if sigma_blur > 0:
+        k = int(6*sigma_blur + 1) | 1
+        processed = cv2.GaussianBlur(processed, (k,k), sigma_blur)
 
     return processed
 

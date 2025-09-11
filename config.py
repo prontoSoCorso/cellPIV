@@ -4,6 +4,7 @@ import os
 import torch
 import random
 import numpy as np
+import cv2
 
 # Rileva il percorso della cartella "cellPIV" in modo dinamico
 current_file_path = os.path.abspath(__file__)
@@ -31,7 +32,7 @@ class user_paths:
         #Per computer fisso nuovo
         dataset = os.path.join(PROJECT_ROOT, "datasets")
         path_original_excel = os.path.join(dataset, "DB morpheus UniPV.xlsx")
-        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti_small_batch"
+        path_BlastoData = "/home/phd2/Scrivania/CorsoData/blastocisti"
     
     elif sourceForPath == 1:
         #Per computer portatile lorenzo
@@ -57,7 +58,7 @@ class utils:
 
     num_classes                 = 2
     project_name                = "BlastoClass_3days_optflow_Farneback"
-    hours2cut                   = 1
+    hours2cut                   = 0
     start_frame                 = framePerHour*hours2cut
 
     # Seed everything
@@ -79,30 +80,33 @@ class Config_00_preprocessing:
     # Percorso della directory con i video equatoriali
     path_main_folder = dest_dir_extracted_equator
 
+    # Path cartella in cui salvare tutti i "valid_wells" selezionati dalle immagini, principalemente dai timing di acquisizione
+    valid_wells_file = os.path.join(user_paths.dataset, 'valid_wells_acquisition_times.csv')
+
     # Preprocessing
     path_original_excel     = user_paths.path_original_excel
     #path_original_excel     = os.path.join(user_paths.path_excels, "BlastoLabels.xlsx")
     path_addedID_csv        = os.path.join(user_paths.dataset, "DB_Morpheus_withID.csv")
     path_double_dish_excel  = os.path.join(user_paths.dataset, "pz con doppia dish.xlsx")
+    filtered_blasto_dataset = os.path.join(user_paths.dataset, "filtered_blasto_dataset.csv")
+    final_blasto_dataset    = os.path.join(user_paths.dataset, "final_blasto_dataset.csv")
 
     # Percorso della directory di destinazione
     dest_dir_blastoData = user_paths.path_BlastoData
-
 
 class Config_01_OpticalFlow:
     method_optical_flow = "Farneback"   # "LucasKanade/Farneback"
 
     # Settings
-    save_metrics = True
+    save_metrics = False
     save_overlay_optical_flow = False
-    save_final_data = False
+    save_final_data = True
 
     # Var
     img_size                    = utils.img_size
-    num_minimum_frames          = 300
-    num_initial_frames_to_cut   = utils.start_frame   # Taglio le prime ore perché biologicamente non significative
-                                                        # (prima delle 4 ore no pronuclei e pochi movimenti cellulari)
-    num_forward_frame           = 4     # Numero di frame per sum_mean_mag
+    num_minimum_frames          = utils.framePerDay*3   # Numero minimo di frame per considerare il video (3 giorni)
+    num_initial_frames_to_cut   = utils.start_frame     # Numero di frame iniziali da tagliare (es. 0h, 1h, 2h, 3h)
+    num_forward_frame           = 4                     # Numero di frame per sum_mean_mag
 
     # LUCAS KANADE
     # LK parameters
@@ -119,20 +123,22 @@ class Config_01_OpticalFlow:
     # General analysis
     pyr_scale = 0.5
     levels = 4
-    winSize_Farneback = 13
-    iterations = 5
+    winSize_Farneback = 25
+    iterations = 3
     poly_n = 5
-    poly_sigma = 1.1
+    poly_sigma = 1.2
+    flags = 0
 
     # Singolo video
     single_video = False
     if single_video:
-        pyr_scale        = 0.4
+        pyr_scale        = 0.5
         levels           = 4
-        winSize_Farneback= 21      # più grande
-        iterations       = 7       # più iterazioni
-        poly_n           = 7       # vicinato maggiore
-        poly_sigma       = 1.3     # filtro gaussiano più largo
+        winSize_Farneback= 21                               # più grande
+        iterations       = 7                                # più iterazioni
+        poly_n           = 7                                # vicinato maggiore
+        poly_sigma       = 1.3                              # filtro gaussiano più largo
+        flags            = cv2.OPTFLOW_FARNEBACK_GAUSSIAN
 
     base_out_example = f"/home/phd2/Scrivania/CorsoData/opticalFlowExamples{method_optical_flow}" 
     if method_optical_flow == "Farneback":
@@ -155,9 +161,9 @@ class Config_02_temporalData:
 
     # Path in cui salvo il file csv che ottengo leggendo i pkl delle serie temporali e che sarà poi quello usato per creare il csv finale
     temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series_csv', dictAndOptFlowType)
-    csv_file_Danilo_path        = Config_00_preprocessing.path_addedID_csv  # File che ho ottenuto dal preprocessing degli excel (singolo csv con ID)
+    csv_file_Danilo_path        = Config_00_preprocessing.final_blasto_dataset  # File che ho ottenuto dal preprocessing degli excel (singolo csv con ID)
     # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
-    final_csv_path              = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
+    opt_flow_csv_path              = os.path.join(user_paths.dataset, method_optical_flow, "opt_flow_dataset.csv")
 
     embedding_type = "umap"
     use_plotly_lib = True
