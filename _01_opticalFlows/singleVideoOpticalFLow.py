@@ -14,21 +14,21 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_01_OpticalFlow as conf
+from config import Config_01_OpticalFlow as config
 from config import utils as utils
 from _01_opticalFlows._process_optical_flow import process_frames
 from _utils_._utils import config_logging
 
 def main(input_path,
          output_base_dir,
-         method_optical_flow=conf.method_optical_flow,
-         img_size=conf.img_size,
-         num_minimum_frames=conf.num_minimum_frames,
-         num_initial_frames_to_cut=conf.num_initial_frames_to_cut,
-         num_forward_frame=conf.num_forward_frame,
-         save_metrics=conf.save_metrics,
-         save_overlay_optical_flow=conf.save_overlay_optical_flow,
-         save_final_data=conf.save_final_data):
+         method_optical_flow=config.method_optical_flow,
+         img_size=config.img_size,
+         num_minimum_frames=config.num_minimum_frames,
+         num_initial_frames_to_cut=config.num_initial_frames_to_cut,
+         num_forward_frame=config.num_forward_frame,
+         save_metrics=config.save_metrics,
+         save_overlay_optical_flow=config.save_overlay_optical_flow,
+         save_final_data=config.save_final_data):
     """
     Process a single folder (input_path) and save:
       - overlay images with optical flow in output_base_dir/overlays
@@ -68,20 +68,20 @@ def main(input_path,
             output_path_images_with_optical_flow=overlays_dir,
 
             # parametri Farneback / LK
-            pyr_scale           = conf.pyr_scale,
-            levels              = conf.levels,
-            winsize_Farneback   = conf.winSize_Farneback,
-            iterations          = conf.iterations,
-            poly_n              = conf.poly_n,
-            poly_sigma          = conf.poly_sigma,
-            flags               = conf.flags,
+            pyr_scale           = config.pyr_scale,
+            levels              = config.levels,
+            winsize_Farneback   = config.winSize_Farneback,
+            iterations          = config.iterations,
+            poly_n              = config.poly_n,
+            poly_sigma          = config.poly_sigma,
+            flags               = config.flags,
 
-            winSize_LK      = conf.winSize_LK,
-            maxLevelPyramid = conf.maxLevelPyramid,
-            maxCorners      = conf.maxCorners,
-            qualityLevel    = conf.qualityLevel,
-            minDistance     = conf.minDistance,
-            blockSize       = conf.blockSize
+            winSize_LK      = config.winSize_LK,
+            maxLevelPyramid = config.maxLevelPyramid,
+            maxCorners      = config.maxCorners,
+            qualityLevel    = config.qualityLevel,
+            minDistance     = config.minDistance,
+            blockSize       = config.blockSize
         )
 
         # Salva i dati grezzi delle metriche

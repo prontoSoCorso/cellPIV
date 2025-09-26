@@ -1,0 +1,34 @@
+COMPARISON REPORT
+N_series: 6001
+--- RAW ---
+mean_of_means: 1.4599108230604024e-05
+var_between_means: 5.260173353572686e-10
+mean_within_var: 6.599017624109419e-08
+ratio: 0.007971146090525226
+cv_means: 1.5709910116232337
+cv_stds: 1.4948177464275938
+--- PER-SERIE (z per serie) ---
+mean_of_means: 1.3658092783361473e-19
+var_between_means: 4.883933982212112e-34
+mean_within_var: 1.0
+ratio: 4.883933982212112e-34
+cv_means: 161.80607894152905
+cv_stds: 9.10713079182665e-17
+--- GLOBALE (z con mean/std globali) ---
+global_mean: 1.4599108230604016e-05, global_std: 0.0002579073352513485
+mean_of_means: 2.486485160966856e-17
+var_between_means: 0.007908109395235946
+mean_within_var: 0.9920918906047639
+ratio: 0.007971146090525228
+cv_means: 3576436038326566.0
+cv_stds: 1.4948177464275942
+--- CENTER-PER-SERIE + SCALE-GLOBALE ---
+mean_of_means: 1.716473371752511e-19
+var_between_means: 2.052242283364833e-34
+mean_within_var: 0.9920918906047639
+ratio: 2.0686010064186877e-34
+cv_means: 83.45978185361525
+cv_stds: 1.4948177464275942
+
+Label correlation analysis:
+None

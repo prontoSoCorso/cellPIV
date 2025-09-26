@@ -1,0 +1,13 @@
+RIEPILOGO
+Numero serie: 6001
+mean_of_means: 0.26658143507390303
+std_of_means: 0.03787270566113294
+var_between_means: 0.0014343418340948108
+mean_within_var: 0.010324567740566176
+ratio_between_within: 0.1389251221103572
+cv_means: 0.14206805380364795
+cv_stds: 0.11128104860038285
+
+Suggerimento:
+ - centratura GLOBALE sufficiente (baseline simili).
+ - scaling GLOBALE sufficiente (std simili tra serie).

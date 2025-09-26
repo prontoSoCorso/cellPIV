@@ -89,13 +89,14 @@ class Config_00_preprocessing:
     path_addedID_csv        = os.path.join(user_paths.dataset, "DB_Morpheus_withID.csv")
     path_double_dish_excel  = os.path.join(user_paths.dataset, "pz con doppia dish.xlsx")
     filtered_blasto_dataset = os.path.join(user_paths.dataset, "filtered_blasto_dataset.csv")
-    final_blasto_dataset    = os.path.join(user_paths.dataset, "final_blasto_dataset.csv")
 
     # Percorso della directory di destinazione
     dest_dir_blastoData = user_paths.path_BlastoData
 
 class Config_01_OpticalFlow:
-    method_optical_flow = "Farneback"   # "LucasKanade/Farneback"
+    method_optical_flow     = "Farneback"   # "LucasKanade/Farneback"
+    #method_optical_flow    = "LucasKanade"   # "LucasKanade/Farneback"
+    pickle_dir              = os.path.join(user_paths.dataset, method_optical_flow, 'pickles')
 
     # Settings
     save_metrics = False
@@ -137,7 +138,7 @@ class Config_01_OpticalFlow:
         winSize_Farneback= 21                               # più grande
         iterations       = 7                                # più iterazioni
         poly_n           = 7                                # vicinato maggiore
-        poly_sigma       = 1.3                              # filtro gaussiano più largo
+        poly_sigma       = 1.2                              # filtro gaussiano più largo
         flags            = cv2.OPTFLOW_FARNEBACK_GAUSSIAN
 
     base_out_example = f"/home/phd2/Scrivania/CorsoData/opticalFlowExamples{method_optical_flow}" 
@@ -149,35 +150,30 @@ class Config_01_OpticalFlow:
         raise SystemExit("\n===== Scegliere un metodo di flusso ottico valido nel config =====\n")
 
 
-class Config_02_temporalData:
-    dict                        = "sum_mean_mag"  # mean_magnitude / sum_mean_mag / vorticity
-    method_optical_flow         = "Farneback"
-    type_files                  = f"files_all_days_{method_optical_flow}"
-    dict_in                     = dict + "_" + method_optical_flow + ".pkl"
+class Config_02_processTemporalData:
+    method_optical_flow     = "Farneback"   # "LucasKanade/Farneback"
+    pickle_dir              = os.path.join(user_paths.dataset, method_optical_flow, 'pickles')
+    dict                    = "sum_mean_mag"  # mean_magnitude / sum_mean_mag / vorticity / hybrid
+    print(f"Config 02_processTemporalData - Using dict: {dict}")
+
+    # File pickle e CSV da caricare per il processamento dei dati raw del flusso ottico
+    pickle_files            = [f"{dict}.pkl"]   # es. ["sum_mean_mag.pkl"] oppure [] per tutti
+    reference_file_path     = Config_00_preprocessing.filtered_blasto_dataset  # File che ho ottenuto dal preprocessing degli excel (singolo csv con ID)
+    acquisition_times_path  = Config_00_preprocessing.valid_wells_file  # File con i tempi di acquisizione
     
-    convert_pkl_to_csv          = True
-    path_pkl                    = os.path.join(type_files, dict_in)
-    dictAndOptFlowType          = dict + "_" + method_optical_flow + ".csv"
+    # Path del csv finale che contiene gli identificativi dei video, la classe, i metadati e tutti i valori delle serie temporali allineate
+    out_pickle_dir          = os.path.join(user_paths.dataset, method_optical_flow, "pickles_preprocessed")
+    final_csv_path          =  os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
 
-    # Path in cui salvo il file csv che ottengo leggendo i pkl delle serie temporali e che sarà poi quello usato per creare il csv finale
-    temporal_csv_path           = os.path.join(PROJECT_ROOT, '_02_temporalData', 'final_series_csv', dictAndOptFlowType)
-    csv_file_Danilo_path        = Config_00_preprocessing.final_blasto_dataset  # File che ho ottenuto dal preprocessing degli excel (singolo csv con ID)
-    # Path del csv finale che contiene gli identificativi dei video, la classe e tutti i valori delle serie temporali
-    opt_flow_csv_path              = os.path.join(user_paths.dataset, method_optical_flow, "opt_flow_dataset.csv")
-
-    embedding_type = "umap"
-    use_plotly_lib = True
-    path_output_dim_reduction_files = os.path.join("dim_reduction_files", method_optical_flow, dict)
-    num_max_days = 7
-    days_to_consider_for_dim_reduction = [1,3,5,7]    # array perché fa ciclo per poter svolgere umap su più giorni
+class Config_02b_statisticalTemporalAnalysis:
+    print("Config 02b_statisticalTemporalAnalysis")
 
 
-
-class Config_02b_normalization:
+class Config_02c_splitAndNormalization:
     method_optical_flow = "Farneback"   #LucasKanade / Farneback
 
     # Data
-    temporalDataType = Config_02_temporalData.dict
+    temporalDataType = Config_02_processTemporalData.dict
     train_size = 0.7
     embedding_type=""   # "umap" OR "tsne"
     save_normalization_example_single_pt=True
@@ -202,7 +198,7 @@ class Config_02b_normalization:
     def get_normalized_base_path(days_to_consider, method_optical_flow=method_optical_flow):
         subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow,"subsets")
         return os.path.join(subsets_base_path, 
-                            f"Normalized_{Config_02b_normalization.temporalDataType}_{days_to_consider}Days")
+                            f"Normalized_{Config_02c_splitAndNormalization.temporalDataType}_{days_to_consider}Days")
 
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
@@ -214,8 +210,8 @@ class Config_02b_normalization:
         :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
         :return: Tuple con i percorsi di train, validation e test.
         """
-        base_path = Config_02b_normalization.get_normalized_base_path(days_to_consider=days_to_consider, 
-                                                                      method_optical_flow=Config_02b_normalization.method_optical_flow)
+        base_path = Config_02c_splitAndNormalization.get_normalized_base_path(days_to_consider=days_to_consider, 
+                                                                      method_optical_flow=Config_02c_splitAndNormalization.method_optical_flow)
         train_path = f"{base_path}_train.csv"
         val_path = f"{base_path}_val.csv"
         test_path = f"{base_path}_test.csv"
@@ -266,7 +262,7 @@ class Config_03_train:
         :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
         :return: Tuple con i percorsi di train, validation e test.
         """
-        base_path = Config_02b_normalization.get_normalized_base_path(days_to_consider=days_to_consider, 
+        base_path = Config_02c_splitAndNormalization.get_normalized_base_path(days_to_consider=days_to_consider, 
                                                                       method_optical_flow=Config_03_train.method_optical_flow)
         train_path = f"{base_path}_train.csv"
         val_path = f"{base_path}_val.csv"

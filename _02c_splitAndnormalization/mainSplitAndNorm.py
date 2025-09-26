@@ -13,10 +13,10 @@ while os.path.basename(parent_dir) != "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_02b_normalization as conf
+from config import Config_02c_splitAndNormalization as conf
 from config import utils
-from _02b_normalization._01_split_normalization import load_data, normalize_data, save_data, stratified_split
-from _02b_normalization._02_visualization import (visualize_normalized_data_single_pt,
+from _02c_splitAndnormalization._01_split_normalization import load_data, normalize_data, save_data, stratified_split
+from _02c_splitAndnormalization._02_visualization import (visualize_normalized_data_single_pt,
                                                   create_and_save_plots_mean_temp_data, 
                                                   create_and_save_stratified_plots_mean_temp_data)
 from _utils_.dimReduction import compute_UMAP, compute_tSNE, compute_UMAP_with_plotly

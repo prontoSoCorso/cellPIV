@@ -14,20 +14,20 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_01_OpticalFlow as conf
+from config import Config_01_OpticalFlow as config
 from config import user_paths as myPaths
 from config import utils as utils
 from _01_opticalFlows._process_optical_flow import process_frames
 from _utils_._utils import config_logging
 
-def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.path_BlastoData, 
-         img_size=conf.img_size, num_minimum_frames=conf.num_minimum_frames, 
-         num_initial_frames_to_cut=conf.num_initial_frames_to_cut, num_forward_frame=conf.num_forward_frame,
+def main(method_optical_flow=config.method_optical_flow, path_BlastoData=myPaths.path_BlastoData, 
+         img_size=config.img_size, num_minimum_frames=config.num_minimum_frames, 
+         num_initial_frames_to_cut=config.num_initial_frames_to_cut, num_forward_frame=config.num_forward_frame,
          output_metrics_base_dir = os.path.join(current_dir, "metrics_examples"),
-         save_metrics=conf.save_metrics,
-         output_path_optical_flow_images=conf.output_path_optical_flow_images,
-         save_overlay_optical_flow=conf.save_overlay_optical_flow,
-         save_final_data=conf.save_final_data):
+         save_metrics=config.save_metrics,
+         output_path_optical_flow_images=config.output_path_optical_flow_images,
+         save_overlay_optical_flow=config.save_overlay_optical_flow,
+         save_final_data=config.save_final_data):
     # Configure logging
     log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                            f'optical_flow_complete_analysis_{method_optical_flow}.log')
@@ -89,20 +89,20 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
                     save_overlay_optical_flow=save_overlay_optical_flow,
                     output_path_images_with_optical_flow=output_images_path,
 
-                    pyr_scale           = conf.pyr_scale,
-                    levels              = conf.levels,
-                    winsize_Farneback   = conf.winSize_Farneback,
-                    iterations          = conf.iterations,
-                    poly_n              = conf.poly_n,
-                    poly_sigma          = conf.poly_sigma,
-                    flags               = conf.flags,
+                    pyr_scale           = config.pyr_scale,
+                    levels              = config.levels,
+                    winsize_Farneback   = config.winSize_Farneback,
+                    iterations          = config.iterations,
+                    poly_n              = config.poly_n,
+                    poly_sigma          = config.poly_sigma,
+                    flags               = config.flags,
 
-                    winSize_LK      = conf.winSize_LK,
-                    maxLevelPyramid = conf.maxLevelPyramid,
-                    maxCorners      = conf.maxCorners,
-                    qualityLevel    = conf.qualityLevel,
-                    minDistance     = conf.minDistance,
-                    blockSize       = conf.blockSize
+                    winSize_LK      = config.winSize_LK,
+                    maxLevelPyramid = config.maxLevelPyramid,
+                    maxCorners      = config.maxCorners,
+                    qualityLevel    = config.qualityLevel,
+                    minDistance     = config.minDistance,
+                    blockSize       = config.blockSize
                     )
                 
                 # Store metrics
@@ -133,7 +133,7 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
 
     # Save final data
     if save_final_data:
-        temporal_data_dir = os.path.join(parent_dir, '_02_temporalData', f"files_all_days_{method_optical_flow}")
+        temporal_data_dir = config.pickle_dir
         os.makedirs(temporal_data_dir, exist_ok=True)
 
         logging.info(f"\nSaving metrics data to: {temporal_data_dir}")
@@ -148,11 +148,11 @@ def main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.p
 if __name__ == "__main__":
     start_time = time.time()
     # execution_time = timeit.timeit(main, number=1)
-    main(method_optical_flow=conf.method_optical_flow, path_BlastoData=myPaths.path_BlastoData, 
-         img_size=conf.img_size, num_minimum_frames=conf.num_minimum_frames, 
-         num_initial_frames_to_cut=conf.num_initial_frames_to_cut, num_forward_frame=conf.num_forward_frame,
+    main(method_optical_flow=config.method_optical_flow, path_BlastoData=myPaths.path_BlastoData, 
+         img_size=config.img_size, num_minimum_frames=config.num_minimum_frames, 
+         num_initial_frames_to_cut=config.num_initial_frames_to_cut, num_forward_frame=config.num_forward_frame,
          output_metrics_base_dir = os.path.join(current_dir, "metrics_examples"),
-         save_metrics=conf.save_metrics,
-         output_path_optical_flow_images=conf.output_path_optical_flow_images,
-         save_overlay_optical_flow=conf.save_overlay_optical_flow)
+         save_metrics=config.save_metrics,
+         output_path_optical_flow_images=config.output_path_optical_flow_images,
+         save_overlay_optical_flow=config.save_overlay_optical_flow)
     print("Execution time:", str(time.time()-start_time), "seconds")
