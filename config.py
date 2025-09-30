@@ -154,7 +154,6 @@ class Config_02_processTemporalData:
     method_optical_flow     = "Farneback"   # "LucasKanade/Farneback"
     pickle_dir              = os.path.join(user_paths.dataset, method_optical_flow, 'pickles')
     dict                    = "sum_mean_mag"  # mean_magnitude / sum_mean_mag / vorticity / hybrid
-    print(f"Config 02_processTemporalData - Using dict: {dict}")
 
     # File pickle e CSV da caricare per il processamento dei dati raw del flusso ottico
     pickle_files            = [f"{dict}.pkl"]   # es. ["sum_mean_mag.pkl"] oppure [] per tutti
@@ -165,9 +164,6 @@ class Config_02_processTemporalData:
     out_pickle_dir          = os.path.join(user_paths.dataset, method_optical_flow, "pickles_preprocessed")
     final_csv_path          =  os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
 
-class Config_02b_statisticalTemporalAnalysis:
-    print("Config 02b_statisticalTemporalAnalysis")
-
 
 class Config_02c_splitAndNormalization:
     method_optical_flow = "Farneback"   #LucasKanade / Farneback
@@ -176,19 +172,20 @@ class Config_02c_splitAndNormalization:
     temporalDataType = Config_02_processTemporalData.dict
     train_size = 0.7
     embedding_type=""   # "umap" OR "tsne"
-    save_normalization_example_single_pt=True
-    mean_data_visualization=True
+    save_normalization_example_single_pt=False
+    per_series_normalization = True
+    mean_data_visualization=False
     specific_patient_to_analyse=42
     mean_data_visualization_stratified=False
     path_original_excel = user_paths.path_original_excel
 
     # Per gestire dati a N giorni a partire dalla i-esima ora con limiti normalizzazione
-    days_to_consider = [1,3]        # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
-    inf_quantile = 0.05
-    sup_quantile = 0.95
-    initial_hours_to_cut = 3    # Remember that I already cut the first hour
+    days_to_consider = [1]        # Imposta il numero di giorni da considerare (1, 3, 5, o 7)
+    inf_quantile = 0.01
+    sup_quantile = 0.99
+    initial_hours_to_cut = 0    # Remember that I already cut the first hour
     initial_frames_to_cut = initial_hours_to_cut*utils.framePerHour
-    start_frame = initial_frames_to_cut+utils.start_frame
+    start_time = initial_frames_to_cut+utils.start_frame
 
     # Paths file completo
     csv_file_path = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
@@ -196,10 +193,9 @@ class Config_02c_splitAndNormalization:
     # Base path generico per i file normalizzati
     @staticmethod
     def get_normalized_base_path(days_to_consider, method_optical_flow=method_optical_flow):
-        subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow,"subsets")
+        subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow, "subsets")
         return os.path.join(subsets_base_path, 
                             f"Normalized_{Config_02c_splitAndNormalization.temporalDataType}_{days_to_consider}Days")
-
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @staticmethod
@@ -230,7 +226,7 @@ class Config_02c_splitAndNormalization:
 
 class Config_03_train:
     method_optical_flow = "Farneback"
-    days_to_consider = 3
+    days_label = 3
     project_name = utils.project_name
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     multi_gpu = torch.cuda.device_count() > 1  # Variabile per controllare l'uso di più GPU
@@ -238,7 +234,7 @@ class Config_03_train:
     img_size = utils.img_size
     seed = utils.seed
     num_labels = 2
-    Data_shape = (1,96) #variabile di base, verrà aggiornata in ConvTran
+    Data_shape = (1,97) #variabile di base, verrà aggiornata in ConvTran
     output_model_base_dir = os.path.join(PROJECT_ROOT, "_04_test", "best_models", method_optical_flow)
     save_plots = True
     output_dir_plots = os.path.join(PROJECT_ROOT, "_03_train", "test_results_after_training", method_optical_flow)
@@ -271,7 +267,7 @@ class Config_03_train:
     
 
     # ROCKET
-    kernel_number_ROCKET     = [10000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
+    kernel_number_ROCKET     = [5000, 10000, 15000, 20000] #provato con [50,100,200,300,500,1000,5000,10000,20000]
     type_model_classification = "RF"    #or "LR" or "XGB"
     most_important_metric = "balanced_accuracy"
     
@@ -279,7 +275,7 @@ class Config_03_train:
     num_epochs_FCN      = 300
     batch_size_FCN      = 16
     dropout_FCN         = 0.3
-    kernel_sizes_FCN    = "8,5,3"           # def: 8,5,3
+    kernel_sizes_FCN    = "7,5,3"           # def: 7,5,3
     filter_sizes_FCN    = "128,256,128"
     lstm_size_FCN       = 4
     attention_FCN       = False
@@ -293,32 +289,31 @@ class Config_03_train:
 
     # ConvTran
     # ConvTran - Input & Output                                  
-    output_dir      = user_paths.dataset
-    Norm            = False        # Data Normalization
-    val_ratio       = 0.2     # Propotion of train-set to be used as validation
-    print_interval  = 50 # Print batch info every this many batches
+    output_dir_convtran = user_paths.dataset
+    Norm                = False        # Data Normalization
+    print_interval      = 50 # Print batch info every this many batches
     # ConvTran - Transformers Parameters
-    Net_Type        = 'C-T'    # choices={'T', 'C-T'}, help="Network Architecture. Convolution (C)", "Transformers (T)") (def = C-T)
-    emb_size        = 128       # Internal dimension of transformer embeddings (def = 16)
-    dim_ff          = emb_size*2       # Dimension of dense feedforward part of transformer layer (def = 256)
-    num_heads       = 8       # Number of multi-headed attention heads (def = 8)
-    Fix_pos_encode  = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
-    Rel_pos_encode  = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
+    Net_Type            = 'C-T'    # choices={'T', 'C-T'}, help="Network Architecture. Convolution (C)", "Transformers (T)") (def = C-T)
+    emb_size_convtran   = 128       # Internal dimension of transformer embeddings (def = 16)
+    kernel_len_emb      = 9         # Kernel size of initial Conv1D embedding layer (def = 9)
+    dim_ff              = emb_size_convtran*2       # Dimension of dense feedforward part of transformer layer (def = 256)
+    num_heads_convtran  = 8       # Number of multi-headed attention heads (def = 8)
+    Fix_pos_encode      = 'tAPE' # choices={'tAPE', 'Learn', 'None'}, help='Fix Position Embedding'
+    Rel_pos_encode      = 'eRPE' # choices={'eRPE', 'Vector', 'None'}, help='Relative Position Embedding'
     # ConvTran - Training Parameters/Hyper-Parameters
-    epochs          = 150        # Number of training epochs
-    batch_size      = 16     # Training batch size
-    lr              = 1e-3           # Learning rate
-    dropout         = 0.2       # Dropout regularization ratio
-    val_interval    = 1    # Evaluate on validation every XX epochs
-    key_metric      = 'accuracy' # choices={'loss', 'accuracy', 'precision'}, help='Metric used for defining best epoch'
-    num_classes     = utils.num_classes
-    num_labels      = num_classes
-    # ConvTran - Add Learning Rate Scheduler
-    scheduler_patience  = 5    # Number of epochs with no improvement after which learning rate will be reduced
-    scheduler_factor    = 0.5    # Factor by which the learning rate will be reduced
+    epochs_convtran     = 150        # Number of training epochs
+    batch_size_convtran = 32     # Training batch size
+    lr_convtran         = 5e-4           # Learning rate
+    dropout_convtran    = 0.3       # Dropout regularization ratio
+    num_classes         = utils.num_classes
+    num_labels          = num_classes
+    # ConvTran - scheduler and Early Stopping
+    patience_convtran   = 50    # Number of epochs with no improvement after which training will be stopped
+    scheduler_patience_convtran   = 10    # Number of epochs with no improvement after which learning rate will be reduced
+    scheduler_factor_convtran     = 0.75    # Factor by which the learning rate will be reduced
     # ConvTran - System
-    gpu             = -1             # GPU index, -1 for CPU
-    console         = False     # Optimize printout for console output; otherwise for file
+    gpu                 = -1             # GPU index, -1 for CPU
+    console             = True     # Optimize printout for console output; otherwise for file
 
 
 
@@ -328,7 +323,7 @@ class Config_03_train_with_optimization(Config_03_train):
     run_test_evaluation = True
     
     # Optuna optimization control
-    optimize_with_optuna = True
+    optimize_with_optuna = False
     
     # --- ROCKET search space ---
     rocket_kernels_options = [5000, 7500, 10000, 12500]
@@ -354,6 +349,6 @@ class Config_03_train_with_optimization(Config_03_train):
     convtran_dropout_range      = (0.1, 0.5)
     convtran_learning_rate_range= (1e-5, 1e-3)
     convtran_batch_size_options = [16, 32, 64]
-    convtran_patience           = 60
+    convtran_patience_options   = 50
     convtran_epochs_options     = 150
     optuna_n_trials_ConvTran    = 300

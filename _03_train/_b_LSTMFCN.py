@@ -21,290 +21,233 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from _utils_._utils import save_confusion_matrix, config_logging, plot_roc_curve, load_data, calculate_metrics
 from config import Config_03_train_with_optimization as conf
 
 device = conf.device
 
-class LSTMFCN(nn.Module):
-    def __init__(self, lstm_size, filter_sizes, kernel_sizes, dropout, num_layers):
-        super(LSTMFCN, self).__init__()
-        self.lstm = nn.LSTM(input_size=1, hidden_size=lstm_size, num_layers=num_layers, batch_first=True)
-        self.conv1 = nn.Sequential(
-            nn.Conv1d(1, filter_sizes[0], kernel_sizes[0]),
-            nn.BatchNorm1d(filter_sizes[0]),
-            nn.ReLU(),
-            nn.Dropout(dropout)
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv1d(filter_sizes[0], filter_sizes[1], kernel_sizes[1]),
-            nn.BatchNorm1d(filter_sizes[1]),
-            nn.ReLU(),
-            nn.Dropout(dropout)
-        )
-        self.conv3 = nn.Sequential(
-            nn.Conv1d(filter_sizes[1], filter_sizes[2], kernel_sizes[2]),
-            nn.BatchNorm1d(filter_sizes[2]),
-            nn.ReLU(),
-            nn.Dropout(dropout)
-        )
-        self.global_pooling = nn.AdaptiveAvgPool1d(1)
-        self.fc = nn.Linear(lstm_size + filter_sizes[-1], 2)
+# Positional Encoding
+def get_positional_encoding(seq_len: int, d_model: int, device=None) -> torch.Tensor:
+    pe = torch.zeros(seq_len, d_model, device=device)
+    position = torch.arange(0, seq_len, dtype=torch.float, device=device).unsqueeze(1)
+    div_term = torch.exp(torch.arange(0, d_model, 2, dtype=torch.float, device=device) * (-math.log(10000.0) / d_model))
+    pe[:, 0::2] = torch.sin(position * div_term)
+    if d_model % 2 == 1:
+        pe[:, 1::2] = torch.cos(position * div_term[:-1])
+    else:
+        pe[:, 1::2] = torch.cos(position * div_term)
+    return pe
+
+# Multi-Head Attention
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, n_heads=4, dropout=0.1):
+        super().__init__()
+        self.orig_d = d_model
+        self.n_heads = n_heads
+        pad_to = math.ceil(d_model / n_heads) * n_heads
+        self.pad_extra = pad_to - d_model
+        self.pre_proj = nn.Linear(d_model, pad_to) if pad_to != d_model else nn.Identity()
+        self.d_model = pad_to
+        self.d_k = pad_to // n_heads
+        self.w_q = nn.Linear(pad_to, pad_to, bias=False)
+        self.w_k = nn.Linear(pad_to, pad_to, bias=False)
+        self.w_v = nn.Linear(pad_to, pad_to, bias=False)
+        self.w_o = nn.Linear(pad_to, pad_to)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
-        # x may be either [N, L, C] (quello che facevo prima) or [N, C, L] (what Grad-CAM passes in)
-        if x.shape[2] == self.lstm.input_size:
-            # it’s already [N, L, C]
-            lstm_in = x
-            conv_in = x.permute(0, 2, 1)    # → [N, C, L]
+        x = self.pre_proj(x)  # [B, L, pad_to]
+        B, L, _ = x.size()
+        Q = self.w_q(x).view(B, L, self.n_heads, self.d_k).transpose(1, 2)
+        K = self.w_k(x).view(B, L, self.n_heads, self.d_k).transpose(1, 2)
+        V = self.w_v(x).view(B, L, self.n_heads, self.d_k).transpose(1, 2)
+        scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(self.d_k)
+        attn = torch.softmax(scores, dim=-1)
+        attn = self.dropout(attn)
+        ctx = torch.matmul(attn, V)  # [B, heads, L, d_k]
+        ctx = ctx.transpose(1, 2).contiguous().view(B, L, self.d_model)
+        out = self.w_o(ctx)
+        if self.pad_extra:
+            out = out[..., : self.orig_d]
+        return out
+
+# Residual Convolutional Block
+class ResidualConvBlock(nn.Module):
+    def __init__(self, in_ch, out_ch, kernel, dropout, se_ratio=0.25):
+        super().__init__()
+        self.conv1 = nn.Conv1d(in_ch, out_ch, kernel, padding=kernel // 2, bias=False)
+        self.conv2 = nn.Conv1d(out_ch, out_ch, kernel, padding=kernel // 2, bias=False)
+        self.norm1 = nn.BatchNorm1d(out_ch)
+        self.norm2 = nn.BatchNorm1d(out_ch)
+        self.act = nn.GELU()
+        self.drop = nn.Dropout(dropout)
+        se_ch = max(1, int(out_ch * se_ratio))
+        self.se = nn.Sequential(
+            nn.AdaptiveAvgPool1d(1),
+            nn.Conv1d(out_ch, se_ch, 1),
+            nn.ReLU(inplace=True),
+            nn.Conv1d(se_ch, out_ch, 1),
+            nn.Sigmoid()
+        )
+        self.res = nn.Conv1d(in_ch, out_ch, 1, bias=False) if in_ch != out_ch else nn.Identity()
+        self.res_norm = nn.BatchNorm1d(out_ch) if in_ch != out_ch else nn.Identity()
+
+    def forward(self, x):
+        res = self.res(x)
+        if hasattr(self.res_norm, "weight"):
+            res = self.res_norm(res)
+        out = self.conv1(x)
+        out = self.norm1(out)
+        out = self.act(out)
+        out = self.drop(out)
+        out = self.conv2(out)
+        out = self.norm2(out)
+        out = out * self.se(out)
+        out = self.act(out + res)
+        return out
+
+# Modality Specific Encoder 
+class ModalitySpecificEncoder(nn.Module):
+    def __init__(self, input_dim, hidden_dim, dropout=0.1):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.LayerNorm(hidden_dim),
+            nn.GELU(),
+            nn.Dropout(dropout),
+        )
+
+    def forward(self, x):
+        return self.encoder(x)
+
+# Main Model
+class TimeSeriesClassifier(nn.Module):
+    """
+    Classificatore binario per serie 1D. Accetta x come:
+    - [B, 1, L] oppure [B, L, 1]
+    """
+    def __init__(
+        self,
+        input_channels: int = 1,
+        enc_hidden_dim: int = 64,
+        dropout_enc: float = 0.1,
+        num_features: int = 128,
+        n_heads: int = 4,
+        dropout_attn: float = 0.1,
+        lstm_hidden_dim: int = 64,
+        lstm_layers: int = 2,
+        bidirectional: bool = True,
+        dropout_lstm: float = 0.2,
+        cnn_filter_sizes: tuple = (64, 128, 256),
+        cnn_kernel_sizes: tuple = (3, 3, 3),
+        dropout_cnn: float = 0.2,
+        se_ratio: float = 0.25,
+        dropout_classifier: float = 0.3,
+        use_positional: bool = True,
+        num_classes: int = 2,
+    ):
+        super().__init__()
+        self.use_positional = use_positional
+        self.input_channels = input_channels
+
+        self.encoder = ModalitySpecificEncoder(input_channels, enc_hidden_dim, dropout_enc)
+        fusion_dim = enc_hidden_dim
+        self.fusion_proj = nn.Linear(fusion_dim, num_features)
+        self.fusion_norm = nn.LayerNorm(num_features)
+
+        self.attention = MultiHeadAttention(num_features, n_heads=n_heads, dropout=dropout_attn)
+        self.attn_dropout = nn.Dropout(dropout_attn)
+        self.attn_norm = nn.LayerNorm(num_features)
+
+        self.lstm = nn.LSTM(
+            input_size=num_features,
+            hidden_size=lstm_hidden_dim,
+            num_layers=lstm_layers,
+            dropout=dropout_lstm if lstm_layers > 1 else 0.0,
+            bidirectional=bidirectional,
+            batch_first=True,
+        )
+        lstm_out_dim = lstm_hidden_dim * (2 if bidirectional else 1)
+
+        assert len(cnn_filter_sizes) == 3 and len(cnn_kernel_sizes) == 3, "Need 3 filter sizes and 3 kernel sizes"
+        fs = list(cnn_filter_sizes)
+        ks = list(cnn_kernel_sizes)
+        self.conv_blocks = nn.ModuleList([
+            ResidualConvBlock(num_features, fs[0], ks[0], dropout_cnn, se_ratio),
+            ResidualConvBlock(fs[0], fs[1], ks[1], dropout_cnn, se_ratio),
+            ResidualConvBlock(fs[1], fs[2], ks[2], dropout_cnn, se_ratio),
+        ])
+
+        self.global_avg_pool = nn.AdaptiveAvgPool1d(1)
+        self.global_max_pool = nn.AdaptiveMaxPool1d(1)
+
+        conv_feat_dim = fs[-1] * 2
+        final_dim = lstm_out_dim + conv_feat_dim
+        self.classifier = nn.Sequential(
+            nn.Dropout(dropout_classifier),
+            nn.Linear(final_dim, max(16, final_dim // 2)),
+            nn.LayerNorm(max(16, final_dim // 2)),
+            nn.GELU(),
+            nn.Dropout(dropout_classifier * 0.5),
+            nn.Linear(max(16, final_dim // 2), num_classes),
+        )
+
+        self.apply(self._init_weights)
+
+    def _init_weights(self, m):
+        if isinstance(m, nn.Linear):
+            nn.init.xavier_uniform_(m.weight)
+            if m.bias is not None:
+                nn.init.zeros_(m.bias)
+        elif isinstance(m, nn.Conv1d):
+            nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
+            if m.bias is not None:
+                nn.init.zeros_(m.bias)
+        elif isinstance(m, (nn.BatchNorm1d, nn.LayerNorm)):
+            if hasattr(m, "weight"):
+                nn.init.ones_(m.weight)
+            if hasattr(m, "bias"):
+                nn.init.zeros_(m.bias)
+
+    def forward(self, x):
+        # sanitize and reshape to [B, L, C]
+        x = torch.nan_to_num(x.float(), nan=0.0, posinf=1e6, neginf=-1e6)
+        if x.dim() == 3 and x.shape[1] == 1:   # [B, 1, L]
+            x = x.transpose(1, 2)              # -> [B, L, 1]
+        # encode per-timestep channels
+        enc = self.encoder(x)                  # [B, L, enc_hidden_dim]
+        fused = self.fusion_proj(enc)
+        fused = self.fusion_norm(fused)
+
+        if self.use_positional:
+            L = fused.size(1)
+            pos = get_positional_encoding(L, fused.size(-1), device=fused.device)  # [L, D]
+            fused = fused + pos.unsqueeze(0)
+
+        attn_out = self.attention(fused)
+        attn_out = self.attn_dropout(attn_out)
+        fused = self.attn_norm(fused + attn_out)
+
+        lstm_out, (h_n, _) = self.lstm(fused)
+        if self.lstm.bidirectional:
+            h_final = torch.cat([h_n[-2], h_n[-1]], dim=1)
         else:
-            # it must be [N, C, L]
-            lstm_in = x.permute(0, 2, 1)    # → [N, L, C]
-            conv_in = x                     # already [N, C, L]
- 
-        lstm_out, _ = self.lstm(lstm_in)
-        lstm_out = lstm_out[:, -1, :]
-        x = conv_in
+            h_final = h_n[-1]
 
-        conv_out = self.conv1(x)
-        conv_out = self.conv2(conv_out)
-        conv_out = self.conv3(conv_out)
-        conv_out = self.global_pooling(conv_out)
-        conv_out = torch.flatten(conv_out, 1)
-        combined = torch.cat((lstm_out, conv_out), dim=-1)
-        return self.fc(combined)
+        x_conv = fused.permute(0, 2, 1)  # [B, D, L]
+        for block in self.conv_blocks:
+            x_conv = block(x_conv)
 
-def prepare_data(df):
-    temporal_columns = [col for col in df.columns if col.startswith("value_")]
-    X = torch.tensor(df[temporal_columns].values, dtype=torch.float32).unsqueeze(-1)
-    y = torch.tensor(df['BLASTO NY'].values, dtype=torch.long)
-    return TensorDataset(X, y)
+        conv_avg = self.global_avg_pool(x_conv).squeeze(-1)
+        conv_max = self.global_max_pool(x_conv).squeeze(-1)
+        conv_feat = torch.cat([conv_avg, conv_max], dim=1)
+        final_feat = torch.cat([h_final, conv_feat], dim=1)
+        logits = self.classifier(final_feat)   # [B, 2]
+        return logits
 
-def find_best_threshold(model, val_loader, thresholds=np.linspace(0.0, 0.5, 101)):
-    """ Trova la migliore soglia basata sulla balanced accuracy sul validation set. """
-    model.eval()
-    y_true, y_prob = [], []
-    with torch.no_grad():
-        for X, y in val_loader:
-            X, y = X.to(device), y.to(device)
-            outputs = model(X)
-            probs = torch.softmax(outputs, dim=1)[:, 1].cpu().numpy()
-            y_prob.extend(probs)
-            y_true.extend(y.cpu().numpy())
-    
-    best_threshold = 0.5
-    best_balanced_accuracy = 0.0
-    for threshold in thresholds:
-        y_pred = (np.array(y_prob) >= threshold).astype(int)
-        acc = balanced_accuracy_score(y_true=y_true, y_pred=y_pred)
-        
-        if acc > best_balanced_accuracy:
-            best_balanced_accuracy = acc
-            best_threshold = threshold
-
-    return best_threshold
-
-def evaluate_model(model, dataloader, threshold=0.5):
-    model.eval()
-    y_true, y_pred, y_prob = [], [], []
-    with torch.no_grad():
-        for X, y in dataloader:
-            X, y = X.to(device), y.to(device)
-            outputs = model(X)
-            probs = torch.softmax(outputs, dim=1)[:, 1].cpu().numpy()
-            preds = (probs >= threshold).astype(int)
-            y_true.extend(y.cpu().numpy())
-            y_pred.extend(preds)
-            y_prob.extend(probs)
-    return calculate_metrics(y_true, y_pred, y_prob)
-
-def train_model(model, train_loader, val_loader, optimizer, criterion, num_epochs, patience, trial=None):
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=math.floor(patience/4), factor=0.5)
-    best_val_loss = float('inf')
-    best_metric = 0
-    epochs_no_improve = 0
-
-    for epoch in range(num_epochs):
-        model.train()
-        train_loss = 0.0
-        for X, y in train_loader:
-            X, y = X.to(device), y.to(device)
-            optimizer.zero_grad()
-            outputs = model(X)
-            loss = criterion(outputs, y)
-            loss.backward()
-            optimizer.step()
-            train_loss += loss.item() * X.size(0)
-
-        val_metrics = evaluate_model(model, val_loader)
-        val_loss = val_metrics['brier']
-        scheduler.step(val_loss)
-
-        if trial:
-            trial.report(val_metrics[conf.most_important_metric], epoch)
-            if trial.should_prune():
-                raise optuna.exceptions.TrialPruned()
-
-        if val_loss < (best_val_loss - 0.001):
-            best_val_loss = val_loss
-            best_metric = val_metrics[conf.most_important_metric]
-            epochs_no_improve = 0
-        else:
-            epochs_no_improve += 1
-            if epochs_no_improve >= patience:
-                break
-
-    return best_metric
-
-def objective(trial, days_to_consider, train_data, val_data):
-    params = {
-        'lstm_size': trial.suggest_categorical('lstm_size', conf.lstm_size_options),
-        'filter_sizes': tuple(map(int, trial.suggest_categorical('filter_sizes', conf.filter_sizes_options).split(','))),
-        'kernel_sizes': tuple(map(int, trial.suggest_categorical('kernel_sizes', conf.kernel_sizes_options).split(','))),
-        'dropout': trial.suggest_float('dropout', *conf.dropout_range),
-        'num_layers': trial.suggest_int('num_layers', *conf.num_layers_range),
-        'batch_size': trial.suggest_categorical('batch_size', conf.batch_size_options),
-        'learning_rate': trial.suggest_float('learning_rate', *conf.learning_rate_range, log=True)
-    }
-
-    # 2) build DataLoaders with the suggested batch_size
-    train_loader = DataLoader(train_data,
-                              batch_size=params['batch_size'],
-                              shuffle=True,
-                              pin_memory=True,
-                              num_workers=16,
-                              persistent_workers=True,  # keep workers alive across epochs
-                              multiprocessing_context='forkserver')
-    val_loader   = DataLoader(val_data,
-                              batch_size=params['batch_size'])
-
-    model = LSTMFCN(
-        lstm_size=params['lstm_size'],
-        filter_sizes=params['filter_sizes'],
-        kernel_sizes=params['kernel_sizes'],
-        dropout=params['dropout'],
-        num_layers=params['num_layers']
-    ).to(device)
-
-    optimizer = optim.Adam(model.parameters(), lr=params['learning_rate'])
-    criterion = nn.CrossEntropyLoss()
-
-    metric = train_model(
-        model=model,
-        train_loader=train_loader,
-        val_loader=val_loader,
-        optimizer=optimizer,
-        criterion=criterion,
-        num_epochs=conf.optuna_num_epochs,
-        patience=conf.early_stopping_patience,
-        trial=trial
-    )
-    return metric
-
-
-
-
-def main(days_to_consider=1,
-         train_path="", val_path="", test_path="", default_path=True, 
-         save_plots=conf.save_plots,
-         output_dir_plots=conf.output_dir_plots, 
-         output_model_base_dir=conf.output_model_base_dir,
-         trial=None,
-         run_test_evaluation=conf.run_test_evaluation, **kwargs):
-    
-    log_filename = kwargs.get('log_filename')
-    if (trial is None) and (log_filename!="" and log_filename is not None):
-        config_logging(log_dir=kwargs.get('log_dir'), log_filename=kwargs.get('log_filename'))
-    
-    os.makedirs(output_model_base_dir, exist_ok=True)
-    if default_path:
-        # Ottieni i percorsi dal config
-        train_path, val_path, test_path = conf.get_paths(days_to_consider)
-    
-    # Caricamento e preparazione dati
-    df_train = load_data(train_path)
-    df_val = load_data(val_path)
-    df_test = load_data(test_path) if run_test_evaluation else None
-
-    if trial:  # Use smaller subset for optimization
-        df_train = df_train.sample(frac=0.5, random_state=conf.seed)
-        df_val = df_val.sample(frac=0.5, random_state=conf.seed)
-    
-    train_data = prepare_data(df_train)
-    val_data = prepare_data(df_val)
-    test_data = prepare_data(df_test) if df_test is not None else None
-    
-    if trial is not None:
-        return objective(trial, days_to_consider, 
-                         train_data, val_data)
-
-    # Full training logic
-    model = LSTMFCN(
-        lstm_size=kwargs.get('lstm_size'),
-        filter_sizes=tuple(map(int, kwargs.get('filter_sizes').split(','))),
-        kernel_sizes=tuple(map(int, kwargs.get('kernel_sizes').split(','))),
-        dropout=kwargs.get('dropout'),
-        num_layers=kwargs.get('num_layers')
-    ).to(device)
-
-    optimizer = optim.Adam(model.parameters(), lr=kwargs.get('learning_rate'))
-    criterion = nn.CrossEntropyLoss()
-
-    train_loader = DataLoader(train_data, batch_size=kwargs.get('batch_size'), shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=kwargs.get('batch_size'))
-
-    train_model(model, train_loader, val_loader, optimizer, criterion,
-               conf.num_epochs_FCN, conf.early_stopping_patience)
-
-    # Final evaluation
-    final_threshold = find_best_threshold(model, val_loader)
-    model_state = {
-        'model_state_dict': model.state_dict(),
-        'best_threshold': final_threshold,
-        'params': kwargs
-    }
-    best_model_path = os.path.join(output_model_base_dir, f"best_lstmfcn_model_{days_to_consider}Days.pth")
-    torch.save(model_state, best_model_path)
-
-    if run_test_evaluation and test_data:
-        test_metrics = evaluate_model(model, DataLoader(test_data, batch_size=kwargs.get('batch_size')), final_threshold)
-        logging.info("\n===== FINAL TEST RESULTS =====")
-        for metric, value in test_metrics.items():
-            if metric not in ("conf_matrix", "fpr", "tpr"):
-                logging.info(f"{metric.capitalize()}: {value:.4f}")
-
-        if save_plots:
-            complete_output_dir = os.path.join(output_dir_plots, f"day{days_to_consider}")
-            os.makedirs(complete_output_dir, exist_ok=True)
-            conf_matrix_filename = os.path.join(complete_output_dir, f'confusion_matrix_LSTMFCN_{days_to_consider}Days.png')
-            save_confusion_matrix(test_metrics['conf_matrix'], conf_matrix_filename, "LSTMFCN")
-            plot_roc_curve(test_metrics['fpr'], test_metrics['tpr'], test_metrics['roc_auc'], 
-                          conf_matrix_filename.replace('confusion_matrix', 'roc'))
-
-    return test_metrics if run_test_evaluation else None
 
 if __name__ == "__main__":
-    import time
-    start_time = time.time()
-    day=3
-    
-    main(
-        days_to_consider=day,
-        train_path="", val_path="", test_path="",
-        default_path=True,
-        run_test_evaluation=False,
-        log_dir="",
-        log_filename="",
-        # default hyperparameters from config.py
-        batch_size=conf.batch_size_FCN,
-        dropout=conf.dropout_FCN,
-        filter_sizes=conf.filter_sizes_FCN,
-        kernel_sizes=conf.kernel_sizes_FCN,
-        lstm_size=conf.lstm_size_FCN,
-        num_layers=conf.num_layers_FCN,
-        attention=conf.attention_FCN,
-        learning_rate=conf.learning_rate_FCN,
-        final_epochs=conf.final_epochs_FCN
-    )
-    
-    logging.info(f"Total execution time: {time.time() - start_time:.2f}s")
+    pass

@@ -1,26 +1,24 @@
 
+# Importa "/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/Farneback/subsets/Normalized_sum_mean_mag_5Days_train.csv"
+# e verifica se ci sono NaN o infiniti
+import os
+import pandas as pd
+import sys
+import numpy as np
 
+df = pd.read_csv("/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/Farneback/subsets/Normalized_sum_mean_mag_5Days_test.csv")
 
-def copy_and_rename(file_index, output_base, valid_wells):
-    t0_well = {}
-    for _, _, _, pdb, well, _, t in file_index:
-        key = (pdb, well)
-        if key not in valid_wells: continue
-        t0_well[key] = min(t0_well.get(key, t), t)
+# select only the "hours" columns
+print(df.head())
 
-    for src, year, vf, pdb, well, run, t in file_index:
-        key = (pdb, well)
-        if key not in valid_wells: continue
-        rel_min = (t - t0_well[key]) * 24 * 60
-        dest_dir = os.path.join(output_base, year, vf)
-        os.makedirs(dest_dir, exist_ok=True)
-        new = f"{pdb}_{well}_{run}_{rel_min:.1f}min.jpg"
-        shutil.copy2(src, os.path.join(dest_dir, new))
+df_hours = df[[c for c in df.columns if c.endswith('h')]]
+print(df_hours.head())
 
+# Verifica NaN
+if df_hours.isnull().values.any():
+    count_NaN = df_hours.isnull().sum().sum()
+    print(f"Il DataFrame contiene {count_NaN} valori NaN.")
 
-
-    # Copia e rinomina
-    no = False
-    if no:
-        copy_and_rename(files, scope_final_dir, set(per_well.keys()))
-        print(f"Log e plot in: {log_dir}\nCopia/rename fatte.")
+# Verifica infiniti
+if np.isinf(df_hours.values).any():
+    print("Il DataFrame contiene valori infiniti.")

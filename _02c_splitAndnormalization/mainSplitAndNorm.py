@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import pandas as pd
+import numpy as np
 
 # Rileva il percorso della cartella genitore, che sarà la stessa in cui ho il file da convertire
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -15,12 +16,11 @@ sys.path.append(parent_dir)
 
 from config import Config_02c_splitAndNormalization as conf
 from config import utils
-from _02c_splitAndnormalization._01_split_normalization import load_data, normalize_data, save_data, stratified_split
+from _utils_._utils import detect_time_columns
+from _02c_splitAndnormalization._01_split_normalization import normalize_per_series, normalize_data, save_data, stratified_split
 from _02c_splitAndnormalization._02_visualization import (visualize_normalized_data_single_pt,
                                                   create_and_save_plots_mean_temp_data, 
                                                   create_and_save_stratified_plots_mean_temp_data)
-from _utils_.dimReduction import compute_UMAP, compute_tSNE, compute_UMAP_with_plotly
-
 
 def import_original_db_and_merge_data(data, original_db_path):
     # Merge PN data with original and normalized data
@@ -39,6 +39,25 @@ def import_original_db_and_merge_data(data, original_db_path):
 
     return data_merged
 
+# Caricamento del file CSV
+def load_data(csv_file_path, initial_frames_to_cut, max_frames):
+    # Load the CSV file
+    data = pd.read_csv(csv_file_path)
+
+    # Identify all columns of hours
+    value_columns = detect_time_columns(data)
+
+    # Selects frames starting at index initial_frames_to_cut for the next max_frames columns.
+    pruned_value_columns = value_columns[initial_frames_to_cut: initial_frames_to_cut + max_frames]
+
+    # Identify the meta columns by excluding the value columns
+    meta_columns = [data.columns[~data.columns.isin(value_columns)].tolist()]
+    
+    # Concatenate meta_columns with the pruned subset of value columns
+    pruned_data = data[meta_columns[0] + pruned_value_columns]
+    
+    return pruned_data
+
 
 def main(days_to_consider=conf.days_to_consider,
          train_size=conf.train_size,
@@ -46,6 +65,7 @@ def main(days_to_consider=conf.days_to_consider,
          temporalDataType = conf.temporalDataType,
          csv_file_path = conf.csv_file_path,
          method_optical_flow = conf.method_optical_flow,
+         per_series_norm = conf.per_series_normalization,
          embedding_type=conf.embedding_type, 
          original_db_path=conf.path_original_excel,
          save_normalization_example_single_pt=conf.save_normalization_example_single_pt, 
@@ -58,20 +78,31 @@ def main(days_to_consider=conf.days_to_consider,
     
     for day in days_to_consider:
         # Carica i dati
-        max_frames = utils.num_frames_by_days(day)
+        max_frames = utils.num_frames_by_days(day)+1 # +1 because the first frame is t0
         data = load_data(csv_file_path=csv_file_path, initial_frames_to_cut=initial_frames_to_cut, max_frames=max_frames)
 
         # Split stratificato
         train_data, val_data, test_data = stratified_split(data, train_size=train_size, seed=seed)
 
         # Normalizza i dati
-        train_data_norm, val_data_norm, test_data_norm = normalize_data(train_data, val_data, test_data, inf_quantile=inf_quantile, sup_quantile=sup_quantile)
+        if per_series_norm:
+            train_data_norm, val_data_norm, test_data_norm, params = normalize_per_series(
+                train_data, val_data, test_data,
+                time_cols=None,            # auto detect
+                p_low=1.0, p_high=99.0,
+                fallback_low=5.0, fallback_high=95.0,
+                min_points_for_1_99=50,
+                clip=True
+                )
+        else:
+            train_data_norm, val_data_norm, test_data_norm = normalize_data(train_data, val_data, test_data, inf_quantile=inf_quantile, sup_quantile=sup_quantile)
 
         # Salva i dataset normalizzati
         base_path = conf.get_normalized_base_path(day)
         save_data(train_data=train_data_norm, val_data=val_data_norm, test_data=test_data_norm, output_base_path=base_path, days_to_consider=day)
 
         if embedding_type:
+            from _utils_.dimReduction import compute_UMAP, compute_tSNE, compute_UMAP_with_plotly
             # Visualizzo embedding di un subset a scelta --> ottengo il percorso, ad esempio, del train (numero maggiore di dati)
             train_path, val_path, test_path = conf.get_paths(day)
             output_path_base = os.path.join(current_dir, method_optical_flow, "dim_reduction_files")
@@ -94,7 +125,7 @@ def main(days_to_consider=conf.days_to_consider,
                 original_data=train_data_merged,  # Use merged data
                 normalized_data=train_data_norm_merged,  # Use merged data
                 output_base=os.path.join(current_dir, method_optical_flow),
-                specific_patient_id=specific_patient_to_analyse if specific_patient_to_analyse is not 0 else None,
+                specific_patient_id=specific_patient_to_analyse if specific_patient_to_analyse != 0 else None,
                 shift_x=initial_frames_to_cut
             )
         
@@ -135,6 +166,7 @@ if __name__ == "__main__":
          seed=conf.seed, 
          temporalDataType = conf.temporalDataType, 
          csv_file_path = conf.csv_file_path, 
+         per_series_norm = conf.per_series_normalization,
          embedding_type=conf.embedding_type, 
          original_db_path=conf.path_original_excel,
          save_normalization_example_single_pt=conf.save_normalization_example_single_pt, 

@@ -33,7 +33,7 @@ def predict(model_type: str, model: Any, X: np.ndarray, params: Dict, device: to
         loader = DataLoader(dataset, batch_size=params['batch_size'], shuffle=False)
     else:
         dataset = CustomDataset(X.reshape(X.shape[0], 1, -1), np.zeros(len(X)))  # Dummy labels
-        loader = DataLoader(dataset, batch_size=conf.batch_size, shuffle=False)
+        loader = DataLoader(dataset, batch_size=conf.batch_size_convtran, shuffle=False)
 
     model.eval()
     preds = []

@@ -1,0 +1,168 @@
+2025-09-29 14:52:58 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 14:52:58 - INFO - ===== RESULTS WITH 5000 KERNELS, BEST THRESHOLD 0.5 =====
+2025-09-29 14:52:58 - INFO - Validation Accuracy: 0.6528
+2025-09-29 14:52:58 - INFO - Validation Balanced_accuracy: 0.6548
+2025-09-29 14:52:58 - INFO - Validation Roc_auc: 0.7085
+2025-09-29 14:52:58 - INFO - Validation Precision: 0.6226
+2025-09-29 14:52:58 - INFO - Validation Recall: 0.7194
+2025-09-29 14:52:58 - INFO - Validation Mcc: 0.3116
+2025-09-29 14:52:58 - INFO - Validation Kappa: 0.3081
+2025-09-29 14:52:58 - INFO - Validation Brier: 0.2187
+2025-09-29 14:52:58 - INFO - Validation F1: 0.6675
+2025-09-29 14:53:03 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 14:53:03 - INFO - ===== RESULTS WITH 10000 KERNELS, BEST THRESHOLD 0.5 =====
+2025-09-29 14:53:03 - INFO - Validation Accuracy: 0.6676
+2025-09-29 14:53:03 - INFO - Validation Balanced_accuracy: 0.6698
+2025-09-29 14:53:03 - INFO - Validation Roc_auc: 0.7145
+2025-09-29 14:53:03 - INFO - Validation Precision: 0.6342
+2025-09-29 14:53:03 - INFO - Validation Recall: 0.7417
+2025-09-29 14:53:03 - INFO - Validation Mcc: 0.3425
+2025-09-29 14:53:03 - INFO - Validation Kappa: 0.3379
+2025-09-29 14:53:03 - INFO - Validation Brier: 0.2170
+2025-09-29 14:53:03 - INFO - Validation F1: 0.6837
+2025-09-29 14:53:10 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 14:53:10 - INFO - ===== RESULTS WITH 15000 KERNELS, BEST THRESHOLD 0.49 =====
+2025-09-29 14:53:10 - INFO - Validation Accuracy: 0.6581
+2025-09-29 14:53:10 - INFO - Validation Balanced_accuracy: 0.6607
+2025-09-29 14:53:10 - INFO - Validation Roc_auc: 0.7101
+2025-09-29 14:53:10 - INFO - Validation Precision: 0.6238
+2025-09-29 14:53:10 - INFO - Validation Recall: 0.7417
+2025-09-29 14:53:10 - INFO - Validation Mcc: 0.3249
+2025-09-29 14:53:10 - INFO - Validation Kappa: 0.3195
+2025-09-29 14:53:10 - INFO - Validation Brier: 0.2179
+2025-09-29 14:53:10 - INFO - Validation F1: 0.6777
+2025-09-29 14:53:19 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 14:53:19 - INFO - ===== RESULTS WITH 20000 KERNELS, BEST THRESHOLD 0.495 =====
+2025-09-29 14:53:19 - INFO - Validation Accuracy: 0.6716
+2025-09-29 14:53:19 - INFO - Validation Balanced_accuracy: 0.6741
+2025-09-29 14:53:19 - INFO - Validation Roc_auc: 0.7183
+2025-09-29 14:53:19 - INFO - Validation Precision: 0.6355
+2025-09-29 14:53:19 - INFO - Validation Recall: 0.7556
+2025-09-29 14:53:19 - INFO - Validation Mcc: 0.3522
+2025-09-29 14:53:19 - INFO - Validation Kappa: 0.3463
+2025-09-29 14:53:19 - INFO - Validation Brier: 0.2157
+2025-09-29 14:53:19 - INFO - Validation F1: 0.6904
+2025-09-29 14:53:30 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 14:53:30 - INFO - Accuracy: 0.6417
+2025-09-29 14:53:30 - INFO - Balanced_accuracy: 0.6421
+2025-09-29 14:53:30 - INFO - Roc_auc: 0.7041
+2025-09-29 14:53:30 - INFO - Precision: 0.6131
+2025-09-29 14:53:30 - INFO - Recall: 0.7632
+2025-09-29 14:53:30 - INFO - Mcc: 0.2928
+2025-09-29 14:53:30 - INFO - Kappa: 0.2839
+2025-09-29 14:53:30 - INFO - Brier: 0.2198
+2025-09-29 14:53:30 - INFO - F1: 0.6800
+2025-09-29 14:53:30 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib
+2025-09-29 18:34:49 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 18:34:49 - INFO - ===== RESULTS WITH 5000 KERNELS, BEST THRESHOLD 0.5 =====
+2025-09-29 18:34:49 - INFO - Validation Accuracy: 0.6528
+2025-09-29 18:34:49 - INFO - Validation Balanced_accuracy: 0.6548
+2025-09-29 18:34:49 - INFO - Validation Roc_auc: 0.7085
+2025-09-29 18:34:49 - INFO - Validation Precision: 0.6226
+2025-09-29 18:34:49 - INFO - Validation Recall: 0.7194
+2025-09-29 18:34:49 - INFO - Validation Mcc: 0.3116
+2025-09-29 18:34:49 - INFO - Validation Kappa: 0.3081
+2025-09-29 18:34:49 - INFO - Validation Brier: 0.2187
+2025-09-29 18:34:49 - INFO - Validation F1: 0.6675
+2025-09-29 18:34:54 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 18:34:54 - INFO - ===== RESULTS WITH 10000 KERNELS, BEST THRESHOLD 0.5 =====
+2025-09-29 18:34:54 - INFO - Validation Accuracy: 0.6676
+2025-09-29 18:34:54 - INFO - Validation Balanced_accuracy: 0.6698
+2025-09-29 18:34:54 - INFO - Validation Roc_auc: 0.7145
+2025-09-29 18:34:54 - INFO - Validation Precision: 0.6342
+2025-09-29 18:34:54 - INFO - Validation Recall: 0.7417
+2025-09-29 18:34:54 - INFO - Validation Mcc: 0.3425
+2025-09-29 18:34:54 - INFO - Validation Kappa: 0.3379
+2025-09-29 18:34:54 - INFO - Validation Brier: 0.2170
+2025-09-29 18:34:54 - INFO - Validation F1: 0.6837
+2025-09-29 18:35:01 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 18:35:01 - INFO - ===== RESULTS WITH 15000 KERNELS, BEST THRESHOLD 0.49 =====
+2025-09-29 18:35:01 - INFO - Validation Accuracy: 0.6581
+2025-09-29 18:35:01 - INFO - Validation Balanced_accuracy: 0.6607
+2025-09-29 18:35:01 - INFO - Validation Roc_auc: 0.7101
+2025-09-29 18:35:01 - INFO - Validation Precision: 0.6238
+2025-09-29 18:35:01 - INFO - Validation Recall: 0.7417
+2025-09-29 18:35:01 - INFO - Validation Mcc: 0.3249
+2025-09-29 18:35:01 - INFO - Validation Kappa: 0.3195
+2025-09-29 18:35:01 - INFO - Validation Brier: 0.2179
+2025-09-29 18:35:01 - INFO - Validation F1: 0.6777
+2025-09-29 18:35:10 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 18:35:10 - INFO - ===== RESULTS WITH 20000 KERNELS, BEST THRESHOLD 0.495 =====
+2025-09-29 18:35:10 - INFO - Validation Accuracy: 0.6716
+2025-09-29 18:35:10 - INFO - Validation Balanced_accuracy: 0.6741
+2025-09-29 18:35:10 - INFO - Validation Roc_auc: 0.7183
+2025-09-29 18:35:10 - INFO - Validation Precision: 0.6355
+2025-09-29 18:35:10 - INFO - Validation Recall: 0.7556
+2025-09-29 18:35:10 - INFO - Validation Mcc: 0.3522
+2025-09-29 18:35:10 - INFO - Validation Kappa: 0.3463
+2025-09-29 18:35:10 - INFO - Validation Brier: 0.2157
+2025-09-29 18:35:10 - INFO - Validation F1: 0.6904
+2025-09-29 18:35:21 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:35:21 - INFO - Accuracy: 0.6417
+2025-09-29 18:35:21 - INFO - Balanced_accuracy: 0.6421
+2025-09-29 18:35:21 - INFO - Roc_auc: 0.7041
+2025-09-29 18:35:21 - INFO - Precision: 0.6131
+2025-09-29 18:35:21 - INFO - Recall: 0.7632
+2025-09-29 18:35:21 - INFO - Mcc: 0.2928
+2025-09-29 18:35:21 - INFO - Kappa: 0.2839
+2025-09-29 18:35:21 - INFO - Brier: 0.2198
+2025-09-29 18:35:21 - INFO - F1: 0.6800
+2025-09-29 18:35:21 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib
+2025-09-29 20:03:11 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 20:03:11 - INFO - ===== RESULTS WITH 5000 KERNELS, BEST THRESHOLD 0.5 =====
+2025-09-29 20:03:11 - INFO - Validation Accuracy: 0.6528
+2025-09-29 20:03:11 - INFO - Validation Balanced_accuracy: 0.6548
+2025-09-29 20:03:11 - INFO - Validation Roc_auc: 0.7085
+2025-09-29 20:03:11 - INFO - Validation Precision: 0.6226
+2025-09-29 20:03:11 - INFO - Validation Recall: 0.7194
+2025-09-29 20:03:11 - INFO - Validation Mcc: 0.3116
+2025-09-29 20:03:11 - INFO - Validation Kappa: 0.3081
+2025-09-29 20:03:11 - INFO - Validation Brier: 0.2187
+2025-09-29 20:03:11 - INFO - Validation F1: 0.6675
+2025-09-29 20:03:17 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 20:03:17 - INFO - ===== RESULTS WITH 10000 KERNELS, BEST THRESHOLD 0.5 =====
+2025-09-29 20:03:17 - INFO - Validation Accuracy: 0.6676
+2025-09-29 20:03:17 - INFO - Validation Balanced_accuracy: 0.6698
+2025-09-29 20:03:17 - INFO - Validation Roc_auc: 0.7145
+2025-09-29 20:03:17 - INFO - Validation Precision: 0.6342
+2025-09-29 20:03:17 - INFO - Validation Recall: 0.7417
+2025-09-29 20:03:17 - INFO - Validation Mcc: 0.3425
+2025-09-29 20:03:17 - INFO - Validation Kappa: 0.3379
+2025-09-29 20:03:17 - INFO - Validation Brier: 0.2170
+2025-09-29 20:03:17 - INFO - Validation F1: 0.6837
+2025-09-29 20:03:24 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 20:03:24 - INFO - ===== RESULTS WITH 15000 KERNELS, BEST THRESHOLD 0.49 =====
+2025-09-29 20:03:24 - INFO - Validation Accuracy: 0.6581
+2025-09-29 20:03:24 - INFO - Validation Balanced_accuracy: 0.6607
+2025-09-29 20:03:24 - INFO - Validation Roc_auc: 0.7101
+2025-09-29 20:03:24 - INFO - Validation Precision: 0.6238
+2025-09-29 20:03:24 - INFO - Validation Recall: 0.7417
+2025-09-29 20:03:24 - INFO - Validation Mcc: 0.3249
+2025-09-29 20:03:24 - INFO - Validation Kappa: 0.3195
+2025-09-29 20:03:24 - INFO - Validation Brier: 0.2179
+2025-09-29 20:03:24 - INFO - Validation F1: 0.6777
+2025-09-29 20:03:33 - INFO - ===== ROCKET - 3 DAYS =====
+2025-09-29 20:03:33 - INFO - ===== RESULTS WITH 20000 KERNELS, BEST THRESHOLD 0.495 =====
+2025-09-29 20:03:33 - INFO - Validation Accuracy: 0.6716
+2025-09-29 20:03:33 - INFO - Validation Balanced_accuracy: 0.6741
+2025-09-29 20:03:33 - INFO - Validation Roc_auc: 0.7183
+2025-09-29 20:03:33 - INFO - Validation Precision: 0.6355
+2025-09-29 20:03:33 - INFO - Validation Recall: 0.7556
+2025-09-29 20:03:33 - INFO - Validation Mcc: 0.3522
+2025-09-29 20:03:33 - INFO - Validation Kappa: 0.3463
+2025-09-29 20:03:33 - INFO - Validation Brier: 0.2157
+2025-09-29 20:03:33 - INFO - Validation F1: 0.6904
+2025-09-29 20:03:44 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 20:03:44 - INFO - Accuracy: 0.6417
+2025-09-29 20:03:44 - INFO - Balanced_accuracy: 0.6421
+2025-09-29 20:03:44 - INFO - Roc_auc: 0.7041
+2025-09-29 20:03:44 - INFO - Precision: 0.6131
+2025-09-29 20:03:44 - INFO - Recall: 0.7632
+2025-09-29 20:03:44 - INFO - Mcc: 0.2928
+2025-09-29 20:03:44 - INFO - Kappa: 0.2839
+2025-09-29 20:03:44 - INFO - Brier: 0.2198
+2025-09-29 20:03:44 - INFO - F1: 0.6800
+2025-09-29 20:03:44 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_rocket_model_3Days.joblib

@@ -1,0 +1,239 @@
+2025-09-29 18:20:31 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1Days.pth
+2025-09-29 18:20:31 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:20:31 - INFO - Accuracy: 0.5669
+2025-09-29 18:20:31 - INFO - Balanced_accuracy: 0.5673
+2025-09-29 18:20:31 - INFO - Roc_auc: 0.5808
+2025-09-29 18:20:31 - INFO - Precision: 0.5517
+2025-09-29 18:20:31 - INFO - Recall: 0.7026
+2025-09-29 18:20:31 - INFO - Mcc: 0.1398
+2025-09-29 18:20:31 - INFO - Kappa: 0.1345
+2025-09-29 18:20:31 - INFO - Brier: 0.2468
+2025-09-29 18:20:31 - INFO - F1: 0.6181
+2025-09-29 18:25:19 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1.pth
+2025-09-29 18:25:19 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:25:19 - INFO - Accuracy: 0.5092
+2025-09-29 18:25:19 - INFO - Balanced_accuracy: 0.5103
+2025-09-29 18:25:19 - INFO - Roc_auc: 0.5120
+2025-09-29 18:25:19 - INFO - Precision: 0.5043
+2025-09-29 18:25:19 - INFO - Recall: 0.9263
+2025-09-29 18:25:19 - INFO - Mcc: 0.0371
+2025-09-29 18:25:19 - INFO - Kappa: 0.0205
+2025-09-29 18:25:19 - INFO - Brier: 0.2566
+2025-09-29 18:25:19 - INFO - F1: 0.6531
+2025-09-29 18:29:27 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1.pth
+2025-09-29 18:29:27 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:29:27 - INFO - Accuracy: 0.5302
+2025-09-29 18:29:27 - INFO - Balanced_accuracy: 0.5314
+2025-09-29 18:29:27 - INFO - Roc_auc: 0.5725
+2025-09-29 18:29:27 - INFO - Precision: 0.5152
+2025-09-29 18:29:27 - INFO - Recall: 0.9789
+2025-09-29 18:29:27 - INFO - Mcc: 0.1406
+2025-09-29 18:29:27 - INFO - Kappa: 0.0626
+2025-09-29 18:29:27 - INFO - Brier: 0.2628
+2025-09-29 18:29:27 - INFO - F1: 0.6751
+2025-09-29 18:33:59 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1.pth
+2025-09-29 18:33:59 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:33:59 - INFO - Accuracy: 0.5157
+2025-09-29 18:33:59 - INFO - Balanced_accuracy: 0.5170
+2025-09-29 18:33:59 - INFO - Roc_auc: 0.5693
+2025-09-29 18:33:59 - INFO - Precision: 0.5074
+2025-09-29 18:33:59 - INFO - Recall: 0.9921
+2025-09-29 18:33:59 - INFO - Mcc: 0.1090
+2025-09-29 18:33:59 - INFO - Kappa: 0.0339
+2025-09-29 18:33:59 - INFO - Brier: 0.2616
+2025-09-29 18:33:59 - INFO - F1: 0.6714
+2025-09-29 19:25:54 - INFO - Epoch 1/100, Train Loss: 0.8098, Val CE Loss: 0.6928, Val balanced_accuracy: 0.5250
+2025-09-29 19:25:55 - INFO - Epoch 2/100, Train Loss: 0.7431, Val CE Loss: 0.7009, Val balanced_accuracy: 0.5151
+2025-09-29 19:25:55 - INFO - Epoch 3/100, Train Loss: 0.7343, Val CE Loss: 0.6927, Val balanced_accuracy: 0.5181
+2025-09-29 19:25:55 - INFO - Epoch 4/100, Train Loss: 0.7301, Val CE Loss: 0.7057, Val balanced_accuracy: 0.5013
+2025-09-29 19:25:56 - INFO - Epoch 5/100, Train Loss: 0.7207, Val CE Loss: 0.7233, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:56 - INFO - Epoch 6/100, Train Loss: 0.7118, Val CE Loss: 0.7153, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:56 - INFO - Epoch 7/100, Train Loss: 0.7065, Val CE Loss: 0.7133, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:57 - INFO - Epoch 8/100, Train Loss: 0.7063, Val CE Loss: 0.7049, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:57 - INFO - Epoch 9/100, Train Loss: 0.7024, Val CE Loss: 0.7012, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:58 - INFO - Epoch 10/100, Train Loss: 0.7029, Val CE Loss: 0.7040, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:58 - INFO - Epoch 11/100, Train Loss: 0.6993, Val CE Loss: 0.7058, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:58 - INFO - Epoch 12/100, Train Loss: 0.6968, Val CE Loss: 0.6941, Val balanced_accuracy: 0.5168
+2025-09-29 19:25:59 - INFO - Epoch 13/100, Train Loss: 0.6983, Val CE Loss: 0.7048, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:59 - INFO - Epoch 14/100, Train Loss: 0.6943, Val CE Loss: 0.7114, Val balanced_accuracy: 0.5000
+2025-09-29 19:25:59 - INFO - Epoch 15/100, Train Loss: 0.6961, Val CE Loss: 0.7156, Val balanced_accuracy: 0.5026
+2025-09-29 19:26:00 - INFO - Epoch 16/100, Train Loss: 0.6971, Val CE Loss: 0.6962, Val balanced_accuracy: 0.5256
+2025-09-29 19:26:00 - INFO - Epoch 17/100, Train Loss: 0.6946, Val CE Loss: 0.7069, Val balanced_accuracy: 0.5170
+2025-09-29 19:26:01 - INFO - Epoch 18/100, Train Loss: 0.6961, Val CE Loss: 0.7055, Val balanced_accuracy: 0.5166
+2025-09-29 19:26:01 - INFO - Epoch 19/100, Train Loss: 0.6955, Val CE Loss: 0.7074, Val balanced_accuracy: 0.5166
+2025-09-29 19:26:01 - INFO - Epoch 20/100, Train Loss: 0.6946, Val CE Loss: 0.7092, Val balanced_accuracy: 0.5153
+2025-09-29 19:26:02 - INFO - Epoch 21/100, Train Loss: 0.6921, Val CE Loss: 0.7018, Val balanced_accuracy: 0.5256
+2025-09-29 19:26:02 - INFO - Epoch 22/100, Train Loss: 0.6947, Val CE Loss: 0.7105, Val balanced_accuracy: 0.5246
+2025-09-29 19:26:03 - INFO - Epoch 23/100, Train Loss: 0.6910, Val CE Loss: 0.7096, Val balanced_accuracy: 0.5243
+2025-09-29 19:26:03 - INFO - Epoch 24/100, Train Loss: 0.6916, Val CE Loss: 0.7074, Val balanced_accuracy: 0.5281
+2025-09-29 19:26:03 - INFO - Epoch 25/100, Train Loss: 0.6932, Val CE Loss: 0.7159, Val balanced_accuracy: 0.5230
+2025-09-29 19:26:04 - INFO - Epoch 26/100, Train Loss: 0.6948, Val CE Loss: 0.7127, Val balanced_accuracy: 0.5242
+2025-09-29 19:26:04 - INFO - Epoch 27/100, Train Loss: 0.6925, Val CE Loss: 0.7185, Val balanced_accuracy: 0.5229
+2025-09-29 19:26:04 - INFO - Epoch 28/100, Train Loss: 0.6900, Val CE Loss: 0.7139, Val balanced_accuracy: 0.5281
+2025-09-29 19:26:05 - INFO - Epoch 29/100, Train Loss: 0.6958, Val CE Loss: 0.7228, Val balanced_accuracy: 0.5229
+2025-09-29 19:26:05 - INFO - Epoch 30/100, Train Loss: 0.6922, Val CE Loss: 0.7178, Val balanced_accuracy: 0.5242
+2025-09-29 19:26:06 - INFO - Epoch 31/100, Train Loss: 0.6941, Val CE Loss: 0.7147, Val balanced_accuracy: 0.5280
+2025-09-29 19:26:06 - INFO - Epoch 32/100, Train Loss: 0.6915, Val CE Loss: 0.7183, Val balanced_accuracy: 0.5241
+2025-09-29 19:26:06 - INFO - Epoch 33/100, Train Loss: 0.6919, Val CE Loss: 0.7148, Val balanced_accuracy: 0.5266
+2025-09-29 19:26:07 - INFO - Epoch 34/100, Train Loss: 0.6919, Val CE Loss: 0.7130, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:07 - INFO - Epoch 35/100, Train Loss: 0.6909, Val CE Loss: 0.7162, Val balanced_accuracy: 0.5266
+2025-09-29 19:26:07 - INFO - Epoch 36/100, Train Loss: 0.6903, Val CE Loss: 0.7197, Val balanced_accuracy: 0.5267
+2025-09-29 19:26:08 - INFO - Epoch 37/100, Train Loss: 0.6940, Val CE Loss: 0.7164, Val balanced_accuracy: 0.5279
+2025-09-29 19:26:08 - INFO - Epoch 38/100, Train Loss: 0.6911, Val CE Loss: 0.7166, Val balanced_accuracy: 0.5279
+2025-09-29 19:26:09 - INFO - Epoch 39/100, Train Loss: 0.6918, Val CE Loss: 0.7208, Val balanced_accuracy: 0.5267
+2025-09-29 19:26:09 - INFO - Epoch 40/100, Train Loss: 0.6894, Val CE Loss: 0.7170, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:09 - INFO - Epoch 41/100, Train Loss: 0.6917, Val CE Loss: 0.7168, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:10 - INFO - Epoch 42/100, Train Loss: 0.6934, Val CE Loss: 0.7190, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:10 - INFO - Epoch 43/100, Train Loss: 0.6902, Val CE Loss: 0.7190, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:10 - INFO - Epoch 44/100, Train Loss: 0.6890, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:11 - INFO - Epoch 45/100, Train Loss: 0.6901, Val CE Loss: 0.7187, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:11 - INFO - Epoch 46/100, Train Loss: 0.6903, Val CE Loss: 0.7192, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:12 - INFO - Epoch 47/100, Train Loss: 0.6895, Val CE Loss: 0.7182, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:12 - INFO - Epoch 48/100, Train Loss: 0.6919, Val CE Loss: 0.7178, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:12 - INFO - Epoch 49/100, Train Loss: 0.6922, Val CE Loss: 0.7184, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:13 - INFO - Epoch 50/100, Train Loss: 0.6908, Val CE Loss: 0.7176, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:13 - INFO - Epoch 51/100, Train Loss: 0.6918, Val CE Loss: 0.7178, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:13 - INFO - Epoch 52/100, Train Loss: 0.6912, Val CE Loss: 0.7177, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:14 - INFO - Epoch 53/100, Train Loss: 0.6898, Val CE Loss: 0.7184, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:14 - INFO - Epoch 54/100, Train Loss: 0.6938, Val CE Loss: 0.7178, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:15 - INFO - Epoch 55/100, Train Loss: 0.6918, Val CE Loss: 0.7185, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:15 - INFO - Epoch 56/100, Train Loss: 0.6906, Val CE Loss: 0.7184, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:15 - INFO - Epoch 57/100, Train Loss: 0.6918, Val CE Loss: 0.7182, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:16 - INFO - Epoch 58/100, Train Loss: 0.6902, Val CE Loss: 0.7183, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:16 - INFO - Epoch 59/100, Train Loss: 0.6948, Val CE Loss: 0.7191, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:17 - INFO - Epoch 60/100, Train Loss: 0.6931, Val CE Loss: 0.7190, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:17 - INFO - Epoch 61/100, Train Loss: 0.6932, Val CE Loss: 0.7183, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:17 - INFO - Epoch 62/100, Train Loss: 0.6913, Val CE Loss: 0.7192, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:18 - INFO - Epoch 63/100, Train Loss: 0.6896, Val CE Loss: 0.7186, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:18 - INFO - Epoch 64/100, Train Loss: 0.6940, Val CE Loss: 0.7186, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:18 - INFO - Epoch 65/100, Train Loss: 0.6930, Val CE Loss: 0.7182, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:19 - INFO - Epoch 66/100, Train Loss: 0.6913, Val CE Loss: 0.7187, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:19 - INFO - Epoch 67/100, Train Loss: 0.6923, Val CE Loss: 0.7182, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:20 - INFO - Epoch 68/100, Train Loss: 0.6919, Val CE Loss: 0.7183, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:20 - INFO - Epoch 69/100, Train Loss: 0.6928, Val CE Loss: 0.7185, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:20 - INFO - Epoch 70/100, Train Loss: 0.6944, Val CE Loss: 0.7185, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:21 - INFO - Epoch 71/100, Train Loss: 0.6911, Val CE Loss: 0.7187, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:21 - INFO - Epoch 72/100, Train Loss: 0.6918, Val CE Loss: 0.7186, Val balanced_accuracy: 0.5305
+2025-09-29 19:26:21 - INFO - Epoch 73/100, Train Loss: 0.6913, Val CE Loss: 0.7187, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:22 - INFO - Epoch 74/100, Train Loss: 0.6890, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:22 - INFO - Epoch 75/100, Train Loss: 0.6931, Val CE Loss: 0.7192, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:23 - INFO - Epoch 76/100, Train Loss: 0.6910, Val CE Loss: 0.7187, Val balanced_accuracy: 0.5305
+2025-09-29 19:26:23 - INFO - Epoch 77/100, Train Loss: 0.6897, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:23 - INFO - Epoch 78/100, Train Loss: 0.6906, Val CE Loss: 0.7191, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:24 - INFO - Epoch 79/100, Train Loss: 0.6903, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:24 - INFO - Epoch 80/100, Train Loss: 0.6926, Val CE Loss: 0.7194, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:24 - INFO - Epoch 81/100, Train Loss: 0.6927, Val CE Loss: 0.7186, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:25 - INFO - Epoch 82/100, Train Loss: 0.6887, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:25 - INFO - Epoch 83/100, Train Loss: 0.6896, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:26 - INFO - Epoch 84/100, Train Loss: 0.6895, Val CE Loss: 0.7186, Val balanced_accuracy: 0.5305
+2025-09-29 19:26:26 - INFO - Epoch 85/100, Train Loss: 0.6895, Val CE Loss: 0.7189, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:26 - INFO - Epoch 86/100, Train Loss: 0.6936, Val CE Loss: 0.7183, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:27 - INFO - Epoch 87/100, Train Loss: 0.6898, Val CE Loss: 0.7185, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:27 - INFO - Epoch 88/100, Train Loss: 0.6891, Val CE Loss: 0.7184, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:28 - INFO - Epoch 89/100, Train Loss: 0.6935, Val CE Loss: 0.7187, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:28 - INFO - Epoch 90/100, Train Loss: 0.6934, Val CE Loss: 0.7182, Val balanced_accuracy: 0.5331
+2025-09-29 19:26:28 - INFO - Epoch 91/100, Train Loss: 0.6909, Val CE Loss: 0.7191, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:29 - INFO - Epoch 92/100, Train Loss: 0.6913, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:29 - INFO - Epoch 93/100, Train Loss: 0.6928, Val CE Loss: 0.7189, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:29 - INFO - Epoch 94/100, Train Loss: 0.6916, Val CE Loss: 0.7187, Val balanced_accuracy: 0.5305
+2025-09-29 19:26:30 - INFO - Epoch 95/100, Train Loss: 0.6923, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:30 - INFO - Epoch 96/100, Train Loss: 0.6909, Val CE Loss: 0.7188, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:31 - INFO - Epoch 97/100, Train Loss: 0.6877, Val CE Loss: 0.7192, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:31 - INFO - Epoch 98/100, Train Loss: 0.6902, Val CE Loss: 0.7191, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:31 - INFO - Epoch 99/100, Train Loss: 0.6895, Val CE Loss: 0.7192, Val balanced_accuracy: 0.5292
+2025-09-29 19:26:32 - INFO - Epoch 100/100, Train Loss: 0.6902, Val CE Loss: 0.7185, Val balanced_accuracy: 0.5318
+2025-09-29 19:26:32 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1.pth
+2025-09-29 19:26:32 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 19:26:32 - INFO - Accuracy: 0.5289
+2025-09-29 19:26:32 - INFO - Balanced_accuracy: 0.5300
+2025-09-29 19:26:32 - INFO - Roc_auc: 0.5741
+2025-09-29 19:26:32 - INFO - Precision: 0.5146
+2025-09-29 19:26:32 - INFO - Recall: 0.9763
+2025-09-29 19:26:32 - INFO - Mcc: 0.1331
+2025-09-29 19:26:32 - INFO - Kappa: 0.0599
+2025-09-29 19:26:32 - INFO - Brier: 0.2619
+2025-09-29 19:26:32 - INFO - F1: 0.6739
+2025-09-29 20:02:24 - INFO - Epoch 1/150, Train Loss: 0.7605, Val CE Loss: 0.7197, Val balanced_accuracy: 0.5064
+2025-09-29 20:02:25 - INFO - Epoch 2/150, Train Loss: 0.7060, Val CE Loss: 0.7135, Val balanced_accuracy: 0.5276
+2025-09-29 20:02:25 - INFO - Epoch 3/150, Train Loss: 0.6946, Val CE Loss: 0.7545, Val balanced_accuracy: 0.5143
+2025-09-29 20:02:26 - INFO - Epoch 4/150, Train Loss: 0.6953, Val CE Loss: 0.7250, Val balanced_accuracy: 0.5399
+2025-09-29 20:02:26 - INFO - Epoch 5/150, Train Loss: 0.6906, Val CE Loss: 0.6950, Val balanced_accuracy: 0.5799
+2025-09-29 20:02:26 - INFO - Epoch 6/150, Train Loss: 0.6857, Val CE Loss: 0.7104, Val balanced_accuracy: 0.5463
+2025-09-29 20:02:27 - INFO - Epoch 7/150, Train Loss: 0.6880, Val CE Loss: 0.6961, Val balanced_accuracy: 0.5464
+2025-09-29 20:02:27 - INFO - Epoch 8/150, Train Loss: 0.6880, Val CE Loss: 0.6763, Val balanced_accuracy: 0.5771
+2025-09-29 20:02:27 - INFO - Epoch 9/150, Train Loss: 0.6861, Val CE Loss: 0.6872, Val balanced_accuracy: 0.5788
+2025-09-29 20:02:28 - INFO - Epoch 10/150, Train Loss: 0.6896, Val CE Loss: 0.6786, Val balanced_accuracy: 0.5735
+2025-09-29 20:02:28 - INFO - Epoch 11/150, Train Loss: 0.6864, Val CE Loss: 0.6832, Val balanced_accuracy: 0.5754
+2025-09-29 20:02:29 - INFO - Epoch 12/150, Train Loss: 0.6805, Val CE Loss: 0.6917, Val balanced_accuracy: 0.5755
+2025-09-29 20:02:29 - INFO - Epoch 13/150, Train Loss: 0.6825, Val CE Loss: 0.6881, Val balanced_accuracy: 0.5608
+2025-09-29 20:02:29 - INFO - Epoch 14/150, Train Loss: 0.6817, Val CE Loss: 0.6809, Val balanced_accuracy: 0.5867
+2025-09-29 20:02:30 - INFO - Epoch 15/150, Train Loss: 0.6781, Val CE Loss: 0.6747, Val balanced_accuracy: 0.5462
+2025-09-29 20:02:30 - INFO - Epoch 16/150, Train Loss: 0.6787, Val CE Loss: 0.6922, Val balanced_accuracy: 0.5759
+2025-09-29 20:02:30 - INFO - Epoch 17/150, Train Loss: 0.6789, Val CE Loss: 0.6803, Val balanced_accuracy: 0.5873
+2025-09-29 20:02:31 - INFO - Epoch 18/150, Train Loss: 0.6777, Val CE Loss: 0.6804, Val balanced_accuracy: 0.5737
+2025-09-29 20:02:31 - INFO - Epoch 19/150, Train Loss: 0.6849, Val CE Loss: 0.6713, Val balanced_accuracy: 0.5732
+2025-09-29 20:02:32 - INFO - Epoch 20/150, Train Loss: 0.6747, Val CE Loss: 0.6849, Val balanced_accuracy: 0.5775
+2025-09-29 20:02:32 - INFO - Epoch 21/150, Train Loss: 0.6775, Val CE Loss: 0.6923, Val balanced_accuracy: 0.5655
+2025-09-29 20:02:32 - INFO - Epoch 22/150, Train Loss: 0.6744, Val CE Loss: 0.6825, Val balanced_accuracy: 0.5514
+2025-09-29 20:02:33 - INFO - Epoch 23/150, Train Loss: 0.6710, Val CE Loss: 0.6981, Val balanced_accuracy: 0.5607
+2025-09-29 20:02:33 - INFO - Epoch 24/150, Train Loss: 0.6731, Val CE Loss: 0.7364, Val balanced_accuracy: 0.5462
+2025-09-29 20:02:33 - INFO - Epoch 25/150, Train Loss: 0.6710, Val CE Loss: 0.6766, Val balanced_accuracy: 0.5771
+2025-09-29 20:02:34 - INFO - Epoch 26/150, Train Loss: 0.6695, Val CE Loss: 0.6857, Val balanced_accuracy: 0.5645
+2025-09-29 20:02:34 - INFO - Epoch 27/150, Train Loss: 0.6667, Val CE Loss: 0.6967, Val balanced_accuracy: 0.5754
+2025-09-29 20:02:35 - INFO - Epoch 28/150, Train Loss: 0.6633, Val CE Loss: 0.6831, Val balanced_accuracy: 0.5745
+2025-09-29 20:02:35 - INFO - Epoch 29/150, Train Loss: 0.6670, Val CE Loss: 0.6893, Val balanced_accuracy: 0.5698
+2025-09-29 20:02:35 - INFO - Epoch 30/150, Train Loss: 0.6619, Val CE Loss: 0.6817, Val balanced_accuracy: 0.5696
+2025-09-29 20:02:36 - INFO - Epoch 31/150, Train Loss: 0.6575, Val CE Loss: 0.7060, Val balanced_accuracy: 0.5588
+2025-09-29 20:02:36 - INFO - Epoch 32/150, Train Loss: 0.6527, Val CE Loss: 0.7093, Val balanced_accuracy: 0.5588
+2025-09-29 20:02:36 - INFO - Epoch 33/150, Train Loss: 0.6482, Val CE Loss: 0.7138, Val balanced_accuracy: 0.5775
+2025-09-29 20:02:37 - INFO - Epoch 34/150, Train Loss: 0.6544, Val CE Loss: 0.7065, Val balanced_accuracy: 0.5649
+2025-09-29 20:02:37 - INFO - Epoch 35/150, Train Loss: 0.6458, Val CE Loss: 0.6934, Val balanced_accuracy: 0.5558
+2025-09-29 20:02:38 - INFO - Epoch 36/150, Train Loss: 0.6452, Val CE Loss: 0.7278, Val balanced_accuracy: 0.5701
+2025-09-29 20:02:38 - INFO - Epoch 37/150, Train Loss: 0.6479, Val CE Loss: 0.7115, Val balanced_accuracy: 0.5482
+2025-09-29 20:02:38 - INFO - Epoch 38/150, Train Loss: 0.6413, Val CE Loss: 0.7029, Val balanced_accuracy: 0.5455
+2025-09-29 20:02:39 - INFO - Epoch 39/150, Train Loss: 0.6399, Val CE Loss: 0.7337, Val balanced_accuracy: 0.5634
+2025-09-29 20:02:39 - INFO - Epoch 40/150, Train Loss: 0.6356, Val CE Loss: 0.7001, Val balanced_accuracy: 0.5606
+2025-09-29 20:02:39 - INFO - Epoch 41/150, Train Loss: 0.6372, Val CE Loss: 0.7172, Val balanced_accuracy: 0.5515
+2025-09-29 20:02:40 - INFO - Epoch 42/150, Train Loss: 0.6278, Val CE Loss: 0.7409, Val balanced_accuracy: 0.5507
+2025-09-29 20:02:40 - INFO - Epoch 43/150, Train Loss: 0.6218, Val CE Loss: 0.7189, Val balanced_accuracy: 0.5565
+2025-09-29 20:02:41 - INFO - Epoch 44/150, Train Loss: 0.6203, Val CE Loss: 0.7148, Val balanced_accuracy: 0.5479
+2025-09-29 20:02:41 - INFO - Epoch 45/150, Train Loss: 0.6200, Val CE Loss: 0.7455, Val balanced_accuracy: 0.5603
+2025-09-29 20:02:41 - INFO - Epoch 46/150, Train Loss: 0.6207, Val CE Loss: 0.7384, Val balanced_accuracy: 0.5352
+2025-09-29 20:02:42 - INFO - Epoch 47/150, Train Loss: 0.6183, Val CE Loss: 0.7241, Val balanced_accuracy: 0.5646
+2025-09-29 20:02:42 - INFO - Epoch 48/150, Train Loss: 0.6138, Val CE Loss: 0.7272, Val balanced_accuracy: 0.5755
+2025-09-29 20:02:42 - INFO - Epoch 49/150, Train Loss: 0.6129, Val CE Loss: 0.7455, Val balanced_accuracy: 0.5469
+2025-09-29 20:02:43 - INFO - Epoch 50/150, Train Loss: 0.6071, Val CE Loss: 0.7536, Val balanced_accuracy: 0.5285
+2025-09-29 20:02:43 - INFO - Epoch 51/150, Train Loss: 0.6102, Val CE Loss: 0.7385, Val balanced_accuracy: 0.5725
+2025-09-29 20:02:44 - INFO - Epoch 52/150, Train Loss: 0.6037, Val CE Loss: 0.7787, Val balanced_accuracy: 0.5640
+2025-09-29 20:02:44 - INFO - Epoch 53/150, Train Loss: 0.5993, Val CE Loss: 0.7262, Val balanced_accuracy: 0.5768
+2025-09-29 20:02:44 - INFO - Epoch 54/150, Train Loss: 0.5881, Val CE Loss: 0.7565, Val balanced_accuracy: 0.5535
+2025-09-29 20:02:45 - INFO - Epoch 55/150, Train Loss: 0.5863, Val CE Loss: 0.7398, Val balanced_accuracy: 0.5735
+2025-09-29 20:02:45 - INFO - Epoch 56/150, Train Loss: 0.5785, Val CE Loss: 0.8142, Val balanced_accuracy: 0.5527
+2025-09-29 20:02:45 - INFO - Epoch 57/150, Train Loss: 0.5765, Val CE Loss: 0.7706, Val balanced_accuracy: 0.5643
+2025-09-29 20:02:46 - INFO - Epoch 58/150, Train Loss: 0.5765, Val CE Loss: 0.8587, Val balanced_accuracy: 0.5239
+2025-09-29 20:02:46 - INFO - Epoch 59/150, Train Loss: 0.5752, Val CE Loss: 0.8477, Val balanced_accuracy: 0.5689
+2025-09-29 20:02:47 - INFO - Epoch 60/150, Train Loss: 0.5698, Val CE Loss: 0.7812, Val balanced_accuracy: 0.5460
+2025-09-29 20:02:47 - INFO - Epoch 61/150, Train Loss: 0.5624, Val CE Loss: 0.8478, Val balanced_accuracy: 0.5475
+2025-09-29 20:02:47 - INFO - Epoch 62/150, Train Loss: 0.5586, Val CE Loss: 1.0163, Val balanced_accuracy: 0.5382
+2025-09-29 20:02:48 - INFO - Epoch 63/150, Train Loss: 0.5543, Val CE Loss: 0.7974, Val balanced_accuracy: 0.5438
+2025-09-29 20:02:48 - INFO - Epoch 64/150, Train Loss: 0.5506, Val CE Loss: 0.8703, Val balanced_accuracy: 0.5532
+2025-09-29 20:02:48 - INFO - Epoch 65/150, Train Loss: 0.5400, Val CE Loss: 0.8889, Val balanced_accuracy: 0.5491
+2025-09-29 20:02:49 - INFO - Epoch 66/150, Train Loss: 0.5340, Val CE Loss: 0.8444, Val balanced_accuracy: 0.5485
+2025-09-29 20:02:49 - INFO - Epoch 67/150, Train Loss: 0.5345, Val CE Loss: 0.9470, Val balanced_accuracy: 0.5565
+2025-09-29 20:02:49 - INFO - Model saved at: /home/phd2/Scrivania/CorsoRepo/cellPIV/_04_test/best_models/Farneback/best_lstmfcn_model_1.pth
+2025-09-29 20:02:49 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 20:02:49 - INFO - Accuracy: 0.5827
+2025-09-29 20:02:49 - INFO - Balanced_accuracy: 0.5831
+2025-09-29 20:02:49 - INFO - Roc_auc: 0.5834
+2025-09-29 20:02:49 - INFO - Precision: 0.5605
+2025-09-29 20:02:49 - INFO - Recall: 0.7553
+2025-09-29 20:02:49 - INFO - Mcc: 0.1771
+2025-09-29 20:02:49 - INFO - Kappa: 0.1661
+2025-09-29 20:02:49 - INFO - Brier: 0.2467
+2025-09-29 20:02:49 - INFO - F1: 0.6435

@@ -119,7 +119,7 @@ def test_model_wrapper(model_type, model_info, test_data, device):
         X, y = test_data
         # Prepare data using CustomDataset
         dataset = CustomDataset(X.reshape(X.shape[0], 1, -1), y)
-        loader = DataLoader(dataset, batch_size=conf.batch_size, shuffle=False)
+        loader = DataLoader(dataset, batch_size=conf.batch_size_convtran, shuffle=False)
         model = model_info["model"]
         model.eval()
         all_pred, all_prob = [], []

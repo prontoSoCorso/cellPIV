@@ -1,0 +1,210 @@
+2025-09-29 15:52:35 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 15:53:11 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 15:57:21 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 15:57:36 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 15:58:12 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 15:59:48 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:03:42 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:17:29 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:18:16 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:19:02 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:19:57 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:22:52 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:22:58 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:23:05 - INFO - Validation Metric - Epoch [10/150]: 0.5885
+2025-09-29 16:23:11 - INFO - Validation Metric - Epoch [20/150]: 0.5683
+2025-09-29 16:23:17 - INFO - Validation Metric - Epoch [30/150]: 0.5736
+2025-09-29 16:23:22 - INFO - Validation Metric - Epoch [40/150]: 0.5754
+2025-09-29 16:23:28 - INFO - Validation Metric - Epoch [50/150]: 0.5764
+2025-09-29 16:23:34 - INFO - Validation Metric - Epoch [60/150]: 0.5750
+2025-09-29 16:23:36 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 16:23:36 - INFO - Accuracy: 0.5486
+2025-09-29 16:23:36 - INFO - Balanced_accuracy: 0.5490
+2025-09-29 16:23:36 - INFO - Roc_auc: 0.5817
+2025-09-29 16:23:36 - INFO - Precision: 0.5363
+2025-09-29 16:23:36 - INFO - Recall: 0.7000
+2025-09-29 16:23:36 - INFO - Mcc: 0.1027
+2025-09-29 16:23:36 - INFO - Kappa: 0.0978
+2025-09-29 16:23:36 - INFO - Brier: 0.2491
+2025-09-29 16:23:36 - INFO - F1: 0.6073
+2025-09-29 16:25:12 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:25:42 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 16:25:49 - INFO - Validation Metric - Epoch [10/150]: 0.5798
+2025-09-29 16:25:55 - INFO - Validation Metric - Epoch [20/150]: 0.5875
+2025-09-29 16:26:00 - INFO - Validation Metric - Epoch [30/150]: 0.5758
+2025-09-29 16:26:06 - INFO - Validation Metric - Epoch [40/150]: 0.5725
+2025-09-29 16:26:12 - INFO - Validation Metric - Epoch [50/150]: 0.5828
+2025-09-29 16:26:17 - INFO - Validation Metric - Epoch [60/150]: 0.5897
+2025-09-29 16:26:20 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 16:26:20 - INFO - Accuracy: 0.5525
+2025-09-29 16:26:20 - INFO - Balanced_accuracy: 0.5529
+2025-09-29 16:26:20 - INFO - Roc_auc: 0.5866
+2025-09-29 16:26:20 - INFO - Precision: 0.5380
+2025-09-29 16:26:20 - INFO - Recall: 0.7263
+2025-09-29 16:26:20 - INFO - Mcc: 0.1129
+2025-09-29 16:26:20 - INFO - Kappa: 0.1058
+2025-09-29 16:26:20 - INFO - Brier: 0.2465
+2025-09-29 16:26:20 - INFO - F1: 0.6181
+2025-09-29 18:20:31 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 18:20:34 - INFO - Validation Metric - Epoch [10/150]: 0.6004
+2025-09-29 18:20:38 - INFO - Validation Metric - Epoch [20/150]: 0.5945
+2025-09-29 18:20:41 - INFO - Validation Metric - Epoch [30/150]: 0.5815
+2025-09-29 18:20:44 - INFO - Validation Metric - Epoch [40/150]: 0.5693
+2025-09-29 18:20:47 - INFO - Validation Metric - Epoch [50/150]: 0.5842
+2025-09-29 18:20:51 - INFO - Validation Metric - Epoch [60/150]: 0.5707
+2025-09-29 18:20:54 - INFO - Validation Metric - Epoch [70/150]: 0.5715
+2025-09-29 18:20:54 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:20:54 - INFO - Accuracy: 0.5801
+2025-09-29 18:20:54 - INFO - Balanced_accuracy: 0.5804
+2025-09-29 18:20:54 - INFO - Roc_auc: 0.6105
+2025-09-29 18:20:54 - INFO - Precision: 0.5641
+2025-09-29 18:20:54 - INFO - Recall: 0.6947
+2025-09-29 18:20:54 - INFO - Mcc: 0.1651
+2025-09-29 18:20:54 - INFO - Kappa: 0.1606
+2025-09-29 18:20:54 - INFO - Brier: 0.2439
+2025-09-29 18:20:54 - INFO - F1: 0.6226
+2025-09-29 18:25:19 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 18:25:23 - INFO - Validation Metric - Epoch [10/150]: 0.5990
+2025-09-29 18:25:26 - INFO - Validation Metric - Epoch [20/150]: 0.5933
+2025-09-29 18:25:29 - INFO - Validation Metric - Epoch [30/150]: 0.5783
+2025-09-29 18:25:32 - INFO - Validation Metric - Epoch [40/150]: 0.5697
+2025-09-29 18:25:36 - INFO - Validation Metric - Epoch [50/150]: 0.5890
+2025-09-29 18:25:39 - INFO - Validation Metric - Epoch [60/150]: 0.5724
+2025-09-29 18:25:42 - INFO - Validation Metric - Epoch [70/150]: 0.5730
+2025-09-29 18:25:42 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:25:42 - INFO - Accuracy: 0.5801
+2025-09-29 18:25:42 - INFO - Balanced_accuracy: 0.5803
+2025-09-29 18:25:42 - INFO - Roc_auc: 0.6106
+2025-09-29 18:25:42 - INFO - Precision: 0.5644
+2025-09-29 18:25:42 - INFO - Recall: 0.6921
+2025-09-29 18:25:42 - INFO - Mcc: 0.1648
+2025-09-29 18:25:42 - INFO - Kappa: 0.1606
+2025-09-29 18:25:42 - INFO - Brier: 0.2439
+2025-09-29 18:25:42 - INFO - F1: 0.6217
+2025-09-29 18:29:27 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 18:29:30 - INFO - Validation Metric - Epoch [10/150]: 0.5992
+2025-09-29 18:29:33 - INFO - Validation Metric - Epoch [20/150]: 0.5877
+2025-09-29 18:29:37 - INFO - Validation Metric - Epoch [30/150]: 0.5763
+2025-09-29 18:29:40 - INFO - Validation Metric - Epoch [40/150]: 0.5662
+2025-09-29 18:29:43 - INFO - Validation Metric - Epoch [50/150]: 0.5841
+2025-09-29 18:29:46 - INFO - Validation Metric - Epoch [60/150]: 0.5737
+2025-09-29 18:29:49 - INFO - Validation Metric - Epoch [70/150]: 0.5738
+2025-09-29 18:29:49 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:29:49 - INFO - Accuracy: 0.5827
+2025-09-29 18:29:49 - INFO - Balanced_accuracy: 0.5829
+2025-09-29 18:29:49 - INFO - Roc_auc: 0.6106
+2025-09-29 18:29:49 - INFO - Precision: 0.5701
+2025-09-29 18:29:49 - INFO - Recall: 0.6632
+2025-09-29 18:29:49 - INFO - Mcc: 0.1679
+2025-09-29 18:29:49 - INFO - Kappa: 0.1657
+2025-09-29 18:29:49 - INFO - Brier: 0.2439
+2025-09-29 18:29:49 - INFO - F1: 0.6131
+2025-09-29 18:33:59 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 18:34:02 - INFO - Validation Metric - Epoch [10/150]: 0.6005
+2025-09-29 18:34:06 - INFO - Validation Metric - Epoch [20/150]: 0.5960
+2025-09-29 18:34:09 - INFO - Validation Metric - Epoch [30/150]: 0.5786
+2025-09-29 18:34:12 - INFO - Validation Metric - Epoch [40/150]: 0.5710
+2025-09-29 18:34:15 - INFO - Validation Metric - Epoch [50/150]: 0.5890
+2025-09-29 18:34:18 - INFO - Validation Metric - Epoch [60/150]: 0.5710
+2025-09-29 18:34:22 - INFO - Validation Metric - Epoch [70/150]: 0.5731
+2025-09-29 18:34:22 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 18:34:22 - INFO - Accuracy: 0.5801
+2025-09-29 18:34:22 - INFO - Balanced_accuracy: 0.5804
+2025-09-29 18:34:22 - INFO - Roc_auc: 0.6110
+2025-09-29 18:34:22 - INFO - Precision: 0.5641
+2025-09-29 18:34:22 - INFO - Recall: 0.6947
+2025-09-29 18:34:22 - INFO - Mcc: 0.1651
+2025-09-29 18:34:22 - INFO - Kappa: 0.1606
+2025-09-29 18:34:22 - INFO - Brier: 0.2438
+2025-09-29 18:34:22 - INFO - F1: 0.6226
+2025-09-29 19:26:32 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 19:30:47 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 19:30:51 - INFO - Epoch 10/150, Train loss: 0.7429
+2025-09-29 19:30:51 - INFO - Validation Balanced Accuracy: 0.5858, Best: 0.5805
+2025-09-29 19:30:51 - INFO - Current Learning Rate: 0.001000
+2025-09-29 19:30:54 - INFO - Epoch 20/150, Train loss: 0.6696
+2025-09-29 19:30:54 - INFO - Validation Balanced Accuracy: 0.5805, Best: 0.5858
+2025-09-29 19:30:54 - INFO - Current Learning Rate: 0.000200
+2025-09-29 19:30:56 - INFO - Epoch 30/150, Train loss: 0.6882
+2025-09-29 19:30:56 - INFO - Validation Balanced Accuracy: 0.5645, Best: 0.5858
+2025-09-29 19:30:56 - INFO - Current Learning Rate: 0.000040
+2025-09-29 19:30:59 - INFO - Epoch 40/150, Train loss: 0.5897
+2025-09-29 19:30:59 - INFO - Validation Balanced Accuracy: 0.5567, Best: 0.5858
+2025-09-29 19:30:59 - INFO - Current Learning Rate: 0.000008
+2025-09-29 19:31:02 - INFO - Epoch 50/150, Train loss: 0.6138
+2025-09-29 19:31:02 - INFO - Validation Balanced Accuracy: 0.5765, Best: 0.5898
+2025-09-29 19:31:02 - INFO - Current Learning Rate: 0.000002
+2025-09-29 19:31:04 - INFO - Epoch 60/150, Train loss: 0.6102
+2025-09-29 19:31:04 - INFO - Validation Balanced Accuracy: 0.5694, Best: 0.5898
+2025-09-29 19:31:04 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:07 - INFO - Epoch 70/150, Train loss: 0.7162
+2025-09-29 19:31:07 - INFO - Validation Balanced Accuracy: 0.5640, Best: 0.5898
+2025-09-29 19:31:07 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:09 - INFO - Epoch 80/150, Train loss: 0.7254
+2025-09-29 19:31:09 - INFO - Validation Balanced Accuracy: 0.5763, Best: 0.5898
+2025-09-29 19:31:09 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:12 - INFO - Epoch 90/150, Train loss: 0.6871
+2025-09-29 19:31:12 - INFO - Validation Balanced Accuracy: 0.5822, Best: 0.5951
+2025-09-29 19:31:12 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:15 - INFO - Epoch 100/150, Train loss: 0.6367
+2025-09-29 19:31:15 - INFO - Validation Balanced Accuracy: 0.5771, Best: 0.5951
+2025-09-29 19:31:15 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:17 - INFO - Epoch 110/150, Train loss: 0.5972
+2025-09-29 19:31:17 - INFO - Validation Balanced Accuracy: 0.5872, Best: 0.5951
+2025-09-29 19:31:17 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:20 - INFO - Epoch 120/150, Train loss: 0.6848
+2025-09-29 19:31:20 - INFO - Validation Balanced Accuracy: 0.5544, Best: 0.5951
+2025-09-29 19:31:20 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:23 - INFO - Epoch 130/150, Train loss: 0.6611
+2025-09-29 19:31:23 - INFO - Validation Balanced Accuracy: 0.5649, Best: 0.5951
+2025-09-29 19:31:23 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:25 - INFO - Epoch 140/150, Train loss: 0.7701
+2025-09-29 19:31:25 - INFO - Validation Balanced Accuracy: 0.5613, Best: 0.5951
+2025-09-29 19:31:25 - INFO - Current Learning Rate: 0.000000
+2025-09-29 19:31:26 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 19:31:26 - INFO - Accuracy: 0.5801
+2025-09-29 19:31:26 - INFO - Balanced_accuracy: 0.5802
+2025-09-29 19:31:26 - INFO - Roc_auc: 0.6119
+2025-09-29 19:31:26 - INFO - Precision: 0.5708
+2025-09-29 19:31:26 - INFO - Recall: 0.6368
+2025-09-29 19:31:26 - INFO - Mcc: 0.1614
+2025-09-29 19:31:26 - INFO - Kappa: 0.1604
+2025-09-29 19:31:26 - INFO - Brier: 0.2466
+2025-09-29 19:31:26 - INFO - F1: 0.6020
+2025-09-29 20:02:49 - INFO - === Training ConvTran for day 1 ===
+2025-09-29 20:02:52 - INFO - Epoch 10/150, Train loss: 0.7552
+2025-09-29 20:02:52 - INFO - Validation Balanced Accuracy: 0.5838, Best: 0.5707
+2025-09-29 20:02:52 - INFO - Current Learning Rate: 0.000500
+2025-09-29 20:02:55 - INFO - Epoch 20/150, Train loss: 0.7053
+2025-09-29 20:02:55 - INFO - Validation Balanced Accuracy: 0.5664, Best: 0.5964
+2025-09-29 20:02:55 - INFO - Current Learning Rate: 0.000375
+2025-09-29 20:02:58 - INFO - Epoch 30/150, Train loss: 0.6445
+2025-09-29 20:02:58 - INFO - Validation Balanced Accuracy: 0.5675, Best: 0.5964
+2025-09-29 20:02:58 - INFO - Current Learning Rate: 0.000281
+2025-09-29 20:03:00 - INFO - Epoch 40/150, Train loss: 0.5922
+2025-09-29 20:03:00 - INFO - Validation Balanced Accuracy: 0.5710, Best: 0.5964
+2025-09-29 20:03:00 - INFO - Current Learning Rate: 0.000211
+2025-09-29 20:03:03 - INFO - Epoch 50/150, Train loss: 0.6297
+2025-09-29 20:03:03 - INFO - Validation Balanced Accuracy: 0.5712, Best: 0.5964
+2025-09-29 20:03:03 - INFO - Current Learning Rate: 0.000158
+2025-09-29 20:03:06 - INFO - Epoch 60/150, Train loss: 0.6280
+2025-09-29 20:03:06 - INFO - Validation Balanced Accuracy: 0.5672, Best: 0.5964
+2025-09-29 20:03:06 - INFO - Current Learning Rate: 0.000119
+2025-09-29 20:03:08 - INFO - 
+===== FINAL TEST RESULTS =====
+2025-09-29 20:03:08 - INFO - Accuracy: 0.5879
+2025-09-29 20:03:08 - INFO - Balanced_accuracy: 0.5882
+2025-09-29 20:03:08 - INFO - Roc_auc: 0.6341
+2025-09-29 20:03:08 - INFO - Precision: 0.5727
+2025-09-29 20:03:08 - INFO - Recall: 0.6842
+2025-09-29 20:03:08 - INFO - Mcc: 0.1797
+2025-09-29 20:03:08 - INFO - Kappa: 0.1763
+2025-09-29 20:03:08 - INFO - Brier: 0.2367
+2025-09-29 20:03:08 - INFO - F1: 0.6235

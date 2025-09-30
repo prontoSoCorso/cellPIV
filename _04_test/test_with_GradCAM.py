@@ -15,7 +15,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 from config import Config_03_train as conf
-from _03_train._b_LSTMFCN import LSTMFCN
+from _03_train._b_LSTMFCN import TimeSeriesClassifier
 import _04_test._testFunctions as _testFunctions
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -34,7 +34,7 @@ def main():
     model_path = os.path.join(base_models_path, f"best_lstmfcn_model_{day}Days.pth")
     checkpoint = torch.load(model_path, map_location=device, weights_only=False)
 
-    model = LSTMFCN(
+    model = TimeSeriesClassifier(
         lstm_size=checkpoint['params']['lstm_size'],
         filter_sizes=tuple(map(int, checkpoint['params']['filter_sizes'].split(','))),
         kernel_sizes=tuple(map(int, checkpoint['params']['kernel_sizes'].split(','))),

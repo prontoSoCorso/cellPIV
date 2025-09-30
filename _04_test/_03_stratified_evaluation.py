@@ -62,7 +62,7 @@ def evaluate_model(model_type, model_info, X, y, device):
         loader = DataLoader(dataset, batch_size=model_info['batch_size'], shuffle=False)
     else:  # ConvTran
         dataset = CustomDataset(X.reshape(X.shape[0], 1, -1), y)
-        loader = DataLoader(dataset, batch_size=conf.batch_size, shuffle=False)
+        loader = DataLoader(dataset, batch_size=conf.batch_size_convtran, shuffle=False)
     
     model_info['model'].eval()
     all_pred, all_prob = [], []
@@ -365,7 +365,7 @@ def stratified_evaluation(merge_types="no_merging",
         # Preparing data and test
         # ---------------------------
         # Prepare data
-        temporal_cols = [c for c in df_merged.columns if c.startswith("value_")]
+        temporal_cols = utils.detect_time_columns(df_merged)
         X = df_merged[temporal_cols].values
         y = df_merged["BLASTO NY"].values
 

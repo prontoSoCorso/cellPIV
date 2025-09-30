@@ -22,7 +22,7 @@ sys.path.append(parent_dir)
 # Import project modules
 from config import Config_03_train as conf
 from _03_train._c_ConvTranUtils import CustomDataset
-from _03_train._b_LSTMFCN import LSTMFCN
+from _03_train._b_LSTMFCN import TimeSeriesClassifier
 from _99_ConvTranModel.model import model_factory
 
 
@@ -104,7 +104,7 @@ def plot_summary_roc_curves(model_name, roc_data, day, output_dir):
 def instantiate_LSTMFCN(checkpoint, device):
     params = checkpoint.get('params', {})
 
-    model = LSTMFCN(
+    model = TimeSeriesClassifier(
         lstm_size=params.get('lstm_size'),
         filter_sizes=tuple(map(int, params.get('filter_sizes', '').split(','))),
         kernel_sizes=tuple(map(int, params.get('kernel_sizes', '').split(','))),

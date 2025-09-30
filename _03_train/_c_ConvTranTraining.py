@@ -3,6 +3,7 @@ from sklearn.metrics import balanced_accuracy_score
 import numpy as np
 import logging
 import optuna
+from tqdm import tqdm
 
 import _utils_._utils as utils
 
@@ -18,6 +19,7 @@ class SupervisedTrainer:
         self.is_training = is_training
         self.total_correct = 0
         self.total_samples = 0
+        self.train_epoch_loss = 0.0
 
     def train_epoch(self, epoch):
         self.model.train()
@@ -44,11 +46,7 @@ class SupervisedTrainer:
             total_correct += predicted.eq(targets).sum().item()
             total_samples += targets.size(0)
 
-            """
-            # Stampa la perdita e l'accuratezza nel terminale
-            if i % self.print_interval == 0:
-                logging.info(f'Train Step: {i}, Loss: {loss.item():.4f}, Accuracy: {accuracy:.4f}')
-            """
+        self.train_epoch_loss = loss.item()
 
     def evaluate(self, epoch=None, keep_all=True):
         self.model.eval()
@@ -152,12 +150,12 @@ def train_runner(config, model, trainer, val_evaluator, save_path, trial=None):
     best_val_metric = float('-inf')
     epochs_no_improve = 0
     early_stopping_delta = 0.001
-    best_threshold = 0.5
+    base_threshold = 0.5
 
     # Learning Rate Scheduler
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(trainer.optimizer, mode='min', factor=config.scheduler_factor, patience=config.scheduler_patience)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(trainer.optimizer, mode='min', factor=config.scheduler_factor_convtran, patience=config.scheduler_patience_convtran)
 
-    for epoch in range(config.epochs):  # Config non è dizionario, uso notazione a punto per accedere agli attributi
+    for epoch in tqdm(range(config.epochs_convtran), desc="Training Progress"):
         # Training phase
         trainer.train_epoch(epoch)
 
@@ -171,12 +169,12 @@ def train_runner(config, model, trainer, val_evaluator, save_path, trial=None):
                 val_probs.extend(probs.cpu().numpy())
                 val_true.extend(y.cpu().numpy())
         
-        # Find best threshold for current epoch
-        current_threshold = find_best_threshold(model=None, y_true=val_true, y_probs=val_probs)
-        current_metric = balanced_accuracy_score(val_true, (np.array(val_probs) >= current_threshold))
+        current_metric = balanced_accuracy_score(val_true, (np.array(val_probs) >= base_threshold))
         scheduler.step(current_metric)
         if (epoch + 1) % 10 == 0:
-            logging.info(f"Validation Metric - Epoch [{epoch+1}/{config.epochs}]: {current_metric:.4f}")
+            logging.info(f"Epoch {epoch+1}/{config.epochs_convtran}, Train loss: {trainer.train_epoch_loss:.4f}")
+            logging.info(f"Validation Balanced Accuracy: {current_metric:.4f}, Best: {best_val_metric:.4f}")
+            logging.info(f"Current Learning Rate: {trainer.optimizer.param_groups[0]['lr']:.6f}")
         
         # Report intermediate results for pruning
         if trial:
@@ -187,20 +185,25 @@ def train_runner(config, model, trainer, val_evaluator, save_path, trial=None):
         # Early stopping logic and Update best metric and threshold
         if current_metric > (best_val_metric+ early_stopping_delta):
             best_val_metric = current_metric
-            best_threshold = current_threshold
+            # Find best threshold for current epoch
+            best_threshold = find_best_threshold(model=None, y_true=val_true, y_probs=val_probs)
             # Create a serializable config dictionary
             config_dict = {
-                'emb_size': config.emb_size,
-                'num_heads': config.num_heads,
-                'dropout': config.dropout,
-                'batch_size': config.batch_size,
-                'lr': config.lr,
+                'emb_size': config.emb_size_convtran,
+                'num_heads': config.num_heads_convtran,
+                'dropout': config.dropout_convtran,
+                'batch_size': config.batch_size_convtran,
+                'lr': config.lr_convtran,
                 'Data_shape': config.Data_shape,
                 'Fix_pos_encode': config.Fix_pos_encode,
                 'Rel_pos_encode': config.Rel_pos_encode,
                 'Net_Type': config.Net_Type,
                 'dim_ff': config.dim_ff,
-                'num_labels': config.num_labels
+                'num_labels': config.num_labels,
+                'epochs': config.epochs_convtran,
+                'scheduler_patience': config.scheduler_patience_convtran,
+                'scheduler_factor': config.scheduler_factor_convtran,
+                'patience': config.patience_convtran
             }
 
             torch.save({
@@ -212,7 +215,7 @@ def train_runner(config, model, trainer, val_evaluator, save_path, trial=None):
             epochs_no_improve = 0
         else:
             epochs_no_improve += 1
-            if epochs_no_improve >= config.convtran_patience:
+            if epochs_no_improve >= config.patience_convtran:
                 break
 
-    return best_val_metric, best_threshold
+    return model, best_val_metric, best_threshold

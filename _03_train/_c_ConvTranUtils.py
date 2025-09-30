@@ -2,39 +2,29 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 import torch
 
-def load_my_data(train_path, val_path, test_path, val_ratio=0.2, batch_size=16):
-    train_loader = None
-    val_loader = None
-    test_loader = None
-
-    if train_path:
-        print("Reading training data ...")
-        data_train = pd.read_csv(train_path)
-        temporal_columns = [col for col in data_train.columns if col.startswith('value_')]  # Equal for train, val e test
-        X_train = data_train[temporal_columns].values.reshape(data_train.shape[0], 1, -1)
-        y_train = data_train["BLASTO NY"].values
-
-        print("Reading validation data ...")
-        data_val = pd.read_csv(val_path)
-        X_val = data_val[temporal_columns].values.reshape(data_val.shape[0], 1, -1)
-        y_val = data_val["BLASTO NY"].values
-
+def load_my_data(X_train=None, y_train=None, 
+                 X_val=None, y_val=None, 
+                 X_test=None, y_test=None, 
+                 batch_size=16):
+    
+    # Initialize loaders as None
+    train_loader, val_loader, test_loader = None, None, None
+    
+    # Create datasets and loaders if data is provided
+    if X_train is not None and y_train is not None:
+        print("Loading training data ...")
         train_dataset = CustomDataset(X_train, y_train)
-        val_dataset = CustomDataset(X_val, y_val)
-        
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+
+    if X_val is not None and y_val is not None:
+        print("Loading validation data ...")
+        val_dataset = CustomDataset(X_val, y_val)
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-    if test_path:
-        print("Reading test data ...")
-        data_test = pd.read_csv(test_path)
-        temporal_columns = [col for col in data_test.columns if col.startswith('value_')]
-        X_test = data_test[temporal_columns].values.reshape(data_test.shape[0], 1, -1)
-        y_test = data_test["BLASTO NY"].values
+    if X_test is not None and y_test is not None:
+        print("Loading test data ...")
         test_dataset = CustomDataset(X_test, y_test)
         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-        
-    print("Data loaders ready.")
 
     return train_loader, val_loader, test_loader
 
