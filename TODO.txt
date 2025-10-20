@@ -1,0 +1,28 @@
+1. Sistemare GRADCAM per ConvTran   ✔
+
+2. Migliorare visualizzazione mappe medie
+    - stesso asse y
+    - conversione da num_frame a ore totali
+    - aggiungere classe0 e classe1 come no_blasto e no_blasto
+
+3. Sistemare analisi stratificata
+
+4. Push
+
+5. Rifaccio la selezione dei video (posso aggiornarla nel nuovo split per ViT) per il quinto giorno, di solo
+    gli embrioni che non hanno ancora raggiunto blastocisti e che arrivano ALMENO alla 120esima ora
+
+6. nuova cartella per ViT
+    - Creazione di un file con train-val-test dish_well id a partire dai 3 file "normalized"
+    - train del modello base ViT --> trovo un'implementazione semplice di pytorch
+        - Allenamento ad 1 giorno
+        - Allenamento a 3 giorni
+        - Allenamento a 5 giorni
+        - NB: selezione del quinto giorno SOLO dei video che hanno almeno 500 frame e che non hanno ancora raggiunto blastocisti
+    - test del modello con stesse funzioni degli altri modelli
+    - grad-cam sulle immagini
+
+
+
+
+

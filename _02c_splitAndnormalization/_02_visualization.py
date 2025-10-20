@@ -84,7 +84,7 @@ def visualize_normalized_data_single_pt(original_data, normalized_data, output_b
     print(f"Plot saved at the path: {output_file_path}")
 
 
-def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output_base, seed, temporal_data_type, days_to_consider, shift_x=0):
+def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, seed, temporal_data_type, days_to_consider, temporal_columns=None, output_base=None, shift_x=0):
     """
     Carica i dati, separa i gruppi Blasto e No Blasto, e crea i grafici per train, validation e test.
     
@@ -95,7 +95,8 @@ def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output
     :param seed: Seed usato per la randomizzazione
     :param temporal_data_type: Tipo di dati temporali
     """
-    os.makedirs(output_base, exist_ok=True)  # Crea la cartella se non esiste
+    if output_base:
+        os.makedirs(output_base, exist_ok=True)
     
     def separate_data(df_input):
         """Separa i dati in base alla colonna 'BLASTO NY'."""
@@ -103,9 +104,8 @@ def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output
         no_blasto = df_input[df_input['BLASTO NY'] == 0]
         return blasto, no_blasto
     
-    def create_plot(blasto, no_blasto, title, filename, output_folder):
+    def create_plot(blasto, no_blasto, title):
         """Genera e salva il grafico delle medie e deviazioni standard per Blasto e No Blasto."""
-        temporal_columns = [col for col in blasto.columns if col.startswith("value_")]
         x = np.arange(shift_x, shift_x + len(temporal_columns))
 
         blasto_mean = blasto[temporal_columns].mean()
@@ -113,34 +113,44 @@ def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, output
         
         no_blasto_mean = no_blasto[temporal_columns].mean()
         no_blasto_std = no_blasto[temporal_columns].std()
-        
-        plt.figure(figsize=(12, 6))
-        
-        plt.plot(x, blasto_mean, label='Blasto', color='blue')
-        plt.fill_between(x, blasto_mean - blasto_std, blasto_mean + blasto_std, color='blue', alpha=0.2)
-        
-        plt.plot(x, no_blasto_mean, label='No Blasto', color='red')
-        plt.fill_between(x, no_blasto_mean - no_blasto_std, no_blasto_mean + no_blasto_std, color='red', alpha=0.2)
-        
-        plt.title(title)
-        plt.xlabel('Time Steps')
-        plt.ylabel('Optical Flow Metric')
-        plt.legend()
-        plt.grid(True)
-        
-        plt.savefig(os.path.join(output_folder, filename))
-        plt.close()
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+
+        ax.plot(x, blasto_mean, label='Blasto', color='blue')
+        ax.fill_between(x, blasto_mean - blasto_std, blasto_mean + blasto_std, color='blue', alpha=0.2)
+
+        ax.plot(x, no_blasto_mean, label='No Blasto', color='red')
+        ax.fill_between(x, no_blasto_mean - no_blasto_std, no_blasto_mean + no_blasto_std, color='red', alpha=0.2)
+
+        ax.set_title(title)
+        ax.set_xlabel('Time Steps')
+        ax.set_ylabel('Optical Flow Metric')
+        ax.legend()
+        ax.grid(True)
+
+        return fig, ax
     
     # Caricamento e creazione dei grafici per train, validation e test
-    output_folder = os.path.join(output_base, "examples")
-    os.makedirs(output_folder, exist_ok=True)
-        
-    for dataset_name, data in zip(["Train", "Validation", "Test"], [train_data, val_data, test_data]):
-        blasto, no_blasto = separate_data(df_input=data)
-        filename = f"mean_{dataset_name.lower()}_data_{temporal_data_type}_{str(days_to_consider)}Days_seed{seed}.jpg"
-        create_plot(blasto=blasto, no_blasto=no_blasto, title=f"Media dei valori temporali - {dataset_name} Set - {str(days_to_consider)} Days", filename=filename, output_folder=output_folder)
+    if output_base is None:
+        for dataset_name, data in zip(["Train", "Validation", "Test"], [train_data, val_data, test_data]):
+            blasto, no_blasto = separate_data(df_input=data)
+            filename = f"mean_{dataset_name.lower()}_data_{temporal_data_type}_{str(days_to_consider)}Days_seed{seed}.png"
+            fig, ax = create_plot(blasto=blasto, no_blasto=no_blasto, 
+                              title=f"Media dei valori temporali - {dataset_name} Set - {str(days_to_consider)} Days")
+            plt.show()
+    else:
+        output_folder = os.path.join(output_base, "examples")
+        os.makedirs(output_folder, exist_ok=True)
+        for dataset_name, data in zip(["Train", "Validation", "Test"], [train_data, val_data, test_data]):
+            blasto, no_blasto = separate_data(df_input=data)
+            filename = f"mean_{dataset_name.lower()}_data_{temporal_data_type}_{str(days_to_consider)}Days_seed{seed}.png"
+            fig, ax = create_plot(blasto=blasto, no_blasto=no_blasto, 
+                              title=f"Media dei valori temporali - {dataset_name} Set - {str(days_to_consider)} Days")
+            fig.savefig(os.path.join(output_base, filename))
+            plt.close(fig)
     
-    print(f"Grafici salvati nella cartella '{output_base}' con seed {seed} e tipo dati '{temporal_data_type}'")
+        print(f"Plots saved in the folder '{output_base}' with seed {seed} and temporal data type '{temporal_data_type}'")
+
 
 
 def create_and_save_stratified_plots_mean_temp_data(train_merged, val_merged, test_merged, output_base, seed, temporal_data_type, days_to_consider, shift_x=0):

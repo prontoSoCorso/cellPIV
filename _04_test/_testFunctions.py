@@ -20,7 +20,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 # Import project modules
-from config import Config_03_train as conf
+from config import Config_03_train as conf_train
 from _03_train._c_ConvTranUtils import CustomDataset
 from _03_train._b_LSTMFCN import TimeSeriesClassifier
 from _99_ConvTranModel.model import model_factory
@@ -116,7 +116,7 @@ def instantiate_LSTMFCN(checkpoint, device):
 
 # Funzione per importare dati di test
 def load_test_data(days_val):
-    train_path, val_path, test_path = conf.get_paths(days_val)
+    train_path, val_path, test_path = conf_train.get_paths(days_val)
     if not os.path.exists(test_path):
         print(f"Test file not found: {test_path}")
         return None, None
@@ -209,10 +209,10 @@ def load_model_by_type(model_type: str, days: int, base_models_path: str, device
         # Restore parameters to config
         saved_config = conv_checkpoint['config']
         for key, value in saved_config.items():
-            setattr(conf, key, value)
+            setattr(conf_train, key, value)
 
         # Rebuild model with original config and save best threshold
-        model = model_factory(conf).to(device)
+        model = model_factory(conf_train).to(device)
         model.load_state_dict(conv_checkpoint['model_state_dict'])
         return {
             "model": model,

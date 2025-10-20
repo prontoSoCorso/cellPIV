@@ -19,7 +19,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 # Import config and model definitions
-from config import Config_03_train as conf
+from config import Config_03_train as conf_train
 from _03_train._b_LSTMFCN import TimeSeriesClassifier
 from _03_train._c_ConvTranUtils import CustomDataset
 import _04_test._testFunctions as _testFunctions
@@ -29,15 +29,11 @@ import _utils_._utils as utils
 # Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def _sanitize_np(X):
-    X = np.asarray(X, dtype=np.float32)
-    return np.nan_to_num(X, nan=0.0, posinf=1e6, neginf=-1e6)
-
 def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
              days=[1, 3, 5],
              models = ['ROCKET', 'LSTMFCN', 'ConvTran'],
-             base_models_path=conf.output_model_base_dir,
-             method_optical_flow=conf.method_optical_flow):
+             base_models_path=conf_train.output_model_base_dir,
+             method_optical_flow=conf_train.method_optical_flow):
     
     # Create base output directory
     base_path_opt_flow = os.path.join(base_path, method_optical_flow)
@@ -56,14 +52,14 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         
         # Load test data
         # Prepara i dati (lettura e organizzazione esterna)
-        _, _, test_path = conf.get_paths(day)
+        _, _, test_path = conf_train.get_paths(day)
         df_test = utils.load_data(test_path) if True else None  # se vuoi disattivare il test, metti False
         data_dict = utils.build_data_dict(df_test=df_test)
         _, _, _, _, X_test, y_test = utils._check_data_dict(data=data_dict, 
                                                            require_test=True,
                                                            only_check_test=True)
         # Sanitize input
-        X = _sanitize_np(X_test)        
+        X = utils._sanitize_np(X_test)        
         # Ground truth as 1D numpy array
         y_true = np.asarray(y_test).astype(int).ravel()
 
@@ -120,7 +116,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
                 checkpoint = torch.load(model_path, map_location=device, weights_only=False)
 
                 # Restore config from checkpoint
-                conf_local = copy.deepcopy(conf)
+                conf_local = copy.deepcopy(conf_train)
                 saved_config = checkpoint['config']
                 for key, value in saved_config.items():
                     setattr(conf_local, key, value)

@@ -53,7 +53,7 @@ class utils:
     framePerDay                 = framePerHour*24
 
     def num_frames_by_days(num_days):
-        tot_frames = utils.framePerDay*num_days
+        tot_frames = utils.framePerDay*num_days+1
         return tot_frames
 
     num_classes                 = 2
@@ -190,6 +190,9 @@ class Config_02c_splitAndNormalization:
     # Paths file completo
     csv_file_path = os.path.join(user_paths.dataset, method_optical_flow, "FinalDataset.csv")
 
+    # output dir for umap/tsne
+    visual_output_dir_base = os.path.join(PROJECT_ROOT, "_02c_splitAndnormalization", method_optical_flow, "dim_reduction_files")
+    
     # Base path generico per i file normalizzati
     @staticmethod
     def get_normalized_base_path(days_to_consider, method_optical_flow=method_optical_flow):
@@ -238,7 +241,6 @@ class Config_03_train:
     output_model_base_dir = os.path.join(PROJECT_ROOT, "_04_test", "best_models", method_optical_flow)
     save_plots = True
     output_dir_plots = os.path.join(PROJECT_ROOT, "_03_train", "test_results_after_training", method_optical_flow)
-    path_original_excel = user_paths.path_original_excel
 
     @staticmethod
     def seed_everything(seed):
@@ -352,3 +354,40 @@ class Config_03_train_with_optimization(Config_03_train):
     convtran_patience_options   = 50
     convtran_epochs_options     = 150
     optuna_n_trials_ConvTran    = 300
+
+
+
+class Config_04_test:
+    method_optical_flow = "Farneback"
+    base_model_path = Config_03_train.output_model_base_dir  #os.path.join(PROJECT_ROOT, "_04_test", "best_models", method_optical_flow)
+    base_output_stratified_path = os.path.join(PROJECT_ROOT, "_04_test", "stratified_test_results", method_optical_flow)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    num_classes = utils.num_classes
+    img_size = utils.img_size
+    seed = utils.seed
+    num_labels = 2
+
+    @staticmethod
+    def seed_everything(seed):
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+
+    # Metodo per ottenere i percorsi in base ai giorni selezionati
+    @staticmethod
+    def get_paths(days_to_consider):
+        """
+        Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
+
+        :param days_to_consider: Numero di giorni da considerare (1, 3, 5, o 7).
+        :return: Tuple con i percorsi di train, validation e test.
+        """
+        base_path = Config_02c_splitAndNormalization.get_normalized_base_path(days_to_consider=days_to_consider, 
+                                                                      method_optical_flow=Config_04_test.method_optical_flow)
+        train_path = f"{base_path}_train.csv"
+        val_path = f"{base_path}_val.csv"
+        test_path = f"{base_path}_test.csv"
+        return train_path, val_path, test_path

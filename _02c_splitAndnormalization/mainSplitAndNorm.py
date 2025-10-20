@@ -79,7 +79,9 @@ def main(days_to_consider=conf.days_to_consider,
     for day in days_to_consider:
         # Carica i dati
         max_frames = utils.num_frames_by_days(day)+1 # +1 because the first frame is t0
-        data = load_data(csv_file_path=csv_file_path, initial_frames_to_cut=initial_frames_to_cut, max_frames=max_frames)
+        data = load_data(csv_file_path=csv_file_path, 
+                         initial_frames_to_cut=initial_frames_to_cut, 
+                         max_frames=max_frames)
 
         # Split stratificato
         train_data, val_data, test_data = stratified_split(data, train_size=train_size, seed=seed)
@@ -95,7 +97,8 @@ def main(days_to_consider=conf.days_to_consider,
                 clip=True
                 )
         else:
-            train_data_norm, val_data_norm, test_data_norm = normalize_data(train_data, val_data, test_data, inf_quantile=inf_quantile, sup_quantile=sup_quantile)
+            train_data_norm, val_data_norm, test_data_norm = normalize_data(train_data, val_data, test_data, 
+                                                                            inf_quantile=inf_quantile, sup_quantile=sup_quantile)
 
         # Salva i dataset normalizzati
         base_path = conf.get_normalized_base_path(day)
@@ -111,7 +114,7 @@ def main(days_to_consider=conf.days_to_consider,
 
             if embedding_type.lower()=="umap":
                 print("Computing UMAP...")
-                compute_UMAP_with_plotly(csv_path=train_path, days_to_consider=day, max_frames=max_frames, output_path_base=output_path_base)
+                compute_UMAP_with_plotly(data_csv_path=train_path, days_to_consider=day, max_frames=max_frames, output_path_base=output_path_base)
             elif embedding_type.lower()=="tsne":
                 print("Computing tSNE...")
                 compute_tSNE(csv_path=train_path, days_to_consider=day, max_frames=max_frames, output_path_base=output_path_base)
@@ -142,9 +145,12 @@ def main(days_to_consider=conf.days_to_consider,
             )
 
         if mean_data_visualization_stratified:
-            train_merged = import_original_db_and_merge_data(data=train_data, original_db_path=original_db_path)
-            val_merged = import_original_db_and_merge_data(data=val_data, original_db_path=original_db_path)
-            test_merged = import_original_db_and_merge_data(data=test_data, original_db_path=original_db_path)
+            train_merged    = import_original_db_and_merge_data(data=train_data, 
+                                                                original_db_path=original_db_path)
+            val_merged      = import_original_db_and_merge_data(data=val_data, 
+                                                                original_db_path=original_db_path)
+            test_merged     = import_original_db_and_merge_data(data=test_data, 
+                                                                original_db_path=original_db_path)
 
             # Create stratified plots
             create_and_save_stratified_plots_mean_temp_data(

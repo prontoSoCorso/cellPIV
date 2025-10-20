@@ -23,7 +23,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
 sys.path.append(parent_dir)
 
 # Import project modules
-from config import Config_03_train as conf
+from config import Config_03_train as conf_train
 from _03_train._c_ConvTranUtils import CustomDataset
 import _04_test._testFunctions as _testFunctions
 import _utils_._utils as utils
@@ -41,7 +41,7 @@ def load_and_prepare_test_data(model_type, days_val):
         X_tensor = torch.tensor(X, dtype=torch.float32)
         y_tensor = torch.tensor(y, dtype=torch.long)
         dataset = TensorDataset(X_tensor, y_tensor)
-        loader = DataLoader(dataset, batch_size=conf.batch_size_FCN, shuffle=False)
+        loader = DataLoader(dataset, batch_size=conf_train.batch_size_FCN, shuffle=False)
         return loader  # loader will be used for evaluation
     else:
         return (X, y)
@@ -119,7 +119,7 @@ def test_model_wrapper(model_type, model_info, test_data, device):
         X, y = test_data
         # Prepare data using CustomDataset
         dataset = CustomDataset(X.reshape(X.shape[0], 1, -1), y)
-        loader = DataLoader(dataset, batch_size=conf.batch_size_convtran, shuffle=False)
+        loader = DataLoader(dataset, batch_size=conf_train.batch_size_convtran, shuffle=False)
         model = model_info["model"]
         model.eval()
         all_pred, all_prob = [], []

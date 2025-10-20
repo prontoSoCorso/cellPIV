@@ -9,111 +9,16 @@ import plotly.graph_objects as go
 import dash
 from dash import dcc, html, Input, Output
 
-def compute_UMAP(csv_path, days_to_consider, max_frames, output_path_base):
-    # Caricamento del dataset
-    data = pd.read_csv(csv_path)
+from _utils_ import _utils as utils
 
-    # Seleziono solo le colonne che contengono "value_" e poi filtro fino al numero di giorni da considerare
-    features = data.filter(like="value_")
-    features = features.iloc[:, :max_frames]
-    labels = data["BLASTO NY"]
-    dish_well = data.get("dish_well", data.index.astype(str))
-
-    # Standardizzazione delle feature
-    scaler = StandardScaler()
-    features_scaled = scaler.fit_transform(features)
-
-    # Riduzione delle dimensioni con UMAP
-    umap_model = UMAP(n_components=2, n_jobs=-1)  # Usa tutti i core disponibili
-    features_2d = umap_model.fit_transform(features_scaled)
-
-    # Creazione del DataFrame per la visualizzazione
-    umap_df = pd.DataFrame(features_2d, columns=["Dim1", "Dim2"])
-    umap_df["Label"] = labels
-    umap_df["ID"] = dish_well
-
-    # Plot setup
-    plt.figure(figsize=(10, 8))
-    colors = {0: "red", 1: "blue"}
-    scatters = []
-    
-    # Create scatter plots and store references
-    for label, color in colors.items():
-        subset = umap_df[umap_df["Label"] == label]
-        sc = plt.scatter(subset["Dim1"], subset["Dim2"], 
-                        c=color, label=f"Classe {label}", alpha=0.7)
-        scatters.append((sc, subset["ID"].tolist()))  # Store scatter and IDs
-
-    # Add interactive hover functionality
-    for sc, ids_scatter in scatters:
-        cursor = mplcursors.cursor(sc)
-        cursor.connect("add", lambda sel, ids=ids_scatter: sel.annotation.set_text(f"ID: {ids[sel.index]}"))
-
-    plt.title(f"Visualizzazione UMAP, {days_to_consider} Days")
-    plt.xlabel("Dimensione 1")
-    plt.ylabel("Dimensione 2")
-    plt.legend()
-    plt.grid(True)
-
-    # Salva immagine
-    output_path = os.path.join(output_path_base, f"umap_{days_to_consider}Days.png")
-    plt.savefig(output_path)
-    print(f"Grafico salvato in: {output_path}")
-
-    # Mostra grafico
-    plt.show()  # Mostra il grafico interattivo
-
-
-
-def compute_tSNE(csv_path, days_to_consider, max_frames, output_path_base):
-    # Caricamento del dataset
-    data = pd.read_csv(csv_path)
-
-    # Seleziono solo le colonne che contengono "value_" e poi filtro fino al numero di giorni da considerare
-    features = data.filter(like="value_")
-    features = features.iloc[:, :max_frames]
-    labels = data["BLASTO NY"]
-
-    # Riduzione delle dimensioni con t-SNE
-    tsne = TSNE(n_components=2, random_state=42, max_iter=300)  # max_iter per sklearn 1.5+
-    features_2d = tsne.fit_transform(features)
-
-    # Creazione del DataFrame per la visualizzazione
-    tsne_df = pd.DataFrame(features_2d, columns=["Dim1", "Dim2"])
-    tsne_df["Label"] = labels
-
-    # Visualizzazione
-    plt.figure(figsize=(10, 8))
-
-    # Colori per le classi
-    colors = {0: "red", 1: "blue"}
-    for label, color in colors.items():
-        subset = tsne_df[tsne_df["Label"] == label]
-        plt.scatter(subset["Dim1"], subset["Dim2"], c=color, label=f"Classe {label}", alpha=0.7)
-
-    plt.title(f"Visualizzazione t-SNE, {days_to_consider} Days")
-    plt.xlabel("Dimensione 1")
-    plt.ylabel("Dimensione 2")
-    plt.legend()
-    plt.grid(True)
-
-    # Salva immagine
-    output_path = os.path.join(output_path_base, f"tSNE_{days_to_consider}Days.png")
-    plt.savefig(output_path)
-    print(f"Grafico salvato in: {output_path}")
-
-    # Mostra grafico
-    plt.show()  # Mostra il grafico interattivo
-
-
-
-
-def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path_base, port=8050):
+def compute_UMAP_with_plotly(data_csv_path, days_to_consider, 
+                             output_path_base, inline_show=False, 
+                             max_frames=None, port=8050):
     """
     Computes a 2D UMAP projection of time series features and visualizes it using Plotly.
 
     Parameters:
-    - csv_path (str): Path to the CSV file containing time series features and metadata.
+    - data_csv_path (str): Path to the CSV file containing time series features and metadata.
     - days_to_consider (int): Number of days used to define the temporal window for analysis (used in the plot title).
     - max_frames (int): Maximum number of time steps (frames) to consider from the temporal features.
     - output_path_base (str): If non-empty, the static UMAP plot is saved as a PNG file in this path.
@@ -126,10 +31,10 @@ def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path
     - If output_path_base is not specified, launches an interactive Dash app allowing
       filtering by categorical metadata with dynamic dropdowns and live plot updates.
     """
-    data = pd.read_csv(csv_path)
+    data = pd.read_csv(data_csv_path)
 
-    all_time_features = data.filter(like="value_")
-    features = all_time_features.iloc[:, :max_frames]
+    all_time_features = utils.detect_time_columns(data)
+    features = data[all_time_features] if max_frames is None else data[all_time_features[:max_frames]]
     labels = data["BLASTO NY"]
 
     scaler = StandardScaler()
@@ -143,7 +48,7 @@ def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path
     umap_df["Label"] = labels.map({0: "No Blasto", 1: "Blasto"})  # Convert to categorical label
 
     # Automatically identify categorical features (excluding time features and BLASTO NY)
-    excluded_columns = all_time_features.columns.union(["BLASTO NY"])  # Exclude dish_well
+    excluded_columns = all_time_features + ["BLASTO NY"]
     categorical_features = [col for col in data.columns 
                            if col not in excluded_columns] # Limit to features with <50 unique values
     
@@ -201,10 +106,13 @@ def compute_UMAP_with_plotly(csv_path, days_to_consider, max_frames, output_path
     )
 
     # Se output_path_base non è vuoto, salva la figura come immagine PNG e la mostra
-    if output_path_base:
+    if inline_show and not output_path_base:
+        base_fig.show()
+    elif output_path_base:
+        os.makedirs(output_path_base, exist_ok=True)
         output_file = os.path.join(output_path_base, f"umap_{days_to_consider}Days.png")
         base_fig.write_image(output_file)
-        print(f"Grafico interattivo salvato in: {output_file}")
+        print(f"Grafico salvato in: {output_file}")
         base_fig.show()
     else:
         # Inizializza l'app Dash
@@ -303,7 +211,7 @@ if __name__ == "__main__":
     csv_path = f"/home/phd2/Scrivania/CorsoRepo/cellPIV/datasets/{method_optical_flow}/FinalDataset.csv"
     port = 8050
     
-    compute_UMAP_with_plotly(csv_path=csv_path, 
+    compute_UMAP_with_plotly(data_csv_path=csv_path, 
                              days_to_consider=day, 
                              max_frames=max_frames, 
                              output_path_base="",

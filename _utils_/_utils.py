@@ -102,25 +102,9 @@ def _check_data_dict(data: dict, require_test: bool, only_check_test=False):
     return X_train, y_train, X_val, y_val, X_test, y_test
 
 
-def _check_test_data(data: dict):
-    require_test = "X_test" in data and "y_test" in data
-    if require_test:
-        if data["X_test"] is None or data["y_test"] is None:
-            raise ValueError("If 'X_test' or 'y_test' are present, they must not be None.")
-    else:
-        raise ValueError("Keys 'X_test' and 'y_test' must be present in data dict to perform testing.")
-        
-    # Check dimensionalità (N, 1, T)
-    if require_test:
-        X_test = data["X_test"]
-        y_test = data["y_test"]
-        if X_test.ndim != 3 or X_test.shape[1] != 1:
-            raise ValueError(f"X_test must have shape (N, 1, T). Found: {X_test.shape}")
-        if y_test.ndim != 1:
-            raise ValueError(f"y_test must be 1D. Found: {y_test.shape}")
-    
-    return require_test
-
+def _sanitize_np(X):
+    X = np.asarray(X, dtype=np.float32)
+    return np.nan_to_num(X, nan=0.0, posinf=1e6, neginf=-1e6)
 
 # Configure logging
 def config_logging(log_dir, log_filename):

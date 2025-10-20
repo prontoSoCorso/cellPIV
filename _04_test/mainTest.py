@@ -9,7 +9,7 @@ while not os.path.basename(parent_dir) == "cellPIV":
     parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
-from config import Config_03_train as conf
+from config import Config_03_train as conf_train
 from config import user_paths
 from _04_test._00_test_metrics_roc_umap_barPlots_cm import test_all
 from _04_test._01_mcNemarTest import compare_with_McNemar
@@ -24,10 +24,9 @@ def main(do_test_all=False,
          models = ['ROCKET', 'LSTMFCN', 'ConvTran'],
          days_for_analysis = [],
          days_mcNemar = [],
-         base_models_path = conf.output_model_base_dir,
+         base_models_path = conf_train.output_model_base_dir,
          base_test_csv_path = user_paths.dataset,
-         path_original_excel = conf.path_original_excel,
-         method_optical_flow = conf.method_optical_flow
+         method_optical_flow = conf_train.method_optical_flow
          ):
     
     # Test different models for different days
@@ -85,8 +84,7 @@ if __name__ == "__main__":
          models = ['ROCKET', 'LSTMFCN', 'ConvTran'],
          days_for_analysis = [1,3],
          days_mcNemar = [1,3],
-         base_models_path = conf.output_model_base_dir,
+         base_models_path = conf_train.output_model_base_dir,
          base_test_csv_path = user_paths.dataset,
-         path_original_excel = conf.path_original_excel,
-         method_optical_flow = conf.method_optical_flow)
+         method_optical_flow = conf_train.method_optical_flow)
     print("Execution time: ", str(time.time()-start_time), "seconds")

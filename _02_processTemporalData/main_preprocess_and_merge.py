@@ -156,20 +156,6 @@ def resample_to_grid(values, original_times, grid_hours):
     return out
 
 
-def compute_percentile_normalization(arr, p_low=1.0, p_high=99.0, clip=True):
-    a = np.asarray(arr, dtype=float)
-    if np.all(np.isnan(a)):
-        return a, np.nan, np.nan
-    p1 = np.nanpercentile(a, p_low)
-    p99 = np.nanpercentile(a, p_high)
-    denom = (p99 - p1)
-    if denom == 0 or np.isnan(denom):
-        denom = 1.0
-    norm = (a - p1) / denom
-    if clip:
-        norm = np.clip(norm, 0.0, 1.0)
-    return norm, p1, p99
-
 # ---------------- main pipeline ----------------
 
 def main():
