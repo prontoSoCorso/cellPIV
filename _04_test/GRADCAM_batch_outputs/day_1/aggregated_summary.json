@@ -1,18 +1,18 @@
 {
   "LSTMFCN": {
     "0": {
-      "n_samples": 19
+      "n_samples": 762
     },
     "1": {
-      "n_samples": 19
+      "n_samples": 762
     }
   },
   "ConvTran": {
     "0": {
-      "n_samples": 19
+      "n_samples": 762
     },
     "1": {
-      "n_samples": 19
+      "n_samples": 762
     }
   }
 }

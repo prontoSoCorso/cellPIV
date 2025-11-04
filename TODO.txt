@@ -1,9 +1,9 @@
 1. Sistemare GRADCAM per ConvTran   ✔
 
-2. Migliorare visualizzazione mappe medie
-    - stesso asse y
-    - conversione da num_frame a ore totali
-    - aggiungere classe0 e classe1 come no_blasto e no_blasto
+2. Migliorare visualizzazione mappe medie  ✔
+    - stesso asse y ✔ (normalized)
+    - conversione da num_frame a ore totali ✔
+    - aggiungere classe0 e classe1 come no_blasto e no_blasto ✔
 
 3. Sistemare analisi stratificata
 
