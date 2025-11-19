@@ -21,8 +21,6 @@ import os
 import sys
 import copy
 import json
-import shutil
-import tempfile
 from collections import defaultdict
 
 import numpy as np
@@ -639,3 +637,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

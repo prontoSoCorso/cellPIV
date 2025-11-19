@@ -195,14 +195,17 @@ class Config_02c_splitAndNormalization:
     
     # Base path generico per i file normalizzati
     @staticmethod
-    def get_normalized_base_path(days_to_consider, method_optical_flow=method_optical_flow):
-        subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow, "subsets")
+    def get_normalized_base_path(days_to_consider, method_optical_flow=method_optical_flow, small_subsets=False):
+        if small_subsets:
+            subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow, "small_subsets")
+        else:
+            subsets_base_path = os.path.join(user_paths.dataset, method_optical_flow, "subsets")
         return os.path.join(subsets_base_path, 
                             f"Normalized_{Config_02c_splitAndNormalization.temporalDataType}_{days_to_consider}Days")
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @staticmethod
-    def get_paths(days_to_consider):
+    def get_paths(days_to_consider, small_subsets=False):
         """
         Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
 
@@ -210,7 +213,8 @@ class Config_02c_splitAndNormalization:
         :return: Tuple con i percorsi di train, validation e test.
         """
         base_path = Config_02c_splitAndNormalization.get_normalized_base_path(days_to_consider=days_to_consider, 
-                                                                      method_optical_flow=Config_02c_splitAndNormalization.method_optical_flow)
+                                                                      method_optical_flow=Config_02c_splitAndNormalization.method_optical_flow,
+                                                                      small_subsets=small_subsets)
         train_path = f"{base_path}_train.csv"
         val_path = f"{base_path}_val.csv"
         test_path = f"{base_path}_test.csv"
@@ -253,7 +257,7 @@ class Config_03_train:
 
     # Metodo per ottenere i percorsi in base ai giorni selezionati
     @staticmethod
-    def get_paths(days_to_consider):
+    def get_paths(days_to_consider, small_subsets=False):
         """
         Ottiene i percorsi di train, validation e test in base al numero di giorni selezionati.
 
@@ -261,7 +265,8 @@ class Config_03_train:
         :return: Tuple con i percorsi di train, validation e test.
         """
         base_path = Config_02c_splitAndNormalization.get_normalized_base_path(days_to_consider=days_to_consider, 
-                                                                      method_optical_flow=Config_03_train.method_optical_flow)
+                                                                      method_optical_flow=Config_03_train.method_optical_flow,
+                                                                      small_subsets=small_subsets)
         train_path = f"{base_path}_train.csv"
         val_path = f"{base_path}_val.csv"
         test_path = f"{base_path}_test.csv"

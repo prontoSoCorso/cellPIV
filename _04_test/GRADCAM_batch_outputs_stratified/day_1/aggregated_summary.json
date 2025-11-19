@@ -1,0 +1,50 @@
+{
+  "LSTMFCN": {
+    "0": {
+      "all": {
+        "n_samples": 762
+      },
+      "right": {
+        "n_samples": 157
+      },
+      "wrong": {
+        "n_samples": 93
+      }
+    },
+    "1": {
+      "all": {
+        "n_samples": 762
+      },
+      "right": {
+        "n_samples": 287
+      },
+      "wrong": {
+        "n_samples": 225
+      }
+    }
+  },
+  "ConvTran": {
+    "0": {
+      "all": {
+        "n_samples": 762
+      },
+      "right": {
+        "n_samples": 188
+      },
+      "wrong": {
+        "n_samples": 120
+      }
+    },
+    "1": {
+      "all": {
+        "n_samples": 762
+      },
+      "right": {
+        "n_samples": 260
+      },
+      "wrong": {
+        "n_samples": 194
+      }
+    }
+  }
+}
