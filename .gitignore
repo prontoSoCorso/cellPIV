@@ -14,3 +14,6 @@ __pycache__/
 # Environment variables
 # This file is used to store environment variables that should not be committed to the repository.
 .env
+
+# don't add single gradcam maps
+*/GRADCAM_single_video_output

@@ -459,15 +459,73 @@ def process_day(day):
             thresh = 0.5
         pred_labels = (pick >= thresh).astype(int)
 
-        # Build CSV summary of predictions (dish_well,true_label,pred_label,prob)
+        # -------------------- Write summary CSV with top-5 peak timings per video --------------------
+        import csv
+
+        def compute_topk_peaks_for_sample(idx, per_class_per_sample, top_k=5, window_frac=0.02):
+            """
+            Return list of up to top_k peak times (strings in hours, e.g. '0.25') for sample index `idx`.
+            Uses all CAM arrays available for the sample across both classes.
+            """
+            # collect all cam arrays available for that sample (both classes)
+            arrs = []
+            arrs.extend(per_class_per_sample.get('0', [])[idx] if idx < len(per_class_per_sample.get('0', [])) else [])
+            arrs.extend(per_class_per_sample.get('1', [])[idx] if idx < len(per_class_per_sample.get('1', [])) else [])
+            if not arrs:
+                return [''] * top_k
+
+            avg, stack = align_and_average(arrs)
+            if avg is None:
+                return [''] * top_k
+
+            importance = np.asarray(avg).copy()
+            # local normalization for peak selection
+            if np.ptp(importance) > 1e-9:
+                importance = (importance - importance.min()) / (importance.max() - importance.min())
+
+            T = len(importance)
+            if T == 0:
+                return [''] * top_k
+
+            window_frames = max(1, int(round(window_frac * T)))
+            inds_sorted = np.argsort(importance)[::-1]
+
+            selected = []
+            for ind in inds_sorted:
+                if len(selected) >= top_k:
+                    break
+                ind = int(ind)
+                if any(abs(ind - s) <= window_frames for s in selected):
+                    continue
+                selected.append(ind)
+
+            # convert indices to hours and format
+            peak_hours = [f"{(idx_peak * ACQUISITION_STEP_HOURS):.2f}" for idx_peak in selected]
+            # pad if fewer than top_k peaks
+            while len(peak_hours) < top_k:
+                peak_hours.append('')
+            return peak_hours
+
+        # prepare CSV path
         summary_csv_path = os.path.join(model_out_dir, f"summary_prediction_day{day}_{model_name}.csv")
+        peak_cols = [f"peak{i+1}_h" for i in range(5)]
         with open(summary_csv_path, "w", newline="") as csvf:
             writer = csv.writer(csvf)
-            writer.writerow(["dish_well", "true_label", "pred_label", "prob_class1"])
+            # header: add peak columns
+            writer.writerow(["dish_well", "true_label", "pred_label", "prob_class1"] + peak_cols)
+
             for i in range(N_samples):
                 dish = data_names[i] if i < len(data_names) else f"idx_{i}"
-                writer.writerow([dish, int(y_true[i]), int(pred_labels[i]), float(pick[i])])
-        print("Wrote prediction summary CSV:", summary_csv_path)
+                true_lbl = int(y_true[i])
+                pred_lbl = int(pred_labels[i])
+                prob = float(pick[i]) if (pick is not None and i < len(pick)) else float('nan')
+                # compute top5 peaks for this sample
+                peaks = compute_topk_peaks_for_sample(i, per_class_per_sample, top_k=5, window_frac=0.02)
+                writer.writerow([dish, true_lbl, pred_lbl, prob] + peaks)
+
+        print("Wrote prediction summary CSV with top-5 peaks:", summary_csv_path)
+        # --------------------------------------------------------------------------------------------
+
 
         # Prepare per-class aggregated lists: all / right / wrong
         def flatten_for_indices(per_sample_lists, indices):
@@ -687,7 +745,7 @@ def process_day(day):
                     save_array_and_plot(weighted, outprefix, title=f"{model_name} {expl_key} prob-weighted (day {day})")
                     print("Saved prob-weighted map:", outprefix + ".npy/.png")
 
-    # --- robust summary writer (sostituire il blocco precedente) ---
+    # --- robust summary writer ---
     summary = {}
     for mname, exps in aggregated_maps.items():
         summary[mname] = {}

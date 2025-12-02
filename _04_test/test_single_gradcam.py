@@ -32,8 +32,8 @@ from signal_grad_cam import TorchCamBuilder
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ---------------- User config ----------------
-DAY = 1                                      # which day subset to use (1,3,...)
-SPECIFIC_VIDEO = "D2013.12.02_S0891_I141_2"  # dish_well id to analyze
+DAYS = [5]                                      # which day subset to use (1,3,...)
+SPECIFIC_VIDEOS = ["D2014.09.25_S1120_I141_5"]  # dish_well id to analyze
 MODELS_TO_RUN = ['LSTMFCN', 'ConvTran']      # subset of models to run
 OUTPUT_BASE = os.path.join(current_dir, "GRADCAM_single_video_output")
 os.makedirs(OUTPUT_BASE, exist_ok=True)
@@ -259,7 +259,9 @@ def run_single_video(day, specific_video):
     return
 
 def main():
-    run_single_video(DAY, SPECIFIC_VIDEO)
+    for DAY in DAYS:
+        for SPECIFIC_VIDEO in SPECIFIC_VIDEOS:
+            run_single_video(DAY, SPECIFIC_VIDEO)
 
 if __name__ == "__main__":
     main()

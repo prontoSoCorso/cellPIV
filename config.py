@@ -135,9 +135,9 @@ class Config_01_OpticalFlow:
     if single_video:
         pyr_scale        = 0.5
         levels           = 4
-        winSize_Farneback= 21                               # più grande
-        iterations       = 7                                # più iterazioni
-        poly_n           = 7                                # vicinato maggiore
+        winSize_Farneback= 25                               # più grande
+        iterations       = 3                                # più iterazioni
+        poly_n           = 5                                # vicinato maggiore
         poly_sigma       = 1.2                              # filtro gaussiano più largo
         flags            = cv2.OPTFLOW_FARNEBACK_GAUSSIAN
 
