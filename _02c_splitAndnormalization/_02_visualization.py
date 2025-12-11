@@ -146,7 +146,7 @@ def create_and_save_plots_mean_temp_data(train_data, val_data, test_data, seed, 
             filename = f"mean_{dataset_name.lower()}_data_{temporal_data_type}_{str(days_to_consider)}Days_seed{seed}.png"
             fig, ax = create_plot(blasto=blasto, no_blasto=no_blasto, 
                               title=f"Media dei valori temporali - {dataset_name} Set - {str(days_to_consider)} Days")
-            fig.savefig(os.path.join(output_base, filename))
+            fig.savefig(os.path.join(output_base, filename), dpi=500, bbox_inches='tight')
             plt.close(fig)
     
         print(f"Plots saved in the folder '{output_base}' with seed {seed} and temporal data type '{temporal_data_type}'")

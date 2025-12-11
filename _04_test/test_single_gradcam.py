@@ -94,7 +94,10 @@ def ensure_list_of_samples(samples, use_conv2d):
     return [normalize_sample_for_model(s, use_conv2d=use_conv2d) for s in samples]
 
 # ---------- Main ----------
-def run_single_video(day, specific_video):
+def run_single_video(day, specific_video, 
+                     output_base=OUTPUT_BASE, models_to_run=MODELS_TO_RUN, 
+                     use_day_in_result_path=True, use_model_in_result_path=True, create_dir_with_data_name=True):
+    
     print(f"\n=== Single video Grad-CAM: day {day} — {specific_video} ===")
 
     # load test set
@@ -115,12 +118,18 @@ def run_single_video(day, specific_video):
     data_label = int(y[idx])
     data_name = [specific_video]
 
-    out_video_dir = os.path.join(OUTPUT_BASE, f"day_{day}")
+    if use_day_in_result_path:
+        out_video_dir = os.path.join(output_base, f"day_{day}")
+    else:
+        out_video_dir = output_base
     os.makedirs(out_video_dir, exist_ok=True)
 
-    for model_name in MODELS_TO_RUN:
+    for model_name in models_to_run:
         print(f"\n--- Model: {model_name} ---")
-        model_out_dir = os.path.join(out_video_dir, model_name)
+        if use_model_in_result_path:
+            model_out_dir = os.path.join(out_video_dir, model_name)
+        else:
+            model_out_dir = out_video_dir
         os.makedirs(model_out_dir, exist_ok=True)
 
         # load model
@@ -249,7 +258,8 @@ def run_single_video(day, specific_video):
                 dt=ACQUISITION_STEP_HOURS * 3600,  # Convert hours to seconds for compatibility
                 line_width=0.6,
                 marker_width=40,
-                axes_names=("Time (hours)", "Signal")  # Updated axis label
+                axes_names=("Time (hours)", "Signal"),  # Updated axis label
+                create_dir_with_data_name=create_dir_with_data_name      # Avoid extra dir level
             )
             print("single_channel_output_display saved outputs to:", model_out_dir)
         except Exception as e:

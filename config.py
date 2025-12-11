@@ -122,6 +122,16 @@ class Config_01_OpticalFlow:
     # Farneback parameters
 
     # General analysis
+    """
+    FINAL PARAMS: 
+    pyr_scale        = 0.5
+    levels           = 4
+    winSize_Farneback= 25                               # più grande
+    iterations       = 3                                # più iterazioni
+    poly_n           = 5                                # vicinato maggiore
+    poly_sigma       = 1.2                              # filtro gaussiano più largo
+    flags            = 0
+    """
     pyr_scale = 0.5
     levels = 4
     winSize_Farneback = 25
@@ -145,7 +155,7 @@ class Config_01_OpticalFlow:
     if method_optical_flow == "Farneback":
         output_path_optical_flow_images = f"{base_out_example}_{str(winSize_Farneback)}_{str(levels)}_{str(pyr_scale)}_{str(iterations)}_{str(poly_n)}_{str(poly_sigma)}"
     elif method_optical_flow == "LucasKanade":
-                output_path_optical_flow_images = f"{base_out_example}_{str(winSize_LK)}_{str(maxLevelPyramid)}_{str(maxCorners)}"
+        output_path_optical_flow_images = f"{base_out_example}_{str(winSize_LK)}_{str(maxLevelPyramid)}_{str(maxCorners)}"
     else:
         raise SystemExit("\n===== Scegliere un metodo di flusso ottico valido nel config =====\n")
 

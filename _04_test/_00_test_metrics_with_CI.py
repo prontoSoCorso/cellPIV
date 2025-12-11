@@ -357,6 +357,46 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         plt.savefig(os.path.join(base_path_opt_flow, f"day {day}", f'summary_metrics_{day}Days.png'))
         plt.close()
 
+    # ---------------------------
+    # FIXED: Metrics Summary Overview
+    # ---------------------------
+    # Create a list to store rows (replacing the deprecated .append method)
+    summary_rows = []
+    
+    for day in days:
+        for model in models:
+            df_subset = df_boot_summary[(df_boot_summary['Day'] == day) & (df_boot_summary['Model'] == model)]
+            
+            if df_subset.empty:
+                continue
+
+            # Check if rows exist before accessing
+            auc_rows = df_subset[df_subset['Metric'] == 'roc_auc']
+            f1_rows = df_subset[df_subset['Metric'] == 'f1']
+            
+            if not auc_rows.empty and not f1_rows.empty:
+                auc_row = auc_rows.iloc[0]
+                f1_row = f1_rows.iloc[0]
+                
+                # Append dictionary to list
+                summary_rows.append({
+                    "classifier": model,
+                    "hours": day * 24,
+                    "auc_mean": auc_row['Value'],
+                    "auc_ci_low": auc_row['CI_Lower_95'],
+                    "auc_ci_high": auc_row['CI_Upper_95'],
+                    "f1_mean": f1_row['Value'],
+                    "f1_ci_low": f1_row['CI_Lower_95'],
+                    "f1_ci_high": f1_row['CI_Upper_95']
+                })
+    
+    # Create DataFrame once at the end
+    df_summary = pd.DataFrame(summary_rows, columns=["classifier", "hours", "auc_mean", "auc_ci_low", "auc_ci_high", "f1_mean", "f1_ci_low", "f1_ci_high"])
+    
+    summary_csv_path = os.path.join(base_path_opt_flow, "metrics_summary_overview.csv")
+    df_summary.to_csv(summary_csv_path, index=False)
+    print(f"Metrics summary overview saved to: {summary_csv_path}")
+
 
 if __name__ == "__main__":
     test_all()

@@ -51,7 +51,7 @@ from signal_grad_cam import TorchCamBuilder
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ---------------- User config ----------------
-DAYS = [1, 3, 5]                         # days to process
+DAYS = [5, 3]                         # days to process
 MODELS_TO_RUN = ['LSTMFCN', 'ConvTran']  # choose subset
 USE_SMALL_SUBSETS = False              # for quick tests with smaller data
 OUTPUT_BASE = os.path.join(current_dir, "GRADCAM_batch_outputs_stratified")
