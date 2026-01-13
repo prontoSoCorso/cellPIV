@@ -27,12 +27,12 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import Config_02_processTemporalData as config
 
 # ---------------- CONFIG ----------------
-# Se usi questo script dentro il tuo progetto, puoi importare la Config_02_processTemporalData
-# come facevi prima; per semplicità qui definisco percorsi diretti.
 
 # Pickles
 PICKLE_DIR              = config.pickle_dir
 PICKLE_LIST             = config.pickle_files
+CHOSEN_METRIC_NAME      = "vorticity.pkl"   # if None, auto-select sum_mean_mag.pkl if present, else first available
+# vorticity rotore del campo vettoriale di movimento
 
 # Path ai CSV
 REFERENCE_CSV           = config.reference_file_path
@@ -45,8 +45,8 @@ FINAL_CSV_PATH          = config.final_csv_path
 # Processing options
 GRID_STEP_HOURS             = 0.25  # 15 minutes
 SMOOTH_METHOD               = 'savgol'  # 'savgol' or 'median' or None
-SMOOTH_WINDOW               = 5        # must be odd for savgol
-SMOOTH_POLYORDER            = 3
+SMOOTH_WINDOW               = 1        # must be odd for savgol
+SMOOTH_POLYORDER            = 1
 TRUNCATE_TO_GRID_EXTENT     = False  # se True tronca i valori fuori grid
 TRIMMING_MAX_LENGTH         = 528
 
@@ -159,6 +159,9 @@ def resample_to_grid(values, original_times, grid_hours):
 # ---------------- main pipeline ----------------
 
 def main():
+    metric_to_use = CHOSEN_METRIC_NAME 
+    final_csv_output = FINAL_CSV_PATH
+
     # load inputs
     pickle_data = load_pickles(PICKLE_DIR, PICKLE_LIST)
     if len(pickle_data) == 0:
@@ -338,20 +341,22 @@ def main():
 
     # ---------------- build merged CSV ----------------
     # choose which processed metric to use for time-series columns: prefer sum_mean_mag if present
-    chosen_metric_name = None
-    if 'sum_mean_mag.pkl' in processed_pickles:
-        chosen_metric_name = 'sum_mean_mag.pkl'
-    else:
-        # take first
-        chosen_metric_name = next(iter(processed_pickles.keys())) if len(processed_pickles)>0 else None
+    if metric_to_use is None:
+        if 'sum_mean_mag.pkl' in processed_pickles:
+            metric_to_use = 'sum_mean_mag.pkl'
+        else:
+            if len(processed_pickles) > 0:
+                # take first
+                metric_to_use = next(iter(processed_pickles.keys())) 
+            else: 
+                print("No processed pickles available to select a metric from. No FinalDataset will be built. Exiting.")
+                return
+    # adjust final csv path if needed. If the selected metric is not sum_mean_mag, append its name to the csv filename
+    if metric_to_use != 'sum_mean_mag.pkl':
+        final_csv_output = final_csv_output.replace('.csv', f'_{metric_to_use.replace(".pkl","")}.csv')
+    print(f"Building FinalDataset using metric: {metric_to_use}")
 
-    if chosen_metric_name is None:
-        print("No processed metric available to build FinalDataset.csv. Exiting.")
-        return
-
-    print(f"Building FinalDataset using metric: {chosen_metric_name}")
-
-    proc_for_csv = processed_pickles[chosen_metric_name]
+    proc_for_csv = processed_pickles[metric_to_use]
 
     # prepare grid column names like '0.00h','0.25h'...
     grid_col_names = [f"{h:.2f}h" for h in grid_hours]
@@ -398,8 +403,10 @@ def main():
         rows.append(row)
 
     final_df = pd.DataFrame(rows)
-    final_df.to_csv(FINAL_CSV_PATH, index=False)
-    print(f"Saved FinalDataset CSV to {FINAL_CSV_PATH} (n_rows={len(final_df)})")
+    # Save with semicolon separator
+    # and limit decimal precision to 5 digits to prevent huge file size/long lines
+    final_df.to_csv(final_csv_output, index=False, sep=';')
+    print(f"Saved FinalDataset CSV to {final_csv_output} (n_rows={len(final_df)})")
 
     # Diagnostic summary after final CSV
     csv_dishwells = set(csv_data['dish_well'].astype(str))
