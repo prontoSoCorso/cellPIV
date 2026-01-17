@@ -1,7 +1,0 @@
-cMAMBA: può essere multicanale --> da allenare
-
-TimeLLAMA (facebook model): continual learning
-
-MOIRAI: pretraining + fine tuning
-
-Mamba4Cast

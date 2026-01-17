@@ -268,23 +268,38 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
 
 
     ##############################
-    # UMAP visualization
+    # UMAP visualization - TRUE BLUE & ORANGE
     ##############################
     print("\nGenerating UMAP visualizations...")
+    import matplotlib.colors as mcolors
+
+    # --- ACCESSIBILITY SETTINGS ---
+    # Define the specific colors
+    color_class_0 = '#000080' # Navy Blue (Dark) -> Represents 0 (Negative)
+    color_class_1 = '#FF8000' # Vivid Orange (Bright) -> Represents 1 (Positive)
+
+    # CREATE CUSTOM COLORMAP: Transitions from Navy Blue to Vivid Orange
+    # This replaces 'cividis' so the points match the contours exactly.
+    cmap_blue_orange = mcolors.LinearSegmentedColormap.from_list(
+        "BlueOrange", [color_class_0, "#DDDDDD", color_class_1] 
+    )
+    # Note: I added a light gray middle point ("#DDDDDD") to make the 
+    # transition smoother and the middle probability (0.5) distinct, 
+    # but you can remove it if you want a direct gradient.
+    
+    # --------------------------------------
 
     # Create figure
     n_days = len(days)
-    n_cols = len(models) + 1  # "+1" because of the ground truth
-    fig = plt.figure(figsize=(6*n_cols + 2, 6*n_days))  # +2 for colorbar space
+    n_cols = len(models) + 1 
+    fig = plt.figure(figsize=(6*n_cols + 2, 6*n_days)) 
     gs = fig.add_gridspec(n_days, n_cols + 1, width_ratios=[1]*n_cols + [0.1])
     
-    # Create consistent colorbar
     norm = plt.Normalize(0, 1)
-    sm = plt.cm.ScalarMappable(cmap="coolwarm", norm=norm)
+    sm = plt.cm.ScalarMappable(cmap=cmap_blue_orange, norm=norm)
 
     for day_idx, (day, data) in enumerate(umap_results):
-        # Prepare X for UMAP: flatten + PCA + UMAP (robust default)
-        X_arr = data['X']  # (N, C, L) or (N, L)
+        X_arr = data['X']  
         y_true_day = data['y_true']
         if X_arr.ndim == 3:
             N, C, L = X_arr.shape
@@ -294,78 +309,77 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         else:
             raise ValueError(f"Unexpected X shape {X_arr.shape}")
 
-        # Standardize
+        # Standardize & PCA & UMAP
         from sklearn.preprocessing import StandardScaler
         from sklearn.decomposition import PCA
-
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X_flat)
-
-        # PCA to 50 dims (or fewer if features < 50)
         pca_n = min(50, X_scaled.shape[1])
         pca = PCA(n_components=pca_n, random_state=42)
         X_pca = pca.fit_transform(X_scaled)
-
-        # UMAP on PCA features
         reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, random_state=42)
-        embedding = reducer.fit_transform(X_pca)  # shape (N, 2)
+        embedding = reducer.fit_transform(X_pca) 
 
-        # Plot ground truth in first column
+        # --- PLOT GROUND TRUTH ---
         ax = fig.add_subplot(gs[day_idx, 0])
-        sc = ax.scatter(embedding[:, 0], embedding[:, 1], 
-                       c=y_true_day, cmap="coolwarm", 
-                       alpha=0.7, s=15, edgecolors='face',
-                       vmin=0, vmax=1)
-        ax.set_title(f"Ground Truth - {day} Days", fontsize=12)
+        ax.scatter(embedding[:, 0], embedding[:, 1], 
+                   c=y_true_day, cmap=cmap_blue_orange, 
+                   alpha=0.8, s=25, edgecolors='none', vmin=0, vmax=1)
+        
+        ax.set_title(f"Ground Truth - Day {day}", fontsize=24)
         ax.set_xticks([])
         ax.set_yticks([])
         
-        # Add ground truth contours for reference
-        for label in [0, 1]:
+        # Blue/Orange Contours
+        for label, color_code in zip([0, 1], [color_class_0, color_class_1]):
             mask = (y_true_day == label)
             if mask.sum() > 10:
                 sns.kdeplot(x=embedding[mask, 0], y=embedding[mask, 1],
-                           levels=3, color='blue' if label == 0 else 'red',
-                           alpha=0.5, ax=ax)
+                           levels=3, color=color_code, linewidths=2,
+                           alpha=0.6, ax=ax)
         
-        # Plot model predictions in subsequent columns
+        # --- PLOT MODELS ---
         for model_idx, model_name in enumerate(models, start=1):
             ax = fig.add_subplot(gs[day_idx, model_idx])
             model_data = data['models'][model_name]
             
-            # Plot UMAP colored by predictions
-            ax.scatter(
-                embedding[:, 0], embedding[:, 1], 
-                c=model_data['prob'], cmap="coolwarm", 
-                alpha=0.7, s=15, edgecolors='face',
-                vmin=0, vmax=1
-                )
-
-            ax.set_title(f"{model_name} - {day} Days\n(Threshold: {model_data['threshold']:.2f})", 
-                         fontsize=12)
+            ax.scatter(embedding[:, 0], embedding[:, 1], 
+                c=model_data['prob'], cmap=cmap_blue_orange, 
+                alpha=0.7, s=25, edgecolors='none', vmin=0, vmax=1)
+            
+            ax.set_title(f"{model_name} - Day {day}", fontsize=24, pad=8)
             ax.set_xticks([])
             ax.set_yticks([])
             
-            # Add ground truth contours
-            for label in [0, 1]:
+            for label, color_code in zip([0, 1], [color_class_0, color_class_1]):
                 mask_pred = (model_data['pred'] == label)
-                if mask_pred.sum() > 10:  # Only plot contours if enough points
+                if mask_pred.sum() > 10:  
                     sns.kdeplot(x=embedding[mask_pred, 0], y=embedding[mask_pred, 1],
-                               levels=3, color='blue' if label == 0 else 'red',
-                               alpha=0.5, ax=ax)
+                               levels=3, color=color_code, linewidths=2,
+                               alpha=0.6, ax=ax)
 
-    # Add colorbar in new column
+    # --- COLORBAR ---
     cbar_ax = fig.add_subplot(gs[:, -1])
     cbar = fig.colorbar(sm, cax=cbar_ax)
-    cbar.set_label("Blasto Probability\n(0=Negative, 1=Positive)", 
-                 rotation=270, labelpad=25, fontsize=12)
+    
+    cbar.set_label("Blasto Probability\n(0=No-Blasto, 1=Blasto)", 
+                 rotation=270, labelpad=60, fontsize=24)
+    
+    cbar.ax.tick_params(labelsize=18)
 
-    plt.subplots_adjust(right=0.85)  # Adjust for colorbar space
+    plt.subplots_adjust(right=0.85)
     plt.savefig(os.path.join(base_path_opt_flow, 'umap_summary.png'), 
-               bbox_inches='tight', dpi=300)
+               bbox_inches='tight', dpi=500)
     plt.close()
-    print("📊 Saved UMAP summary visualization")
+    print("📊 Saved TRUE BLUE-ORANGE UMAP visualization")
+
 
 
 if __name__ == "__main__":
+    import time
+    start_time = time.time()
     test_all()
+    end_time = time.time()
+    print(f"\nTotal execution time: {end_time - start_time:.2f} seconds")
+
+    # around 25 seconds

@@ -2,17 +2,6 @@
 '''
 test_with_GradCAM_fixed2.py
 
-Fixes:
- - Avoid 5D Conv2d input errors by canonicalizing each sample depending on model conv type
- - Avoid passing results_dir_path=None to `cam_builder.get_cam()`. If SAVE_PER_SAMPLE_VIS=False,
-   use a temporary directory and delete it after `get_cam` completes, preventing persistent files.
-
-Improvements in this version:
- - Simplified aggregation: produce only TWO averaged activation maps (one per class: 0 and 1)
-   and their stacks (.npy saved). This removes the many redundant outputs.
- - Improved plotting: mean + shaded std area, normalization to [0,1] (global across classes for
-   comparability), descriptive titles, and x-axis in hours (acquisition step = 15 minutes = 0.25 h).
-
 Usage: drop in your cellPIV repo and run:
     python _04_test/test_with_GradCAM_fixed2.py
 '''
@@ -21,7 +10,8 @@ import os
 import sys
 import copy
 import json
-
+import re
+import csv
 import numpy as np
 import torch
 import torch.nn as nn
@@ -51,8 +41,8 @@ from signal_grad_cam import TorchCamBuilder
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ---------------- User config ----------------
-DAYS = [5, 3]                         # days to process
-MODELS_TO_RUN = ['LSTMFCN', 'ConvTran']  # choose subset
+DAYS = [3]                         # days to process
+MODELS_TO_RUN = ['ConvTran']  # choose subset
 USE_SMALL_SUBSETS = False              # for quick tests with smaller data
 OUTPUT_BASE = os.path.join(current_dir, "GRADCAM_batch_outputs_stratified")
 os.makedirs(OUTPUT_BASE, exist_ok=True)
@@ -99,10 +89,6 @@ def normalize_sample_for_model(sample, use_conv2d=False):
     Convert arbitrary-sample numpy array -> appropriate shape depending on model:
       - if use_conv2d True: return shape (C, H=1, W=T)  (so batch -> (N,C,1,T) valid 4D for Conv2d)
       - otherwise return shape (C, T)
-    Strategy:
-      - Move the largest axis to the last position (assume time)
-      - Collapse all leading dims into channels
-      - If conv2d requested, insert a middle spatial axis H=1
     '''
     a = np.asarray(sample)
     if a.ndim == 0:
@@ -180,7 +166,7 @@ def save_array_and_plot(arr, out_path, title=None):
     plt.ylabel("Activation")
     plt.grid(alpha=0.2)
     plt.tight_layout()
-    plt.savefig(out_path + ".png", bbox_inches='tight', dpi=300)
+    plt.savefig(out_path + ".png", bbox_inches='tight', dpi=500)
     plt.close()
 
 
@@ -262,18 +248,13 @@ def process_day(day):
         print("Wrote named modules to:", named_modules_file)
 
         # guess whether to present samples as conv1d or conv2d inputs
-        # if a target layer override is provided, check that layer's type; else check whole model for Conv2d
         override_layer = TARGET_LAYERS_OVERRIDE.get(model_name)
         use_conv2d = False
         if override_layer:
             use_conv2d = model_has_conv2d(model, override_layer)
         else:
-            # if the model contains Conv2d anywhere, prefer conv2d representation
             use_conv2d = model_has_conv2d(model)
 
-        # Special-case detection: some Conv2d-based architectures (ConvTran) expect
-        # inputs shaped (C, T) and call `x = x.unsqueeze(1)` inside forward.
-        # If the first Conv2d has in_channels == 1, treat the data as 2D (C, T).
         if use_conv2d:
             first_conv2d = None
             first_conv_name = None
@@ -295,8 +276,6 @@ def process_day(day):
         # select or auto-select target layer
         target_layer_name = override_layer
         if target_layer_name is None:
-            # pick last conv layer
-            # prefer conv2d layer name if using conv2d, else conv1d
             last = None
             for n, m in model.named_modules():
                 if use_conv2d and isinstance(m, torch.nn.Conv2d):
@@ -304,7 +283,6 @@ def process_day(day):
                 if (not use_conv2d) and isinstance(m, torch.nn.Conv1d):
                     last = n
             if last is None:
-                # as fallback choose any conv module present
                 last = None
                 for n, m in model.named_modules():
                     if isinstance(m, torch.nn.Conv1d) or isinstance(m, torch.nn.Conv2d):
@@ -315,11 +293,8 @@ def process_day(day):
             target_layer_name = last
         print("Using target layer:", target_layer_name)
 
-        # Prepare TorchCamBuilder. Important: set time_axs = -1 (time last axis)
-        # If we used conv2d representation, our sample shape is (C,1,T) -> time is last axis -> time_axs=-1
         cam_builder = TorchCamBuilder(model=adapter_model, class_names=["no_blasto","blasto"], time_axs=-1)
 
-        # Prepare results dir for get_cam:
         if SAVE_PER_SAMPLE_VIS:
             results_dir_for_getcam = os.path.join(model_out_dir, "per_sample_outputs")
         else:
@@ -346,18 +321,14 @@ def process_day(day):
 
 
         # -------------------- Simplified aggregation & stratified plotting (UPDATED) --------------------
-        import re
-        import csv
-
         print("Collecting CAM arrays for aggregation (simplified to two classes, plus stratified views)...")
 
-        # Build per-class, per-sample lists of 1D cam-vectors (preserve sample indices)
+        # Build per-class, per-sample lists
         N_samples = len(data_list)
         per_class_per_sample = {'0': [ [] for _ in range(N_samples) ], '1': [ [] for _ in range(N_samples) ]}
 
         if isinstance(cams_dict, dict):
             for full_key, expl_val in cams_dict.items():
-                # parse class id from key
                 m = re.search(r'_class(\d+)\b', str(full_key))
                 if m:
                     class_id = m.group(1)
@@ -374,22 +345,18 @@ def process_day(day):
                 if class_id not in ('0', '1'):
                     continue
 
-                # expl_val expected to be a list/array with one entry per sample
                 if isinstance(expl_val, (list, tuple, np.ndarray)):
                     for idx in range(min(N_samples, len(expl_val))):
                         element = expl_val[idx]
                         found = recursive_collect_arrays(element)
                         if len(found) >= 1:
                             per_class_per_sample[class_id][idx].append(found[0])
-                # else skip non-list entries
         else:
             arrays_all = recursive_collect_arrays(cams_dict)
             if arrays_all:
                 per_class_per_sample['0'][0].extend(arrays_all)
 
-        # Robust extraction of class-1 probabilities from predicted_probs_dict
         def extract_class1_probs(predicted_probs_dict, N_samples):
-            # prefer explicit keys that indicate class1
             if isinstance(predicted_probs_dict, dict):
                 for k, v in predicted_probs_dict.items():
                     try:
@@ -400,7 +367,6 @@ def process_day(day):
                                     return a
                     except Exception:
                         continue
-                # fallback: if only class0 arrays present, invert them
                 for k, v in predicted_probs_dict.items():
                     try:
                         if re.search(r'class0\b', k) or k.lower().endswith('class0'):
@@ -410,7 +376,6 @@ def process_day(day):
                                     return 1.0 - a
                     except Exception:
                         continue
-            # final fallback: take first 1D array of correct length
             found = recursive_collect_arrays(predicted_probs_dict)
             for a in found:
                 if isinstance(a, np.ndarray) and a.ndim == 1 and len(a) == N_samples:
@@ -419,7 +384,6 @@ def process_day(day):
 
         pick = extract_class1_probs(predicted_probs_dict, N_samples)
 
-        # fallback to model evaluation if pick is not available
         if pick is None or len(pick) != N_samples:
             print("Computing predicted probabilities via model fallback (stratified)...")
             pick_list = []
@@ -452,22 +416,14 @@ def process_day(day):
                 pick_list.append(prob)
             pick = np.array(pick_list)
 
-        # infer predicted labels with model threshold
         try:
             thresh = float(threshold)
         except Exception:
             thresh = 0.5
         pred_labels = (pick >= thresh).astype(int)
 
-        # -------------------- Write summary CSV with top-5 peak timings per video --------------------
-        import csv
-
+        # -------------------- Prediction Summary CSV --------------------
         def compute_topk_peaks_for_sample(idx, per_class_per_sample, top_k=5, window_frac=0.02):
-            """
-            Return list of up to top_k peak times (strings in hours, e.g. '0.25') for sample index `idx`.
-            Uses all CAM arrays available for the sample across both classes.
-            """
-            # collect all cam arrays available for that sample (both classes)
             arrs = []
             arrs.extend(per_class_per_sample.get('0', [])[idx] if idx < len(per_class_per_sample.get('0', [])) else [])
             arrs.extend(per_class_per_sample.get('1', [])[idx] if idx < len(per_class_per_sample.get('1', [])) else [])
@@ -479,7 +435,6 @@ def process_day(day):
                 return [''] * top_k
 
             importance = np.asarray(avg).copy()
-            # local normalization for peak selection
             if np.ptp(importance) > 1e-9:
                 importance = (importance - importance.min()) / (importance.max() - importance.min())
 
@@ -499,19 +454,15 @@ def process_day(day):
                     continue
                 selected.append(ind)
 
-            # convert indices to hours and format
             peak_hours = [f"{(idx_peak * ACQUISITION_STEP_HOURS):.2f}" for idx_peak in selected]
-            # pad if fewer than top_k peaks
             while len(peak_hours) < top_k:
                 peak_hours.append('')
             return peak_hours
 
-        # prepare CSV path
         summary_csv_path = os.path.join(model_out_dir, f"summary_prediction_day{day}_{model_name}.csv")
         peak_cols = [f"peak{i+1}_h" for i in range(5)]
         with open(summary_csv_path, "w", newline="") as csvf:
             writer = csv.writer(csvf)
-            # header: add peak columns
             writer.writerow(["dish_well", "true_label", "pred_label", "prob_class1"] + peak_cols)
 
             for i in range(N_samples):
@@ -519,15 +470,12 @@ def process_day(day):
                 true_lbl = int(y_true[i])
                 pred_lbl = int(pred_labels[i])
                 prob = float(pick[i]) if (pick is not None and i < len(pick)) else float('nan')
-                # compute top5 peaks for this sample
                 peaks = compute_topk_peaks_for_sample(i, per_class_per_sample, top_k=5, window_frac=0.02)
                 writer.writerow([dish, true_lbl, pred_lbl, prob] + peaks)
 
         print("Wrote prediction summary CSV with top-5 peaks:", summary_csv_path)
-        # --------------------------------------------------------------------------------------------
 
-
-        # Prepare per-class aggregated lists: all / right / wrong
+        # -------------------- Prepare Stratified Aggregation --------------------
         def flatten_for_indices(per_sample_lists, indices):
             out = []
             for i in indices:
@@ -554,14 +502,27 @@ def process_day(day):
                 if arr_list:
                     _, st = align_and_average(arr_list)
                     global_for_norm.append(st)
-
+            
+            # Map simplified keys to descriptive titles for display
+            cls_label_text = 'Blasto' if clsid == '1' else 'No-Blasto'
             model_aggregated[clsid] = {
-                'all': {'arrays': all_arrays, 'indices': indices_with_cam},
-                'right': {'arrays': right_arrays, 'indices': idx_pred_cls_correct},
-                'wrong': {'arrays': wrong_arrays, 'indices': idx_pred_cls_wrong}
+                'all': {
+                    'arrays': all_arrays, 
+                    'indices': indices_with_cam,
+                    'title': f"All Predictions (Predicted as {cls_label_text})"
+                },
+                'right': {
+                    'arrays': right_arrays, 
+                    'indices': idx_pred_cls_correct,
+                    'title': f"Correctly Predicted as {cls_label_text} (True {'Positives' if clsid=='1' else 'Negatives'})"
+                },
+                'wrong': {
+                    'arrays': wrong_arrays, 
+                    'indices': idx_pred_cls_wrong,
+                    'title': f"Incorrectly Predicted as {cls_label_text} (False {'Positives' if clsid=='1' else 'Negatives'})"
+                }
             }
 
-        # compute global normalization range
         if global_for_norm:
             combined_all = np.vstack(global_for_norm)
             global_min = float(np.min(combined_all))
@@ -576,27 +537,36 @@ def process_day(day):
                 return None, None
             return align_and_average(arrs)
 
-        # Plot vertically (3 rows x 1 col) and save .npy similarly
+        # Plot vertically (3 rows x 1 col)
         for clsid, info in model_aggregated.items():
+            # Define parts order
             parts = [('all', info['all']), ('right', info['right']), ('wrong', info['wrong'])]
-            fig, axes = plt.subplots(3, 1, figsize=(8, 12), squeeze=False)
+            
+            fig, axes = plt.subplots(3, 1, figsize=(10, 15), squeeze=False)
             axes = axes[:, 0]
             T_used = None
+            
+            cls_name_text = 'blasto' if clsid == '1' else 'no_blasto'
 
             for ax_idx, (label_part, info_part) in enumerate(parts):
                 ax = axes[ax_idx]
                 arrs = info_part['arrays']
                 indices = info_part.get('indices', [])
+                plot_title = info_part.get('title', label_part)
+                
+                # --- FIXED Y-LIMITS ---
+                ax.set_ylim(-0.05, 1.05)
 
                 if not arrs:
-                    ax.text(0.5, 0.5, 'No data', ha='center', va='center', fontsize=12)
-                    ax.set_title(f"{label_part} (maps=0, unique_samples=0)")
+                    ax.text(0.5, 0.5, 'No data available', ha='center', va='center', fontsize=21)
+                    # Title
+                    ax.set_title(f"{plot_title} (n_maps=0)", fontsize=21, pad=8)
                     ax.set_axis_off()
                     continue
 
                 avg, stack = compute_avg_stack(arrs)
                 if avg is None:
-                    ax.text(0.5, 0.5, 'No valid maps', ha='center', va='center')
+                    ax.text(0.5, 0.5, 'No valid maps', ha='center', va='center', fontsize=21)
                     ax.set_axis_off()
                     continue
 
@@ -609,28 +579,39 @@ def process_day(day):
                 std_norm = stack_norm.std(axis=0)
 
                 hours = np.arange(len(avg_norm)) * ACQUISITION_STEP_HOURS
-                ax.plot(hours, avg_norm, linewidth=1.5)
-                ax.fill_between(hours, np.clip(avg_norm - std_norm, 0, 1), np.clip(avg_norm + std_norm, 0, 1), alpha=0.25)
-                ax.grid(alpha=0.25)
-                ax.set_xlabel('Time (hours)')
-                ax.set_ylabel('Normalized activation (0-1)')
+                ax.plot(hours, avg_norm, linewidth=2.5, color='#1f77b4') # thicker line
+                ax.fill_between(hours, np.clip(avg_norm - std_norm, 0, 1), np.clip(avg_norm + std_norm, 0, 1), 
+                                alpha=0.3, color='#1f77b4')
+                ax.grid(alpha=0.3)
+                
+                # Axis labels
+                ax.set_ylabel('Normalized Activation (0-1)', fontsize=16)
+                
+                # --- X-LABEL ONLY ON LAST PLOT ---
+                if ax_idx == len(parts) - 1:
+                    ax.set_xlabel('Time (hours)', fontsize=18, labelpad=15)
+                else:
+                    ax.set_xlabel('')
 
-                # xticks: max 25 ticks
+                # --- 25 TICKS (FIRST AND LAST INCLUDED) ---
                 T = len(avg_norm)
-                max_ticks = 25
+                n_ticks_desired = 25
                 if T <= 1:
                     tick_indices = np.array([0])
                 else:
-                    step_frames = max(1, int(np.ceil(T / max_ticks)))
-                    tick_indices = np.arange(0, T, step_frames)
-                    if tick_indices[-1] != (T - 1):
-                        tick_indices = np.concatenate([tick_indices, np.array([T - 1])])
+                    # linspace ensures we get start, end, and even spacing
+                    tick_indices = np.linspace(0, T - 1, n_ticks_desired, dtype=int)
+                    # unique checks just in case T < 25
+                    tick_indices = np.unique(tick_indices)
+                    
                 xtick_positions = tick_indices * ACQUISITION_STEP_HOURS
-                xtick_labels = [f"{pos:.2f}h" for pos in xtick_positions]
+                xtick_labels = [f"{pos:.1f}h" for pos in xtick_positions]
+                
                 ax.set_xticks(xtick_positions)
-                ax.set_xticklabels(xtick_labels, rotation=45)
+                ax.set_xticklabels(xtick_labels, rotation=45, fontsize=14)
+                ax.tick_params(axis='y', labelsize=14)
 
-                # top-5 non-overlapping peaks
+                # Peaks
                 top_k = 5
                 importance = avg_norm.copy()
                 window_frac = 0.02
@@ -644,37 +625,41 @@ def process_day(day):
                         continue
                     selected.append(int(ind))
 
-                ymin, ymax = ax.get_ylim()
+                ymin, ymax = -0.05, 1.05  # use our fixed limits
                 half_win = max(1, window_frames) / 2.0
                 for rank, idx_peak in enumerate(selected, start=1):
                     start_idx = max(0, int(idx_peak - np.floor(half_win)))
                     end_idx = min(T - 1, int(idx_peak + np.floor(half_win)))
                     start_h = start_idx * ACQUISITION_STEP_HOURS
                     end_h = (end_idx + 1) * ACQUISITION_STEP_HOURS
-                    ax.axvspan(start_h, end_h, color='yellow', alpha=0.25, linewidth=0)
-                    ax.axvline(x=idx_peak * ACQUISITION_STEP_HOURS, color='orange', linestyle='--', linewidth=1.0)
-                    y_offset = (rank - 1) * 0.08 * (ymax - ymin)
-                    ax.text(idx_peak * ACQUISITION_STEP_HOURS, ymax*0.9 - y_offset,
-                            f"{idx_peak * ACQUISITION_STEP_HOURS:.2f}h", ha='center', va='top', fontsize=8,
-                            color='black', backgroundcolor='white')
+                    ax.axvspan(start_h, end_h, color='gold', alpha=0.3, linewidth=0)
+                    ax.axvline(x=idx_peak * ACQUISITION_STEP_HOURS, color='darkorange', linestyle='--', linewidth=1.5)
+                    
+                    # Position peak text relative to fixed ylim
+                    y_offset = (rank - 1) * 0.1 * (ymax - ymin)
+                    # Peak text
+                    ax.text(idx_peak * ACQUISITION_STEP_HOURS, ymax*0.95 - y_offset,
+                            f"{idx_peak * ACQUISITION_STEP_HOURS:.2f}h", ha='center', va='top', fontsize=14,
+                            color='black', bbox=dict(facecolor='white', alpha=0.8, edgecolor='none', pad=1))
 
-                # title with counts and with wrong+right info
+                # Descriptive Subplot Title
                 n_maps = int(stack.shape[0]) if stack is not None else 0
                 n_unique_samples = len(indices)
-                ax.set_title(f"{label_part} (maps={n_maps}, unique_samples={n_unique_samples})")
+                # no new line in title but tab for readability
+                ax.set_title(f"{plot_title} (n_maps={n_maps})", fontsize=21, pad=8)
 
-            # Count total blasto/no-blasto samples with cams (len(right samples) + len(wrong samples))
+            # Figure Suptitle
             total_embryo_class = len(model_aggregated[clsid]['right']['indices']) + len(model_aggregated[clsid]['wrong']['indices'])
-            fig.suptitle(f"{model_name} - Grad-CAM class {clsid} ({'blasto' if clsid=='1' else 'no_blasto'}) — class samples: {total_embryo_class}", fontsize=16)
-            plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+            fig.suptitle(f"{model_name} - Grad-CAM - class {cls_name_text} — class samples: {total_embryo_class}", fontsize=21, y=0.98)
+            
+            plt.tight_layout(rect=[0, 0.03, 1, 0.96], h_pad=3.0)
             outpng = os.path.join(model_out_dir, f"global_class_{clsid}_stratified.png")
-            plt.savefig(outpng, bbox_inches='tight', dpi=300)
+            plt.savefig(outpng, bbox_inches='tight', dpi=500)
             plt.close()
             print(f"Saved stratified (vertical) plot for class {clsid}:", outpng)
 
-            # Save avg/stack .npy files per part, and populate model_aggregated entries
-            for label_part, _info in parts:  # parts variable is defined above per-class
-                # careful: rebuild arr list for label_part
+            # Save avg/stack .npy files
+            for label_part, _info in parts:
                 arrs = model_aggregated[clsid].get(label_part, {}).get('arrays', [])
                 avg, stack = compute_avg_stack(arrs)
                 if avg is not None:
@@ -686,12 +671,9 @@ def process_day(day):
                     if stack is not None:
                         np.save(os.path.join(model_out_dir, f"class_{clsid}_{label_part}_stack.npy"), stack)
 
-        # attach aggregated results to top-level dict
         aggregated_maps[model_name] = model_aggregated
 
-        # -------------------- End stratified aggregation & plotting --------------------
-
-        # probability-weighted average (kept original behavior)
+        # -------------------- Prob-weighted maps (Legacy) --------------------
         found_probs = recursive_collect_arrays(predicted_probs_dict)
         pick = None
         if found_probs:
@@ -700,16 +682,14 @@ def process_day(day):
                     pick = a
                     break
         if pick is None or len(pick) != len(data_list):
-            # fallback: compute using the model
             print("Computing predicted probabilities via model fallback...")
             pick_list = []
             for sample in data_list:
                 arr = np.asarray(sample)
-                # convert to tensor; keep shape logic coherent:
                 if arr.ndim == 2 and use_conv2d:
-                    t = torch.tensor(arr[np.newaxis, :, :, :], dtype=torch.float32).to(device)  # (1,C,H,W)
+                    t = torch.tensor(arr[np.newaxis, :, :, :], dtype=torch.float32).to(device)
                 elif arr.ndim == 2 and (not use_conv2d):
-                    t = torch.tensor(arr[np.newaxis, :, :], dtype=torch.float32).to(device)  # (1,C,T)
+                    t = torch.tensor(arr[np.newaxis, :, :], dtype=torch.float32).to(device)
                 elif arr.ndim == 1:
                     t = torch.tensor(arr[np.newaxis, :, None], dtype=torch.float32).to(device)
                 else:
@@ -733,8 +713,6 @@ def process_day(day):
                 pick_list.append(prob)
             pick = np.array(pick_list)
 
-        # generate probability-weighted maps if stack sizes match (this part is optional and will be
-        # skipped if our simplified stacks are not compatible in shape)
         for expl_key, expl_res in model_aggregated.items():
             if 'all' in expl_res and expl_res['all']['stack'] is not None:
                 stack = expl_res['all']['stack']
@@ -752,14 +730,11 @@ def process_day(day):
         if not isinstance(exps, dict) or len(exps) == 0:
             continue
 
-        # inspect a sample value to detect format
         sample_val = next(iter(exps.values()))
-        # caso 1: exps è { classid: { 'avg':..., 'stack':..., 'n_samples':... }, ... }
         if isinstance(sample_val, dict) and any(k in sample_val for k in ('avg', 'stack', 'n_samples')):
             for clsid, info in exps.items():
                 n = None
                 if isinstance(info, dict):
-                    # prefer 'n_samples' se presente, altrimenti inferisci da 'stack'
                     n = info.get('n_samples')
                     if n is None and isinstance(info.get('stack'), np.ndarray):
                         try:
@@ -768,7 +743,6 @@ def process_day(day):
                             n = None
                 summary[mname][clsid] = {'n_samples': n}
         else:
-            # caso 2: exps è { explainer_name: { classid: { ... }, ... }, ... }
             for expl_name, classes in exps.items():
                 summary[mname][expl_name] = {}
                 if not isinstance(classes, dict):
@@ -786,7 +760,6 @@ def process_day(day):
 
     with open(os.path.join(out_day_dir, "aggregated_summary.json"), "w") as fh:
         json.dump(summary, fh, indent=2)
-    # --- end summary writer ---
 
     print(f"Finished day {day}. Outputs in {out_day_dir}")
     return aggregated_maps

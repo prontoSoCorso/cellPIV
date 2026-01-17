@@ -1,28 +1,4 @@
 {
-  "LSTMFCN": {
-    "0": {
-      "all": {
-        "n_samples": 762
-      },
-      "right": {
-        "n_samples": 157
-      },
-      "wrong": {
-        "n_samples": 52
-      }
-    },
-    "1": {
-      "all": {
-        "n_samples": 762
-      },
-      "right": {
-        "n_samples": 328
-      },
-      "wrong": {
-        "n_samples": 225
-      }
-    }
-  },
   "ConvTran": {
     "0": {
       "all": {

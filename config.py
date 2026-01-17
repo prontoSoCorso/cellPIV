@@ -163,7 +163,7 @@ class Config_01_OpticalFlow:
 class Config_02_processTemporalData:
     method_optical_flow     = "Farneback"   # "LucasKanade/Farneback"
     pickle_dir              = os.path.join(user_paths.dataset, method_optical_flow, 'pickles')
-    dict                    = "vorticity"  # mean_magnitude / sum_mean_mag / vorticity / hybrid
+    dict                    = "sum_mean_mag"  # mean_magnitude / sum_mean_mag / vorticity / hybrid
 
     # File pickle e CSV da caricare per il processamento dei dati raw del flusso ottico
     pickle_files            = [f"{dict}.pkl"]   # es. ["sum_mean_mag.pkl"] oppure [] per tutti
