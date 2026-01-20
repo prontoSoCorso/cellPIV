@@ -17,3 +17,5 @@ __pycache__/
 
 # don't add single gradcam maps
 */GRADCAM_single_video_output
+
+FinalData*

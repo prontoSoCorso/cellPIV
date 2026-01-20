@@ -111,7 +111,7 @@ class Config_01_OpticalFlow:
 
     # LUCAS KANADE
     # LK parameters
-    winSize_LK      = 13
+    winSize_LK      = 25
     maxLevelPyramid = 4
     maxCorners      = 300
     qualityLevel    = 0.05
