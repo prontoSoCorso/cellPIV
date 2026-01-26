@@ -1,6 +1,0 @@
-Model,Stratum,balanced_accuracy,f1
-ROCKET,Overall,0.7205,0.6546
-ROCKET,0PN,0.9918,0.0
-ROCKET,2PN,0.6479,0.6719
-ROCKET,anomalous,0.6754,0.4407
-ROCKET,deg,1.0,0.0

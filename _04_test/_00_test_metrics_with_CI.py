@@ -41,7 +41,8 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
              random_seed=42):
     
     # Create base output directory
-    base_path_opt_flow = os.path.join(base_path, method_optical_flow)
+    PN_subtype = "2PN"
+    base_path_opt_flow = os.path.join(f"{base_path}_{PN_subtype}", method_optical_flow)
     os.makedirs(base_path_opt_flow, exist_ok=True)
 
     # Instance arrays
@@ -61,6 +62,11 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         # Load test data
         _, _, test_path = conf_train.get_paths(day)
         df_test = utils.load_data(test_path) if True else None
+
+        # select only specific rows based on PN column
+        if PN_subtype:
+            df_test = df_test[df_test['PN'] == PN_subtype]
+
         data_dict = utils.build_data_dict(df_test=df_test)
         _, _, _, _, X_test, y_test = utils._check_data_dict(data=data_dict, 
                                                            require_test=True,
@@ -247,6 +253,9 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
             n_plots = len(target_metrics)
             cols = 3
             rows = math.ceil(n_plots / cols)
+
+            # Set general title
+            plt.suptitle(f"Bootstrap Distributions for {day} Days" + (f" - ({PN_subtype})" if PN_subtype else ""), fontsize=16)
             
             fig_boot, axs_boot = plt.subplots(rows, cols, figsize=(5*cols, 4*rows))
             axs_boot = axs_boot.flatten()
@@ -263,14 +272,14 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
                     axs_boot[i].set_title(f"{metric_name}\nCI: [{ci_results[metric_name]['lower']:.3f}, {ci_results[metric_name]['upper']:.3f}]")
                     axs_boot[i].legend(fontsize='small')
                 else:
-                    axs_boot[i].set_title(f"{metric_name} (No Data)")
+                    axs_boot[i].set_title(f"{metric_name} (No Data)", fontsize=14)
             
             # Remove empty subplots
             for j in range(i+1, len(axs_boot)):
                 fig_boot.delaxes(axs_boot[j])
                 
             plt.tight_layout()
-            plt.savefig(os.path.join(output_path_per_day, f'bootstrap_dist_{model_name}_{day}Days.png'))
+            plt.savefig(os.path.join(output_path_per_day, f'bootstrap_dist_{model_name}_{day}Days.png'), dpi=500, bbox_inches='tight')
             plt.close()
 
 
@@ -285,7 +294,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
             sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=axs[idx], annot_kws={"size": 16})
             axs[idx].set_xticklabels(["no_blasto", "blasto"], fontsize=16)
             axs[idx].set_yticklabels(["no_blasto", "blasto"], fontsize=16)
-            axs[idx].set_title(f'{model_name}\n{day} Days')
+            axs[idx].set_title(f'{model_name}\n{day} Days' + (f" - ({PN_subtype})" if PN_subtype else ""), fontsize=18)
             axs[idx].set_xlabel('Predicted', fontsize=16)
             axs[idx].set_ylabel('Actual', fontsize=16)
 
@@ -305,7 +314,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
     print(f"Summary saved to: {csv_path}")
 
     # ---------------------------
-    # Plot ROC curves (Existing Code)
+    # Plot ROC curves
     # ---------------------------
     print("\nGenerating ROC curves...")
     plt.figure(figsize=(10, 8))
@@ -327,7 +336,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
     plt.close()
 
     # ---------------------------
-    # Generate bar plots (Existing Code)
+    # Generate bar plots
     # ---------------------------
     print("\nGenerating bar plots...")
     df_metrics = pd.DataFrame(metrics_data)
@@ -348,7 +357,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
                 plt.text(bar.get_x() + bar.get_width()/2, height, f'{height:.2f}', 
                         ha='center', va='bottom', fontsize=10)
         
-        plt.title(f'Metrics Comparison for {day} Days')
+        plt.title(f'Metrics Comparison for {day} Days' + (f" - ({PN_subtype})" if PN_subtype else ""))
         plt.xlabel('Metrics')
         plt.ylabel('Score')
         plt.ylim((0,1))
@@ -358,7 +367,7 @@ def test_all(base_path = os.path.join(current_dir, "plots_and_metrics_test"),
         plt.close()
 
     # ---------------------------
-    # FIXED: Metrics Summary Overview
+    # Metrics Summary Overview
     # ---------------------------
     # Create a list to store rows (replacing the deprecated .append method)
     summary_rows = []
